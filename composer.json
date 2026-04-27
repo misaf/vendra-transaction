@@ -1,0 +1,68 @@
+{
+    "$schema": "https://getcomposer.org/schema.json",
+    "name": "misaf/vendra-transaction",
+    "description": "Financial transaction management system with multi-gateway support, status tracking and comprehensive metadata handling",
+    "type": "vendra-module",
+    "license": "MIT",
+    "version": "12.0.0",
+    "keywords": [
+        "laravel",
+        "filamentphp",
+        "transaction"
+    ],
+    "authors": [
+        {
+            "name": "Ehsan Mahmoodi",
+            "email": "misaf.1990@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "filament/filament": "^4.0",
+        "spatie/laravel-activitylog": "^4.10.2",
+        "spatie/laravel-sluggable": "^3.7.5",
+        "spatie/eloquent-sortable": "^4.5.0",
+        "spatie/laravel-queueable-action": "^2.17"
+    },
+    "require-dev": {
+        "fakerphp/faker": "^1.24.1",
+        "larastan/larastan": "^3.9.1",
+        "laravel/boost": "^2.0.6",
+        "laravel/pint": "^1.27",
+        "mockery/mockery": "^1.6.12",
+        "nunomaduro/collision": "^8.8.3",
+        "pestphp/pest": "^4.3.1",
+        "pestphp/pest-plugin-laravel": "^4.0",
+        "orchestra/testbench": "^10.0"
+    },
+    "scripts": {
+        "analyse": "vendor/bin/phpstan analyse",
+        "test": "pest"
+    },
+    "autoload": {
+        "psr-4": {
+            "Misaf\\VendraTransaction\\": "src/",
+            "Misaf\\VendraTransaction\\Tests\\": "tests/",
+            "Misaf\\VendraTransaction\\Database\\Factories\\": "database/factories/",
+            "Misaf\\VendraTransaction\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Misaf\\VendraTransaction\\Providers\\TransactionServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "php-http/discovery": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
