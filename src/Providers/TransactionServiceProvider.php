@@ -26,10 +26,10 @@ final class TransactionServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->loadTranslationsFrom(__DIR__ . '/../../lang', 'transaction');
+        $this->loadTranslationsFrom(__DIR__ . '/../../resources/lang', 'transaction');
 
         $this->publishes([
-            __DIR__ . '/../../lang' => $this->app->langPath('vendor/transaction'),
+            __DIR__ . '/../../resources/lang' => $this->app->langPath('vendor/transaction'),
         ], 'transaction-lang');
 
         Event::subscribe(TransactionTransferSubscriber::class);
