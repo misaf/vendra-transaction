@@ -166,7 +166,7 @@ final class TransactionResource extends Resource
                     ->autocomplete(false)
                     ->columnSpanFull()
                     ->extraInputAttributes(['dir' => 'ltr'])
-                    ->label(__('transaction::attributes.amount'))
+                    ->label(__('vendra-transaction::attributes.amount'))
                     ->minValue(1)
                     ->numeric()
                     ->required(),
@@ -191,30 +191,30 @@ final class TransactionResource extends Resource
 
                 TextColumn::make('transaction_type')
                     ->badge()
-                    ->label(__('transaction::attributes.transaction_type')),
+                    ->label(__('vendra-transaction::attributes.transaction_type')),
 
                 TextColumn::make('token')
                     ->alignCenter()
                     ->copyable()
-                    ->copyMessage(__('transaction::messages.token_copied'))
+                    ->copyMessage(__('vendra-transaction::messages.token_copied'))
                     ->copyMessageDuration(1500)
                     ->extraCellAttributes(['dir' => 'ltr'])
                     ->formatStateUsing(fn(string $state): string => Str::of($state)->split(4)->implode(' '))
-                    ->label(__('transaction::attributes.token'))
+                    ->label(__('vendra-transaction::attributes.token'))
                     ->searchable(isGlobal: true),
 
                 TextColumn::make('amount')
                     ->alignCenter()
                     ->copyable()
-                    ->copyMessage(__('transaction::messages.amount_copied'))
+                    ->copyMessage(__('vendra-transaction::messages.amount_copied'))
                     ->copyMessageDuration(1500)
                     ->extraCellAttributes(['dir' => 'ltr'])
-                    ->label(__('transaction::attributes.amount'))
+                    ->label(__('vendra-transaction::attributes.amount'))
                     ->numeric(locale: 'en', maxDecimalPlaces: 0),
 
                 TextColumn::make('status')
                     ->alignStart()
-                    ->label(__('transaction::attributes.status')),
+                    ->label(__('vendra-transaction::attributes.status')),
 
                 SpatieTagsColumn::make('tags')
                     ->label(__('tag::navigation.tag'))
@@ -222,10 +222,10 @@ final class TransactionResource extends Resource
                     ->toggleable(),
 
                 CreatedAtTextColumn::make('created_at')
-                    ->label(__('transaction::attributes.created_at')),
+                    ->label(__('vendra-transaction::attributes.created_at')),
 
                 UpdatedAtTextColumn::make('updated_at')
-                    ->label(__('transaction::attributes.updated_at')),
+                    ->label(__('vendra-transaction::attributes.updated_at')),
             ])
             ->filters(
                 [
@@ -233,26 +233,26 @@ final class TransactionResource extends Resource
                     QueryBuilder::make()
                         ->constraints([
                             SelectConstraint::make('transaction_type')
-                                ->label(__('transaction::attributes.transaction_type'))
+                                ->label(__('vendra-transaction::attributes.transaction_type'))
                                 ->multiple()
                                 ->options(TransactionTypeEnum::class),
 
                             TextConstraint::make('token')
-                                ->label(__('transaction::attributes.token')),
+                                ->label(__('vendra-transaction::attributes.token')),
 
                             NumberConstraint::make('amount')
-                                ->label(__('transaction::attributes.amount')),
+                                ->label(__('vendra-transaction::attributes.amount')),
 
                             SelectConstraint::make('status')
-                                ->label(__('transaction::attributes.status'))
+                                ->label(__('vendra-transaction::attributes.status'))
                                 ->multiple()
                                 ->options(TransactionStatusEnum::class),
 
                             DateConstraint::make('created_at')
-                                ->label(__('transaction::attributes.created_at')),
+                                ->label(__('vendra-transaction::attributes.created_at')),
 
                             DateConstraint::make('updated_at')
-                                ->label(__('transaction::attributes.updated_at')),
+                                ->label(__('vendra-transaction::attributes.updated_at')),
                         ]),
                 ],
                 layout: FiltersLayout::AboveContentCollapsible,

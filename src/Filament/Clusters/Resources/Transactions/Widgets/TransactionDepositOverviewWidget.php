@@ -60,8 +60,8 @@ final class TransactionDepositOverviewWidget extends StatsOverviewWidget
             ->sum('amount');
 
         $transactionDeposit = Stat::make('deposit_transaction_stats', Number::format($totalDepositAmount))
-            ->label(__('transaction::widgets.deposit_transaction_stats'))
-            ->description(__('transaction::widgets.deposit_transaction_stats_description'))
+            ->label(__('vendra-transaction::widgets.deposit_transaction_stats'))
+            ->description(__('vendra-transaction::widgets.deposit_transaction_stats_description'))
             ->descriptionIcon('heroicon-m-arrow-trending-up')
             ->chart($depositTransactionStats->map(fn(TrendValue $value) => $value->aggregate)->toArray())
             ->color('primary');

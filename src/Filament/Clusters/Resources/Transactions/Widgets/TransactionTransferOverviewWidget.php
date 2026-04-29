@@ -60,8 +60,8 @@ final class TransactionTransferOverviewWidget extends StatsOverviewWidget
             ->sum('amount');
 
         $transactionTransfer = Stat::make('transfer_transaction_stats', Number::format($totalTransferAmount))
-            ->label(__('transaction::widgets.transfer_transaction_stats'))
-            ->description(__('transaction::widgets.transfer_transaction_stats_description'))
+            ->label(__('vendra-transaction::widgets.transfer_transaction_stats'))
+            ->description(__('vendra-transaction::widgets.transfer_transaction_stats_description'))
             ->descriptionIcon('heroicon-m-arrow-trending-up')
             ->chart($transferTransactionStats->map(fn(TrendValue $value) => $value->aggregate)->toArray())
             ->color('primary');

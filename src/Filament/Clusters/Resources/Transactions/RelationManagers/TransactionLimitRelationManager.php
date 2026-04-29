@@ -29,17 +29,17 @@ final class TransactionLimitRelationManager extends RelationManager
 
     public static function getModelLabel(): string
     {
-        return __('transaction::navigation.transaction_limit');
+        return __('vendra-transaction::navigation.transaction_limit');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('transaction::navigation.transaction_limit');
+        return __('vendra-transaction::navigation.transaction_limit');
     }
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
-        return __('transaction::navigation.transaction_limit');
+        return __('vendra-transaction::navigation.transaction_limit');
     }
 
     public function form(Schema $schema): Schema
@@ -57,7 +57,7 @@ final class TransactionLimitRelationManager extends RelationManager
                     ->autocomplete(false)
                     ->columnSpanFull()
                     ->extraInputAttributes(['dir' => 'ltr'])
-                    ->label(__('transaction::attributes.amount'))
+                    ->label(__('vendra-transaction::attributes.amount'))
                     ->minValue(1)
                     ->numeric()
                     ->required(),
@@ -113,34 +113,34 @@ final class TransactionLimitRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('transaction_type')
                     ->badge()
-                    ->label(__('transaction::attributes.transaction_type')),
+                    ->label(__('vendra-transaction::attributes.transaction_type')),
                 TextColumn::make('amount')
                     ->alignCenter()
                     ->copyable()
                     ->copyMessage(__('Amount copied to clipboard'))
                     ->copyMessageDuration(1500)
                     ->extraCellAttributes(['dir' => 'ltr'])
-                    ->label(__('transaction::attributes.amount'))
+                    ->label(__('vendra-transaction::attributes.amount'))
                     ->numeric(locale: 'en', maxDecimalPlaces: 0),
                 CreatedAtTextColumn::make('created_at')
-                    ->label(__('transaction::attributes.created_at')),
+                    ->label(__('vendra-transaction::attributes.created_at')),
                 UpdatedAtTextColumn::make('updated_at')
-                    ->label(__('transaction::attributes.updated_at')),
+                    ->label(__('vendra-transaction::attributes.updated_at')),
             ])
             ->filters(
                 [
                     QueryBuilder::make()
                         ->constraints([
                             SelectConstraint::make('transaction_type')
-                                ->label(__('transaction::attributes.transaction_type'))
+                                ->label(__('vendra-transaction::attributes.transaction_type'))
                                 ->multiple()
                                 ->options(TransactionTypeEnum::class),
                             NumberConstraint::make('amount')
-                                ->label(__('transaction::attributes.amount')),
+                                ->label(__('vendra-transaction::attributes.amount')),
                             DateConstraint::make('created_at')
-                                ->label(__('transaction::attributes.created_at')),
+                                ->label(__('vendra-transaction::attributes.created_at')),
                             DateConstraint::make('updated_at')
-                                ->label(__('transaction::attributes.updated_at')),
+                                ->label(__('vendra-transaction::attributes.updated_at')),
                         ]),
                 ],
                 layout: FiltersLayout::AboveContentCollapsible,

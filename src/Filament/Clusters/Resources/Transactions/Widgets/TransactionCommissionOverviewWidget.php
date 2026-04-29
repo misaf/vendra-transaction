@@ -60,8 +60,8 @@ final class TransactionCommissionOverviewWidget extends StatsOverviewWidget
             ->sum('amount');
 
         $transactionCommission = Stat::make('commission_transaction_stats', Number::format($totalCommissionAmount))
-            ->label(__('transaction::widgets.commission_transaction_stats'))
-            ->description(__('transaction::widgets.commission_transaction_stats_description'))
+            ->label(__('vendra-transaction::widgets.commission_transaction_stats'))
+            ->description(__('vendra-transaction::widgets.commission_transaction_stats_description'))
             ->descriptionIcon('heroicon-m-arrow-trending-up')
             ->chart($commissionTransactionStats->map(fn(TrendValue $value) => $value->aggregate)->toArray())
             ->color('primary');

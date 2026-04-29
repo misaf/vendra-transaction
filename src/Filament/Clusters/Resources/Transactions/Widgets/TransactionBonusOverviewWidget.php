@@ -60,8 +60,8 @@ final class TransactionBonusOverviewWidget extends StatsOverviewWidget
             ->sum('amount');
 
         $transactionBonus = Stat::make('bonus_transaction_stats', Number::format($totalBonusAmount))
-            ->label(__('transaction::widgets.bonus_transaction_stats'))
-            ->description(__('transaction::widgets.bonus_transaction_stats_description'))
+            ->label(__('vendra-transaction::widgets.bonus_transaction_stats'))
+            ->description(__('vendra-transaction::widgets.bonus_transaction_stats_description'))
             ->descriptionIcon('heroicon-m-arrow-trending-up')
             ->chart($bonusTransactionStats->map(fn(TrendValue $value) => $value->aggregate)->toArray())
             ->color('primary');

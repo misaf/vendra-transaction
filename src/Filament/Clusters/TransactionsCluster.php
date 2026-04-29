@@ -19,7 +19,7 @@ final class TransactionsCluster extends Cluster
 
     public static function getNavigationLabel(): string
     {
-        return __('transaction::navigation.transaction');
+        return __('vendra-transaction::navigation.transaction');
     }
 
     public static function getClusterBreadcrumb(): string

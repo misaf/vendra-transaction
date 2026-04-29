@@ -18,7 +18,7 @@ final class WithdrawalLimit implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if ($this->isWithdrawalRakeRequirementNotMet($value)) {
-            $fail(__('transaction::validation.isWithdrawalRakeRequirementNotMet'));
+            $fail(__('vendra-transaction::validation.isWithdrawalRakeRequirementNotMet'));
         }
     }
 

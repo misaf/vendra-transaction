@@ -60,8 +60,8 @@ final class TransactionLimitOverviewWidget extends StatsOverviewWidget
             ->sum('amount');
 
         $transactionWithdrawal = Stat::make('withdrawal_transaction_stats', Number::format($totalWithdrawalAmount))
-            ->label(__('transaction::widgets.withdrawal_transaction_3stats'))
-            ->description(__('transaction::widgets.withdrawal_transac12tion_stats_description'))
+            ->label(__('vendra-transaction::widgets.withdrawal_transaction_3stats'))
+            ->description(__('vendra-transaction::widgets.withdrawal_transac12tion_stats_description'))
             ->descriptionIcon('heroicon-m-arrow-trending-up')
             ->chart($withdrawalTransactionStats->map(fn(TrendValue $value) => $value->aggregate)->toArray())
             ->color('primary');

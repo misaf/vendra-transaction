@@ -75,7 +75,7 @@ final class TransactionMetadataRelationManager extends RelationManager
                 TextColumn::make('key_value')
                     ->alignStart()
                     ->copyable()
-                    ->copyMessage(__('transaction::messages.value_copied'))
+                    ->copyMessage(__('vendra-transaction::messages.value_copied'))
                     ->copyMessageDuration(1500)
                     ->label(__('transaction_metadata.key_value')),
 
