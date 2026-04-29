@@ -4,33 +4,48 @@ declare(strict_types=1);
 
 namespace Misaf\VendraTransaction\Providers;
 
+use Filament\Panel;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Foundation\Console\AboutCommand;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Misaf\VendraTransaction\Listeners\TransactionTransferSubscriber;
 use Misaf\VendraTransaction\Listeners\WithdrawalLimitSubscriber;
 use Misaf\VendraTransaction\Services\TransactionService;
+use Spatie\LaravelPackageTools\Commands\InstallCommand;
+use Spatie\LaravelPackageTools\Package;
 
 final class TransactionServiceProvider extends ServiceProvider
 {
-    /**
-     * @return void
-     */
-    public function register(): void
+    public function configurePackage(Package $package): void
     {
-        $this->app->bind('transaction-service', fn(Application $app) => new TransactionService());
+        $package
+            ->name('vendra-transaction')
+            ->hasTranslations()
+            ->hasMigrations([
+                'create_transactions_table'
+            ])
+            ->hasInstallCommand(function (InstallCommand $command): void {
+                $command->askToStarRepoOnGitHub('misaf/vendra-transaction');
+            });
     }
 
-    /**
-     * @return void
-     */
-    public function boot(): void
+    public function packageRegistered(): void
     {
-        $this->loadTranslationsFrom(__DIR__ . '/../../resources/lang', 'transaction');
+        $this->app->bind('transaction-service', fn(Application $app) => new TransactionService());
 
-        $this->publishes([
-            __DIR__ . '/../../resources/lang' => $this->app->langPath('vendor/transaction'),
-        ], 'transaction-lang');
+        Panel::configureUsing(function (Panel $panel): void {
+            if ('admin' !== $panel->getId()) {
+                return;
+            }
+
+            // $panel->plugin(TransactionPlugin::make());
+        });
+    }
+
+    public function packageBooted(): void
+    {
+        AboutCommand::add('Vendra Transaction', fn() => ['Version' => 'dev-master']);
 
         Event::subscribe(TransactionTransferSubscriber::class);
         Event::subscribe(WithdrawalLimitSubscriber::class);
