@@ -138,7 +138,8 @@ final class TransactionGatewayResource extends Resource
                     ->columnSpanFull()
                     ->image()
                     ->label(__('form.image'))
-                    ->panelLayout('grid'),
+                    ->panelLayout('grid')
+                    ->responsiveImages(),
 
                 StatusToggle::make('status'),
             ]);
