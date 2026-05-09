@@ -4,7 +4,6 @@
     "description": "Financial transaction management system with multi-gateway support, status tracking and comprehensive metadata handling",
     "type": "vendra-module",
     "license": "MIT",
-    "version": "12.0.0",
     "keywords": [
         "laravel",
         "filamentphp",
