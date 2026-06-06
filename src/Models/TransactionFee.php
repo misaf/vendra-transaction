@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Misaf\VendraTransaction\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use Misaf\VendraActivityLog\Concerns\HasDefaultActivityLogOptions;
 use Misaf\VendraTransaction\Database\Factories\TransactionFeeFactory;
 use Misaf\VendraTransaction\Traits\BelongsToTransaction;
-use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
@@ -19,9 +20,11 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property Carbon $created_at
  * @property Carbon $updated_at
  */
+#[Fillable(['transaction_id', 'amount'])]
 final class TransactionFee extends Model
 {
     use BelongsToTransaction;
+    use HasDefaultActivityLogOptions;
     /** @use HasFactory<TransactionFeeFactory> */
     use HasFactory;
     use LogsActivity;
@@ -29,22 +32,20 @@ final class TransactionFee extends Model
     /**
      * @var array<string, string>
      */
-    protected $casts = [
-        'id'             => 'integer',
-        'transaction_id' => 'integer',
-        'amount'         => 'integer',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'id'             => 'integer',
+            'transaction_id' => 'integer',
+            'amount'         => 'integer',
+        ];
+    }
 
     /**
      * @var list<string>
      */
-    protected $fillable = [
-        'transaction_id',
-        'amount',
-    ];
 
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()->logFillable()->logExcept(['id']);
-    }
 }

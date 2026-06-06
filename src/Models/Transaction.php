@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Misaf\VendraTransaction\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Misaf\VendraActivityLog\Concerns\HasDefaultActivityLogOptions;
 use Misaf\VendraTenant\Traits\BelongsToTenant;
 use Misaf\VendraTransaction\Database\Factories\TransactionFactory;
 use Misaf\VendraTransaction\Enums\TransactionStatusEnum;
@@ -20,7 +23,6 @@ use Misaf\VendraTransaction\Traits\HasTransactionFee;
 use Misaf\VendraTransaction\Traits\HasTransactionMetadata;
 use Misaf\VendraTransaction\Traits\HasTransactionTransfer;
 use Misaf\VendraUser\Traits\BelongsToUser;
-use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Tags\HasTags;
 
@@ -37,11 +39,14 @@ use Spatie\Tags\HasTags;
  * @property Carbon $updated_at
  * @property Carbon|null $deleted_at
  */
+#[Fillable(['transaction_gateway_id', 'user_id', 'transaction_type', 'token', 'amount', 'status'])]
+#[Hidden(['tenant_id'])]
 final class Transaction extends Model
 {
     use BelongsToTenant;
     use BelongsToTransactionGateway;
     use BelongsToUser;
+    use HasDefaultActivityLogOptions;
     /** @use HasFactory<TransactionFactory> */
     use HasFactory;
     use HasTags;
@@ -55,35 +60,30 @@ final class Transaction extends Model
     /**
      * @var array<string, string>
      */
-    protected $casts = [
-        'id'                     => 'integer',
-        'tenant_id'              => 'integer',
-        'transaction_gateway_id' => 'integer',
-        'user_id'                => 'integer',
-        'transaction_type'       => TransactionTypeEnum::class,
-        'token'                  => 'string',
-        'amount'                 => 'integer',
-        'status'                 => TransactionStatusEnum::class,
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'id'                     => 'integer',
+            'tenant_id'              => 'integer',
+            'transaction_gateway_id' => 'integer',
+            'user_id'                => 'integer',
+            'transaction_type'       => TransactionTypeEnum::class,
+            'token'                  => 'string',
+            'amount'                 => 'integer',
+            'status'                 => TransactionStatusEnum::class,
+        ];
+    }
 
     /**
      * @var list<string>
      */
-    protected $fillable = [
-        'transaction_gateway_id',
-        'user_id',
-        'transaction_type',
-        'token',
-        'amount',
-        'status',
-    ];
 
     /**
      * @var list<string>
      */
-    protected $hidden = [
-        'tenant_id',
-    ];
 
     /**
      * @param  Builder<self>  $builder
@@ -180,8 +180,4 @@ final class Transaction extends Model
         });
     }
 
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()->logFillable()->logExcept(['id']);
-    }
 }

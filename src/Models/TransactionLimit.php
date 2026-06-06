@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Misaf\VendraTransaction\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use Misaf\VendraActivityLog\Concerns\HasDefaultActivityLogOptions;
 use Misaf\VendraTransaction\Database\Factories\TransactionLimitFactory;
 use Misaf\VendraTransaction\Enums\TransactionTypeEnum;
 use Misaf\VendraUser\Traits\BelongsToUser;
-use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
@@ -22,9 +23,11 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property Carbon $created_at
  * @property Carbon $updated_at
  */
+#[Fillable(['user_id', 'transaction_type', 'amount'])]
 final class TransactionLimit extends Model
 {
     use BelongsToUser;
+    use HasDefaultActivityLogOptions;
     /** @use HasFactory<TransactionLimitFactory> */
     use HasFactory;
     use LogsActivity;
@@ -32,21 +35,22 @@ final class TransactionLimit extends Model
     /**
      * @var array<string, string>
      */
-    protected $casts = [
-        'id'               => 'integer',
-        'user_id'          => 'integer',
-        'transaction_type' => TransactionTypeEnum::class,
-        'amount'           => 'integer',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'id'               => 'integer',
+            'user_id'          => 'integer',
+            'transaction_type' => TransactionTypeEnum::class,
+            'amount'           => 'integer',
+        ];
+    }
 
     /**
      * @var list<string>
      */
-    protected $fillable = [
-        'user_id',
-        'transaction_type',
-        'amount',
-    ];
 
     /**
      * @param  Builder<self>  $builder
@@ -88,8 +92,4 @@ final class TransactionLimit extends Model
         $builder->where('transaction_type', TransactionTypeEnum::Transfer);
     }
 
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()->logFillable()->logExcept(['id']);
-    }
 }
