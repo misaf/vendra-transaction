@@ -1,72 +1,72 @@
 {
-    "$schema": "https://getcomposer.org/schema.json",
-    "name": "misaf/vendra-transaction",
-    "description": "Financial transaction management system with multi-gateway support, status tracking and comprehensive metadata handling",
-    "type": "vendra-module",
-    "license": "MIT",
-    "keywords": [
-        "laravel",
-        "filamentphp",
-        "transaction"
-    ],
-    "authors": [
-        {
-            "name": "Ehsan Mahmoodi",
-            "email": "misaf.1990@gmail.com"
-        }
-    ],
-    "require": {
-        "filament/filament": "^5.0",
-        "misaf/vendra-activity-log": "dev-master",
-        "misaf/vendra-multimedia": "dev-master",
-        "php": "^8.3",
+	"name": "misaf/vendra-transaction",
+	"description": "Financial transaction management system with multi-gateway support, status tracking and comprehensive metadata handling",
+	"license": "MIT",
+	"type": "vendra-module",
+	"keywords": [
+		"laravel",
+		"filamentphp",
+		"transaction"
+	],
+	"authors": [
+		{
+			"name": "Ehsan Mahmoodi",
+			"email": "misaf.1990@gmail.com"
+		}
+	],
+	"require": {
+		"php": "^8.3",
+		"filament/filament": "^5.0",
 		"illuminate/support": "^12.0 || ^13.0",
+		"misaf/vendra-activity-log": "dev-master",
+		"misaf/vendra-multimedia": "dev-master",
 		"misaf/vendra-support": "dev-master",
-        "spatie/eloquent-sortable": "^5.0",
-        "spatie/laravel-activitylog": "^4.0",
-        "spatie/laravel-package-tools": "^1.0",
-        "spatie/laravel-queueable-action": "^2.17",
-        "spatie/laravel-sluggable": "^4.0"
-    },
-    "require-dev": {
-        "fakerphp/faker": "^1.0",
-        "larastan/larastan": "^3.0",
-        "laravel/boost": "^2.0",
-        "laravel/pint": "^1.0",
-        "mockery/mockery": "^1.0",
-        "nunomaduro/collision": "^8.0",
-        "pestphp/pest": "^4.0",
-        "pestphp/pest-plugin-laravel": "^4.0",
-        "orchestra/testbench": "^10.0"
-    },
-    "scripts": {
-        "analyse": "vendor/bin/phpstan analyse",
-        "test": "pest"
-    },
-    "autoload": {
-        "psr-4": {
-            "Misaf\\VendraTransaction\\": "src/",
-            "Misaf\\VendraTransaction\\Tests\\": "tests/",
-            "Misaf\\VendraTransaction\\Database\\Factories\\": "database/factories/",
-            "Misaf\\VendraTransaction\\Database\\Seeders\\": "database/seeders/"
-        }
-    },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "Misaf\\VendraTransaction\\Providers\\TransactionServiceProvider"
-            ]
-        }
-    },
-    "config": {
-        "optimize-autoloader": true,
-        "preferred-install": "dist",
-        "sort-packages": true,
-        "allow-plugins": {
-            "pestphp/pest-plugin": true,
-            "php-http/discovery": true
-        }
-    },
-    "minimum-stability": "stable",
-    "prefer-stable": true
+		"spatie/eloquent-sortable": "^5.0",
+		"spatie/laravel-activitylog": "^4.0",
+		"spatie/laravel-package-tools": "^1.0",
+		"spatie/laravel-queueable-action": "^2.17",
+		"spatie/laravel-sluggable": "^4.0"
+	},
+	"require-dev": {
+		"fakerphp/faker": "^1.0",
+		"larastan/larastan": "^3.0",
+		"laravel/boost": "^2.0",
+		"laravel/pint": "^1.0",
+		"mockery/mockery": "^1.0",
+		"nunomaduro/collision": "^8.0",
+		"orchestra/testbench": "^10.0",
+		"pestphp/pest": "^4.0",
+		"pestphp/pest-plugin-laravel": "^4.0"
+	},
+	"minimum-stability": "stable",
+	"prefer-stable": true,
+	"autoload": {
+		"psr-4": {
+			"Misaf\\VendraTransaction\\": "src/",
+			"Misaf\\VendraTransaction\\Database\\Factories\\": "database/factories/",
+			"Misaf\\VendraTransaction\\Database\\Seeders\\": "database/seeders/",
+			"Misaf\\VendraTransaction\\Tests\\": "tests/"
+		}
+	},
+	"config": {
+		"allow-plugins": {
+			"pestphp/pest-plugin": true,
+			"php-http/discovery": true
+		},
+		"optimize-autoloader": true,
+		"preferred-install": "dist",
+		"sort-packages": true
+	},
+	"extra": {
+		"laravel": {
+			"providers": [
+				"Misaf\\VendraTransaction\\Providers\\TransactionServiceProvider"
+			]
+		}
+	},
+	"scripts": {
+		"analyse": "vendor/bin/phpstan analyse",
+		"test": "pest"
+	},
+	"$schema": "https://getcomposer.org/schema.json"
 }
