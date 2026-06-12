@@ -8,14 +8,14 @@ use Filament\Panel;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Foundation\Console\AboutCommand;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\ServiceProvider;
 use Misaf\VendraTransaction\Listeners\TransactionTransferSubscriber;
 use Misaf\VendraTransaction\Listeners\WithdrawalLimitSubscriber;
 use Misaf\VendraTransaction\Services\TransactionService;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
+use Spatie\LaravelPackageTools\PackageServiceProvider;
 
-final class TransactionServiceProvider extends ServiceProvider
+final class TransactionServiceProvider extends PackageServiceProvider
 {
     public function configurePackage(Package $package): void
     {
