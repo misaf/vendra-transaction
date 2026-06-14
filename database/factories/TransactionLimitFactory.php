@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Misaf\VendraTransaction\Database\Factories;
 
+use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Misaf\VendraTransaction\Enums\TransactionTypeEnum;
 use Misaf\VendraTransaction\Models\TransactionLimit;
@@ -12,13 +13,9 @@ use Misaf\VendraUser\Models\User;
 /**
  * @extends Factory<TransactionLimit>
  */
+#[UseModel(TransactionLimit::class)]
 final class TransactionLimitFactory extends Factory
 {
-    /**
-     * @var class-string<TransactionLimit>
-     */
-    protected $model = TransactionLimit::class;
-
     /**
      * @return array<string, mixed>
      */
