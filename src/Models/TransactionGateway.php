@@ -6,6 +6,7 @@ namespace Misaf\VendraTransaction\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -40,6 +41,7 @@ use Spatie\Translatable\HasTranslations;
  */
 #[Fillable(['name', 'description', 'slug', 'position', 'status'])]
 #[Hidden(['tenant_id'])]
+#[UseFactory(TransactionGatewayFactory::class)]
 final class TransactionGateway extends Model implements HasMedia, Sortable
 {
     use BelongsToTenant;
