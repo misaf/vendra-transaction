@@ -6,6 +6,7 @@ namespace Misaf\VendraTransaction\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -41,6 +42,7 @@ use Spatie\Tags\HasTags;
  */
 #[Fillable(['transaction_gateway_id', 'user_id', 'transaction_type', 'token', 'amount', 'status'])]
 #[Hidden(['tenant_id'])]
+#[UseFactory(TransactionFactory::class)]
 final class Transaction extends Model
 {
     use BelongsToTenant;
