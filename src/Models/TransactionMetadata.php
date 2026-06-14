@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Misaf\VendraTransaction\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -22,6 +23,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property Carbon $updated_at
  */
 #[Fillable(['transaction_id', 'key_name', 'key_value'])]
+#[UseFactory(TransactionMetadataFactory::class)]
 final class TransactionMetadata extends Model
 {
     use BelongsToTransaction;
