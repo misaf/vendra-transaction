@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Misaf\VendraTransaction\Database\Factories;
 
+use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Misaf\VendraTenant\Models\Tenant;
 use Misaf\VendraTransaction\Enums\TransactionStatusEnum;
@@ -16,13 +17,9 @@ use Misaf\VendraUser\Models\User;
 /**
  * @extends Factory<Transaction>
  */
+#[UseModel(Transaction::class)]
 final class TransactionFactory extends Factory
 {
-    /**
-     * @var class-string<Transaction>
-     */
-    protected $model = Transaction::class;
-
     /**
      * @return array<string, mixed>
      */
