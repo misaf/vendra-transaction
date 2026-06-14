@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Misaf\VendraTransaction\Database\Factories;
 
+use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Misaf\VendraTransaction\Models\Transaction;
 use Misaf\VendraTransaction\Models\TransactionCheck;
@@ -11,13 +12,9 @@ use Misaf\VendraTransaction\Models\TransactionCheck;
 /**
  * @extends Factory<TransactionCheck>
  */
+#[UseModel(TransactionCheck::class)]
 final class TransactionCheckFactory extends Factory
 {
-    /**
-     * @var class-string<TransactionCheck>
-     */
-    protected $model = TransactionCheck::class;
-
     /**
      * @return array<string, mixed>
      */
