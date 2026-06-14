@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Misaf\VendraTransaction\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -24,6 +25,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property Carbon $updated_at
  */
 #[Fillable(['user_id', 'transaction_type', 'amount'])]
+#[UseFactory(TransactionLimitFactory::class)]
 final class TransactionLimit extends Model
 {
     use BelongsToUser;
