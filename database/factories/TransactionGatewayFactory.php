@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Misaf\VendraTransaction\Database\Factories;
 
+use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 use Misaf\VendraTenant\Models\Tenant;
@@ -12,13 +13,9 @@ use Misaf\VendraTransaction\Models\TransactionGateway;
 /**
  * @extends Factory<TransactionGateway>
  */
+#[UseModel(TransactionGateway::class)]
 final class TransactionGatewayFactory extends Factory
 {
-    /**
-     * @var class-string<TransactionGateway>
-     */
-    protected $model = TransactionGateway::class;
-
     /**
      * @return array<string, mixed>
      */
