@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Misaf\VendraTransaction\Database\Factories;
 
+use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Misaf\VendraTransaction\Models\Transaction;
 use Misaf\VendraTransaction\Models\TransactionTransfer;
@@ -12,13 +13,9 @@ use Misaf\VendraUser\Models\User;
 /**
  * @extends Factory<TransactionTransfer>
  */
+#[UseModel(TransactionTransfer::class)]
 final class TransactionTransferFactory extends Factory
 {
-    /**
-     * @var class-string<TransactionTransfer>
-     */
-    protected $model = TransactionTransfer::class;
-
     /**
      * @return array<string, mixed>
      */
