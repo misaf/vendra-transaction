@@ -34,7 +34,7 @@ use Spatie\Translatable\HasTranslations;
  * @property array<string, string> $description
  * @property array<string, string> $slug
  * @property int $position
- * @property boolean $status
+ * @property bool $status
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property Carbon|null $deleted_at
@@ -49,8 +49,10 @@ final class TransactionGateway extends Model implements HasMedia, Sortable
     use HasDefaultMediaConversions, InteractsWithMedia {
         HasDefaultMediaConversions::registerMediaConversions insteadof InteractsWithMedia;
     }
+
     /** @use HasFactory<TransactionGatewayFactory> */
     use HasFactory;
+
     use HasTransaction;
     use HasTranslatableSlug;
     use HasTranslations;

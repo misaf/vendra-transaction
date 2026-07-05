@@ -49,8 +49,10 @@ final class Transaction extends Model
     use BelongsToTransactionGateway;
     use BelongsToUser;
     use HasDefaultActivityLogOptions;
+
     /** @use HasFactory<TransactionFactory> */
     use HasFactory;
+
     use HasTags;
     use HasTransactionCheck;
     use HasTransactionFee;
@@ -181,5 +183,4 @@ final class Transaction extends Model
             $transaction->token = TransactionService::generateToken();
         });
     }
-
 }

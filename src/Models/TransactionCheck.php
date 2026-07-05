@@ -27,8 +27,10 @@ final class TransactionCheck extends Model
 {
     use BelongsToTransaction;
     use HasDefaultActivityLogOptions;
+
     /** @use HasFactory<TransactionCheckFactory> */
     use HasFactory;
+
     use LogsActivity;
 
     /**
@@ -49,5 +51,4 @@ final class TransactionCheck extends Model
     /**
      * @var list<string>
      */
-
 }

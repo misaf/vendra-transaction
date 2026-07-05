@@ -27,10 +27,6 @@ final class TransactionTransferFactory extends Factory
         ];
     }
 
-    /**
-     * @param User $user
-     * @return static
-     */
     public function forUser(User $user): static
     {
         return $this->state(fn(): array => [

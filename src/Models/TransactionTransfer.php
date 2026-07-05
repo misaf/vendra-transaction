@@ -29,8 +29,10 @@ final class TransactionTransfer extends Model
     use BelongsToTransaction;
     use BelongsToUser;
     use HasDefaultActivityLogOptions;
+
     /** @use HasFactory<TransactionTransferFactory> */
     use HasFactory;
+
     use LogsActivity;
 
     /**
@@ -51,5 +53,4 @@ final class TransactionTransfer extends Model
     /**
      * @var list<string>
      */
-
 }

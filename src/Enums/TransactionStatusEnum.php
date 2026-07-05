@@ -41,9 +41,6 @@ enum TransactionStatusEnum: string implements HasColor, HasIcon, HasLabel
         };
     }
 
-    /**
-     * @return string
-     */
     public function getIcon(): string
     {
         return match ($this) {
@@ -56,9 +53,6 @@ enum TransactionStatusEnum: string implements HasColor, HasIcon, HasLabel
         };
     }
 
-    /**
-     * @return string
-     */
     public function getLabel(): string
     {
         return match ($this) {

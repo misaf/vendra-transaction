@@ -30,8 +30,10 @@ final class TransactionLimit extends Model
 {
     use BelongsToUser;
     use HasDefaultActivityLogOptions;
+
     /** @use HasFactory<TransactionLimitFactory> */
     use HasFactory;
+
     use LogsActivity;
 
     /**
@@ -93,5 +95,4 @@ final class TransactionLimit extends Model
     {
         $builder->where('transaction_type', TransactionTypeEnum::Transfer);
     }
-
 }

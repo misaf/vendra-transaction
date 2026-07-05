@@ -28,8 +28,10 @@ final class TransactionMetadata extends Model
 {
     use BelongsToTransaction;
     use HasDefaultActivityLogOptions;
+
     /** @use HasFactory<TransactionMetadataFactory> */
     use HasFactory;
+
     use LogsActivity;
 
     /**
@@ -51,5 +53,4 @@ final class TransactionMetadata extends Model
     /**
      * @var list<string>
      */
-
 }

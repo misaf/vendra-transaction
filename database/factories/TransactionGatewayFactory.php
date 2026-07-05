@@ -30,10 +30,6 @@ final class TransactionGatewayFactory extends Factory
         ];
     }
 
-    /**
-     * @param Tenant $tenant
-     * @return static
-     */
     public function forTenant(Tenant $tenant): static
     {
         return $this->state(fn(): array => [

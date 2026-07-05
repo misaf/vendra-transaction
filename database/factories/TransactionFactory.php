@@ -36,10 +36,6 @@ final class TransactionFactory extends Factory
         ];
     }
 
-    /**
-     * @param Tenant $tenant
-     * @return static
-     */
     public function forTenant(Tenant $tenant): static
     {
         return $this->state(fn(): array => [
@@ -47,10 +43,6 @@ final class TransactionFactory extends Factory
         ]);
     }
 
-    /**
-     * @param User $user
-     * @return static
-     */
     public function forUser(User $user): static
     {
         return $this->state(fn(): array => [

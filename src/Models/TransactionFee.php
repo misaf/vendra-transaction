@@ -27,8 +27,10 @@ final class TransactionFee extends Model
 {
     use BelongsToTransaction;
     use HasDefaultActivityLogOptions;
+
     /** @use HasFactory<TransactionFeeFactory> */
     use HasFactory;
+
     use LogsActivity;
 
     /**
@@ -49,5 +51,4 @@ final class TransactionFee extends Model
     /**
      * @var list<string>
      */
-
 }

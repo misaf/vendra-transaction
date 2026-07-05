@@ -23,7 +23,7 @@ final class TransactionServiceProvider extends PackageServiceProvider
             ->name('vendra-transaction')
             ->hasTranslations()
             ->hasMigrations([
-                'create_transactions_table'
+                'create_transactions_table',
             ])
             ->hasInstallCommand(function (InstallCommand $command): void {
                 $command->askToStarRepoOnGitHub('misaf/vendra-transaction');
