@@ -10,11 +10,10 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use Misaf\VendraActivityLog\Concerns\HasDefaultActivityLogOptions;
+use Misaf\VendraSupport\Contracts\ShouldLogActivity;
 use Misaf\VendraTransaction\Database\Factories\TransactionLimitFactory;
 use Misaf\VendraTransaction\Enums\TransactionTypeEnum;
 use Misaf\VendraUser\Traits\BelongsToUser;
-use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
  * @property int $id
@@ -26,15 +25,13 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 #[Fillable(['user_id', 'transaction_type', 'amount'])]
 #[UseFactory(TransactionLimitFactory::class)]
-final class TransactionLimit extends Model
+final class TransactionLimit extends Model implements ShouldLogActivity
 {
     use BelongsToUser;
-    use HasDefaultActivityLogOptions;
 
     /** @use HasFactory<TransactionLimitFactory> */
     use HasFactory;
 
-    use LogsActivity;
 
     /**
      * @var array<string, string>

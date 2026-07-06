@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
-use Misaf\VendraActivityLog\Concerns\HasDefaultActivityLogOptions;
+use Misaf\VendraSupport\Contracts\ShouldLogActivity;
 use Misaf\VendraSupport\Traits\BelongsToTenant;
 use Misaf\VendraTransaction\Database\Factories\TransactionFactory;
 use Misaf\VendraTransaction\Enums\TransactionStatusEnum;
@@ -24,7 +24,6 @@ use Misaf\VendraTransaction\Traits\HasTransactionFee;
 use Misaf\VendraTransaction\Traits\HasTransactionMetadata;
 use Misaf\VendraTransaction\Traits\HasTransactionTransfer;
 use Misaf\VendraUser\Traits\BelongsToUser;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Tags\HasTags;
 
 /**
@@ -43,12 +42,11 @@ use Spatie\Tags\HasTags;
 #[Fillable(['transaction_gateway_id', 'user_id', 'transaction_type', 'token', 'amount', 'status'])]
 #[Hidden(['tenant_id'])]
 #[UseFactory(TransactionFactory::class)]
-final class Transaction extends Model
+final class Transaction extends Model implements ShouldLogActivity
 {
     use BelongsToTenant;
     use BelongsToTransactionGateway;
     use BelongsToUser;
-    use HasDefaultActivityLogOptions;
 
     /** @use HasFactory<TransactionFactory> */
     use HasFactory;
@@ -58,7 +56,6 @@ final class Transaction extends Model
     use HasTransactionFee;
     use HasTransactionMetadata;
     use HasTransactionTransfer;
-    use LogsActivity;
     use SoftDeletes;
 
     /**

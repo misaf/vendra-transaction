@@ -9,11 +9,10 @@ use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use Misaf\VendraActivityLog\Concerns\HasDefaultActivityLogOptions;
+use Misaf\VendraSupport\Contracts\ShouldLogActivity;
 use Misaf\VendraTransaction\Database\Factories\TransactionTransferFactory;
 use Misaf\VendraTransaction\Traits\BelongsToTransaction;
 use Misaf\VendraUser\Traits\BelongsToUser;
-use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
  * @property int $id
@@ -24,16 +23,14 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 #[Fillable(['transaction_id', 'user_id'])]
 #[UseFactory(TransactionTransferFactory::class)]
-final class TransactionTransfer extends Model
+final class TransactionTransfer extends Model implements ShouldLogActivity
 {
     use BelongsToTransaction;
     use BelongsToUser;
-    use HasDefaultActivityLogOptions;
 
     /** @use HasFactory<TransactionTransferFactory> */
     use HasFactory;
 
-    use LogsActivity;
 
     /**
      * @var array<string, string>

@@ -9,10 +9,9 @@ use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use Misaf\VendraActivityLog\Concerns\HasDefaultActivityLogOptions;
+use Misaf\VendraSupport\Contracts\ShouldLogActivity;
 use Misaf\VendraTransaction\Database\Factories\TransactionFeeFactory;
 use Misaf\VendraTransaction\Traits\BelongsToTransaction;
-use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
  * @property int $id
@@ -23,15 +22,13 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 #[Fillable(['transaction_id', 'amount'])]
 #[UseFactory(TransactionFeeFactory::class)]
-final class TransactionFee extends Model
+final class TransactionFee extends Model implements ShouldLogActivity
 {
     use BelongsToTransaction;
-    use HasDefaultActivityLogOptions;
 
     /** @use HasFactory<TransactionFeeFactory> */
     use HasFactory;
 
-    use LogsActivity;
 
     /**
      * @var array<string, string>
