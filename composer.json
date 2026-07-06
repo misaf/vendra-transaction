@@ -43,8 +43,12 @@
 	"autoload": {
 		"psr-4": {
 			"Misaf\\VendraTransaction\\": "src/",
+			"Misaf\\VendraTransaction\\Database\\Seeders\\": "database/seeders/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
 			"Misaf\\VendraTransaction\\Database\\Factories\\": "database/factories/",
-			"Misaf\\VendraTransaction\\Database\\Seeders\\": "database/seeders/",
 			"Misaf\\VendraTransaction\\Tests\\": "tests/"
 		}
 	},
