@@ -35,7 +35,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Unique;
 use LaraZeus\SpatieTranslatable\Resources\Concerns\Translatable;
 use Livewire\Component as Livewire;
-use Misaf\VendraTenant\Models\Tenant;
+use Misaf\VendraSupport\Support\TenantAwareness;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Pages\CreateTransactionGateway;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Pages\EditTransactionGateway;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Pages\ListTransactionGateways;
@@ -60,27 +60,27 @@ final class TransactionGatewayResource extends Resource
 
     public static function getBreadcrumb(): string
     {
-        return __('navigation.transaction_gateway');
+        return __('vendra-transaction::navigation.transaction_gateway');
     }
 
     public static function getModelLabel(): string
     {
-        return __('navigation.transaction_gateway');
+        return __('vendra-transaction::navigation.transaction_gateway');
     }
 
     public static function getNavigationGroup(): string
     {
-        return __('navigation.transaction_management');
+        return __('vendra-transaction::navigation.transaction_management');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('navigation.transaction_gateway');
+        return __('vendra-transaction::navigation.transaction_gateway');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('navigation.transaction_gateway');
+        return __('vendra-transaction::navigation.transaction_gateway');
     }
 
     public static function getDefaultTranslatableLocale(): string
@@ -120,15 +120,13 @@ final class TransactionGatewayResource extends Resource
                     })
                     ->autofocus()
                     ->columnSpan(['lg' => 1])
-                    ->label(__('form.name'))
+                    ->label(__('vendra-transaction::attributes.name'))
                     ->live(onBlur: true)
                     ->required()
                     ->unique(
                         column: fn(Livewire $livewire) => 'name->' . $livewire->activeLocale,
-                        modifyRuleUsing: function (Unique $rule): void {
-                            $rule->where('tenant_id', Tenant::current()->id)
-                                ->withoutTrashed();
-                        },
+                        modifyRuleUsing: fn(Unique $rule): Unique => TenantAwareness::constrainUniqueRule($rule)
+                            ->withoutTrashed(),
                     ),
 
                 SlugTextInput::make('slug'),
@@ -137,7 +135,7 @@ final class TransactionGatewayResource extends Resource
                 SpatieMediaLibraryFileUpload::make('image')
                     ->columnSpanFull()
                     ->image()
-                    ->label(__('form.image'))
+                    ->label(__('vendra-transaction::attributes.image'))
                     ->panelLayout('grid')
                     ->responsiveImages(),
 
@@ -158,7 +156,7 @@ final class TransactionGatewayResource extends Resource
                     ->conversion('thumb-table')
                     ->defaultImageUrl(url('coin-payment/images/default.png'))
                     ->extraImgAttributes(['class' => 'saturate-50', 'loading' => 'lazy'])
-                    ->label(__('form.image'))
+                    ->label(__('vendra-transaction::attributes.image'))
                     ->stacked(),
 
                 NameTextColumn::make('name'),
@@ -184,7 +182,7 @@ final class TransactionGatewayResource extends Resource
                         }),
 
                     Action::make('report')
-                        ->label(__('گزارشات'))
+                        ->label(__('vendra-transaction::messages.reports'))
                         ->action(fn(TransactionGateway $record) => $record->advance())
                         ->modalContent(function () {
                             return view('filament.admin.resources.transaction_gateways.pages.actions.report');

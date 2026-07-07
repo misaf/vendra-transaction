@@ -6,8 +6,9 @@ namespace Misaf\VendraTransaction\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
-use Misaf\VendraTenant\Models\Tenant;
+use Misaf\VendraSupport\Support\TenantAwareness;
 use Misaf\VendraTransaction\Models\TransactionGateway;
 
 /**
@@ -22,7 +23,6 @@ final class TransactionGatewayFactory extends Factory
     public function definition(): array
     {
         return [
-            'tenant_id'   => Tenant::factory(),
             'name'        => fake()->unique()->sentence(3),
             'description' => fake()->text(),
             'slug'        => fn(array $attributes) => Str::slug($attributes['name']),
@@ -30,10 +30,17 @@ final class TransactionGatewayFactory extends Factory
         ];
     }
 
-    public function forTenant(Tenant $tenant): static
+    /**
+     * No-op without a tenant provider, since there is no `tenant_id` column.
+     */
+    public function forTenant(Model|int $tenant): static
     {
+        if ( ! TenantAwareness::enabled()) {
+            return $this;
+        }
+
         return $this->state(fn(): array => [
-            'tenant_id' => $tenant->id,
+            'tenant_id' => $tenant instanceof Model ? $tenant->getKey() : $tenant,
         ]);
     }
 }

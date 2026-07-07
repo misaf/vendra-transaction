@@ -6,7 +6,8 @@ namespace Misaf\VendraTransaction\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Misaf\VendraTenant\Models\Tenant;
+use Illuminate\Database\Eloquent\Model;
+use Misaf\VendraSupport\Support\TenantAwareness;
 use Misaf\VendraTransaction\Enums\TransactionStatusEnum;
 use Misaf\VendraTransaction\Enums\TransactionTypeEnum;
 use Misaf\VendraTransaction\Facades\TransactionService;
@@ -26,7 +27,6 @@ final class TransactionFactory extends Factory
     public function definition(): array
     {
         return [
-            'tenant_id'              => Tenant::factory(),
             'transaction_gateway_id' => TransactionGateway::factory(),
             'user_id'                => User::factory(),
             'transaction_type'       => fake()->randomElement(TransactionTypeEnum::cases()),
@@ -36,10 +36,17 @@ final class TransactionFactory extends Factory
         ];
     }
 
-    public function forTenant(Tenant $tenant): static
+    /**
+     * No-op without a tenant provider, since there is no `tenant_id` column.
+     */
+    public function forTenant(Model|int $tenant): static
     {
+        if ( ! TenantAwareness::enabled()) {
+            return $this;
+        }
+
         return $this->state(fn(): array => [
-            'tenant_id' => $tenant->id,
+            'tenant_id' => $tenant instanceof Model ? $tenant->getKey() : $tenant,
         ]);
     }
 

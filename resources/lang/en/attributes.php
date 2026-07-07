@@ -3,11 +3,15 @@
 declare(strict_types=1);
 
 return [
-    'transaction_type' => 'Type',
-    'token'            => 'Token',
     'amount'           => 'Amount',
-    'status'           => 'Status',
     'created_at'       => 'Created At',
-    'updated_at'       => 'Updated At',
     'deleted_at'       => 'Deleted At',
+    'image'            => 'Image',
+    'key_name'         => 'Key',
+    'key_value'        => 'Value',
+    'name'             => 'Name',
+    'status'           => 'Status',
+    'token'            => 'Token',
+    'transaction_type' => 'Type',
+    'updated_at'       => 'Updated At',
 ];

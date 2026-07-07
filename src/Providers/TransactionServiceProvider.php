@@ -39,6 +39,11 @@ final class TransactionServiceProvider extends PackageServiceProvider
                 return;
             }
 
+            $panel->discoverWidgets(
+                in: __DIR__ . '/../Filament/Widgets',
+                for: 'Misaf\\VendraTransaction\\Filament\\Widgets',
+            );
+
             // $panel->plugin(TransactionPlugin::make());
         });
     }

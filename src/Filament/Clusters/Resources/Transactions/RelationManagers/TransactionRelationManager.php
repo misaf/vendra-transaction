@@ -24,17 +24,17 @@ final class TransactionRelationManager extends RelationManager
 
     public static function getModelLabel(): string
     {
-        return __('navigation.transaction');
+        return __('vendra-transaction::navigation.transaction');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('navigation.transaction');
+        return __('vendra-transaction::navigation.transaction');
     }
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
-        return __('navigation.transaction');
+        return __('vendra-transaction::navigation.transaction');
     }
 
     public function isReadOnly(): bool

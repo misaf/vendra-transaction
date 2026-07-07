@@ -69,27 +69,27 @@ final class TransactionResource extends Resource
 
     public static function getBreadcrumb(): string
     {
-        return __('navigation.transaction');
+        return __('vendra-transaction::navigation.transaction');
     }
 
     public static function getModelLabel(): string
     {
-        return __('navigation.transaction');
+        return __('vendra-transaction::navigation.transaction');
     }
 
     public static function getNavigationGroup(): string
     {
-        return __('navigation.transaction_management');
+        return __('vendra-transaction::navigation.transaction_management');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('navigation.transaction');
+        return __('vendra-transaction::navigation.transaction');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('navigation.transaction');
+        return __('vendra-transaction::navigation.transaction');
     }
 
     public static function getGlobalSearchEloquentQuery(): Builder
@@ -111,9 +111,9 @@ final class TransactionResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            __('form.username')       => $record?->user?->username,
-            __('form.status')         => $record->status,
-            __('tag::navigation.tag') => new HtmlString("<span dir='ltr'>" . collect($record->tags->pluck('name'))
+            __('vendra-user::attributes.username')      => $record?->user?->username,
+            __('vendra-transaction::attributes.status') => $record->status,
+            __('vendra-tagger::navigation.tag')         => new HtmlString("<span dir='ltr'>" . collect($record->tags->pluck('name'))
                 ->map(fn($tag) => "#{$tag}")
                 ->implode(' ') . '</span>'),
         ];
@@ -147,14 +147,14 @@ final class TransactionResource extends Resource
             ->components([
                 Select::make('transaction_type')
                     ->columnSpanFull()
-                    ->label(__('form.category'))
+                    ->label(__('vendra-transaction::attributes.transaction_type'))
                     ->native(false)
                     ->options(TransactionTypeEnum::class)
                     ->required(),
 
                 Select::make('user_id')
                     ->columnSpanFull()
-                    ->label(__('form.username'))
+                    ->label(__('vendra-user::attributes.username'))
                     ->native(false)
                     ->preload()
                     ->relationship('user', 'username')
@@ -183,11 +183,11 @@ final class TransactionResource extends Resource
 
                 ModelLinkColumn::make('user.username')
                     ->alignCenter()
-                    ->label(__('model.user'))
+                    ->label(__('vendra-user::navigation.user'))
                     ->searchable(),
 
                 TextColumn::make('transactionGateway.name')
-                    ->label(__('model.transaction_gateway')),
+                    ->label(__('vendra-transaction::navigation.transaction_gateway')),
 
                 TextColumn::make('transaction_type')
                     ->badge()
@@ -217,7 +217,7 @@ final class TransactionResource extends Resource
                     ->label(__('vendra-transaction::attributes.status')),
 
                 SpatieTagsColumn::make('tags')
-                    ->label(__('tag::navigation.tag'))
+                    ->label(__('vendra-tagger::navigation.tag'))
                     ->action(AddTagAction::make())
                     ->toggleable(),
 
@@ -263,22 +263,22 @@ final class TransactionResource extends Resource
 
                     Action::make('deposit-info')
                         ->icon('heroicon-s-eye')
-                        ->label(__('اطلاعات خرید'))
+                        ->label(__('vendra-transaction::messages.purchase_information'))
                         ->requiresConfirmation()
                         ->slideOver()
                         ->modalDescription(function () {
-                            return __('نمایش اطلاعات تراکنش - مسیر مستقیم درگاه');
+                            return __('vendra-transaction::messages.transaction_direct_gateway_description');
                         })
                         ->modalSubmitAction(false)
                         ->modalCancelAction(false),
 
                     Action::make('withdrawal-info')
                         ->icon('heroicon-s-eye')
-                        ->label(__('اطلاعات تراکنش'))
+                        ->label(__('vendra-transaction::messages.transaction_information'))
                         ->requiresConfirmation()
                         ->slideOver()
                         ->modalDescription(function () {
-                            return __('نمایش اطلاعات تراکنش - مسیر مستقیم درگاه');
+                            return __('vendra-transaction::messages.transaction_direct_gateway_description');
                         })
                         ->modalSubmitAction(false)
                         ->modalCancelAction(false)
@@ -314,10 +314,10 @@ final class TransactionResource extends Resource
 
                     Action::make('tag')
                         ->icon('heroicon-s-tag')
-                        ->label(__('tag::navigation.tag'))
+                        ->label(__('vendra-tagger::navigation.tag'))
                         ->schema([
                             SpatieTagsInput::make('tags')
-                                ->label(__('tag::navigation.tag'))
+                                ->label(__('vendra-tagger::navigation.tag'))
                                 ->reorderable(),
                         ]),
                 ]),

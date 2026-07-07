@@ -18,7 +18,7 @@ final class CreateTransaction extends CreateRecord
 
     public function getBreadcrumb(): string
     {
-        return self::$breadcrumb ?? __('filament-panels::resources/pages/create-record.breadcrumb') . ' ' . __('navigation.transaction');
+        return self::$breadcrumb ?? __('filament-panels::resources/pages/create-record.breadcrumb') . ' ' . __('vendra-transaction::navigation.transaction');
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array
@@ -27,8 +27,8 @@ final class CreateTransaction extends CreateRecord
             $transactionGateway = TransactionService::getTransactionGateway('internal-transactions');
         } catch (Exception $e) {
             Notification::make()
-                ->title(__('newsletter::notifications.retry.no_post.title'))
-                ->body(__('newsletter::notifications.retry.no_post.body'))
+                ->title(__('vendra-transaction::messages.transaction_gateway_not_found_title'))
+                ->body(__('vendra-transaction::messages.transaction_gateway_not_found_body'))
                 ->danger()
                 ->send();
 

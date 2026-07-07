@@ -22,17 +22,17 @@ final class TransactionMetadataRelationManager extends RelationManager
 
     public static function getModelLabel(): string
     {
-        return __('navigation.transaction');
+        return __('vendra-transaction::navigation.transaction');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('navigation.transaction');
+        return __('vendra-transaction::navigation.transaction');
     }
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
-        return __('navigation.transaction');
+        return __('vendra-transaction::navigation.transaction');
     }
 
     public function form(Schema $schema): Schema
@@ -40,7 +40,7 @@ final class TransactionMetadataRelationManager extends RelationManager
         return $schema->components([
             Select::make('transaction_id')
                 ->columnSpanFull()
-                ->label(__('model.transaction'))
+                ->label(__('vendra-transaction::navigation.transaction'))
                 ->native(false)
                 ->preload()
                 ->relationship('transaction', 'token')
@@ -48,11 +48,11 @@ final class TransactionMetadataRelationManager extends RelationManager
                 ->searchable(),
 
             TextInput::make('key_name')
-                ->label(__('transaction_metadata.key_name'))
+                ->label(__('vendra-transaction::attributes.key_name'))
                 ->required(),
 
             TextInput::make('key_value')
-                ->label(__('transaction_metadata.key_value'))
+                ->label(__('vendra-transaction::attributes.key_value'))
                 ->required(),
         ]);
     }
@@ -66,18 +66,18 @@ final class TransactionMetadataRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('name')
-            ->heading(__('model.transaction'))
+            ->heading(__('vendra-transaction::navigation.transaction'))
             ->columns([
                 TextColumn::make('key_name')
                     ->alignStart()
-                    ->label(__('transaction_metadata.key_name')),
+                    ->label(__('vendra-transaction::attributes.key_name')),
 
                 TextColumn::make('key_value')
                     ->alignStart()
                     ->copyable()
                     ->copyMessage(__('vendra-transaction::messages.value_copied'))
                     ->copyMessageDuration(1500)
-                    ->label(__('transaction_metadata.key_value')),
+                    ->label(__('vendra-transaction::attributes.key_value')),
 
                 CreatedAtTextColumn::make('created_at'),
                 UpdatedAtTextColumn::make('updated_at'),
@@ -88,10 +88,10 @@ final class TransactionMetadataRelationManager extends RelationManager
             ->groups([
                 Group::make('key_name')
                     ->collapsible()
-                    ->label(__('transaction_metadata.key_name')),
+                    ->label(__('vendra-transaction::attributes.key_name')),
                 Group::make('key_value')
                     ->collapsible()
-                    ->label(__('transaction_metadata.key_value')),
+                    ->label(__('vendra-transaction::attributes.key_value')),
             ]);
     }
 }

@@ -17,7 +17,7 @@ final class ViewTransactionGateway extends ViewRecord
 
     public function getBreadcrumb(): string
     {
-        return self::$breadcrumb ?? __('filament-panels::resources/pages/view-record.breadcrumb') . ' ' . __('navigation.transaction_gateway');
+        return self::$breadcrumb ?? __('filament-panels::resources/pages/view-record.breadcrumb') . ' ' . __('vendra-transaction::navigation.transaction_gateway');
     }
 
     protected function getHeaderActions(): array

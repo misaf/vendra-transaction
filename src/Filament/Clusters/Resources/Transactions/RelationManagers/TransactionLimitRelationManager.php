@@ -48,7 +48,7 @@ final class TransactionLimitRelationManager extends RelationManager
             ->components([
                 Select::make('transaction_type')
                     ->columnSpanFull()
-                    ->label(__('form.category'))
+                    ->label(__('vendra-transaction::attributes.transaction_type'))
                     ->native(false)
                     ->options(TransactionTypeEnum::class)
                     ->required(),
@@ -117,7 +117,7 @@ final class TransactionLimitRelationManager extends RelationManager
                 TextColumn::make('amount')
                     ->alignCenter()
                     ->copyable()
-                    ->copyMessage(__('Amount copied to clipboard'))
+                    ->copyMessage(__('vendra-transaction::messages.amount_copied'))
                     ->copyMessageDuration(1500)
                     ->extraCellAttributes(['dir' => 'ltr'])
                     ->label(__('vendra-transaction::attributes.amount'))

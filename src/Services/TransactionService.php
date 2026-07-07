@@ -21,7 +21,14 @@ final class TransactionService
 
     public function generateToken(): string
     {
-        return mb_substr(str_shuffle(str_repeat(self::TOKEN_CHARACTERS, self::TOKEN_LENGTH)), 0, self::TOKEN_LENGTH);
+        $maxIndex = mb_strlen(self::TOKEN_CHARACTERS) - 1;
+        $token = '';
+
+        for ($i = 0; $i < self::TOKEN_LENGTH; $i++) {
+            $token .= self::TOKEN_CHARACTERS[random_int(0, $maxIndex)];
+        }
+
+        return $token;
     }
 
     public function getFormattedAmount(int $amount, string $transactionType): int

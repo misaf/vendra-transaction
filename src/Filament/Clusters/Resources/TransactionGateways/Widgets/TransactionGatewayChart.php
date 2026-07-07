@@ -23,7 +23,7 @@ final class TransactionGatewayChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => __('نمودار هفتگی'),
+                    'label' => __('vendra-transaction::messages.weekly_chart'),
                     'data'  => $dailyRakeData,
                 ],
             ],
@@ -52,13 +52,13 @@ final class TransactionGatewayChart extends ChartWidget
     private function getWeekdayLabels(): array
     {
         return [
-            __('Saturday'),
-            __('Sunday'),
-            __('Monday'),
-            __('Tuesday'),
-            __('Wednesday'),
-            __('Thursday'),
-            __('Friday'),
+            __('vendra-transaction::messages.weekday_saturday'),
+            __('vendra-transaction::messages.weekday_sunday'),
+            __('vendra-transaction::messages.weekday_monday'),
+            __('vendra-transaction::messages.weekday_tuesday'),
+            __('vendra-transaction::messages.weekday_wednesday'),
+            __('vendra-transaction::messages.weekday_thursday'),
+            __('vendra-transaction::messages.weekday_friday'),
         ];
     }
 
