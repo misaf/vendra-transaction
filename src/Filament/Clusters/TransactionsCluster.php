@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Admin\Clusters\Transactions;
+namespace Misaf\VendraTransaction\Filament\Clusters;
 
 use Filament\Clusters\Cluster;
 
