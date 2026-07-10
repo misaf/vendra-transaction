@@ -1,6 +1,6 @@
 {
     "name": "misaf/vendra-transaction",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Financial transaction management system with multi-gateway support, status tracking and comprehensive metadata handling",
     "keywords": [
         "laravel",
@@ -19,8 +19,8 @@
         "php": "^8.3",
         "filament/filament": "^5.6.6",
         "illuminate/support": "^13.0",
-        "misaf/vendra-multimedia": "^0.0.1",
-        "misaf/vendra-support": "^0.0.1",
+        "misaf/vendra-multimedia": "^0.0.2",
+        "misaf/vendra-support": "^0.0.2",
         "spatie/eloquent-sortable": "^5.0",
         "spatie/laravel-activitylog": "^4.0",
         "spatie/laravel-package-tools": "^1.0",
