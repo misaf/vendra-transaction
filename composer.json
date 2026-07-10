@@ -1,5 +1,6 @@
 {
     "name": "misaf/vendra-transaction",
+    "version": "0.0.1",
     "description": "Financial transaction management system with multi-gateway support, status tracking and comprehensive metadata handling",
     "keywords": [
         "laravel",
