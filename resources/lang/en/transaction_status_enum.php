@@ -7,6 +7,6 @@ return [
     'declined'   => 'Declined',
     'failed'     => 'Failed',
     'pending'    => 'Pending',
-    'review'     => 'Review',
     'processing' => 'Processing',
+    'review'     => 'Review',
 ];

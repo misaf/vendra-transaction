@@ -7,6 +7,6 @@ return [
     'declined'   => 'Abgelehnt',
     'failed'     => 'Fehlgeschlagen',
     'pending'    => 'Ausstehend',
-    'review'     => 'Prüfung',
     'processing' => 'In Bearbeitung',
+    'review'     => 'Prüfung',
 ];

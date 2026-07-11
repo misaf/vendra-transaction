@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 return [
-    'deposit'    => 'خرید',
-    'withdrawal' => 'برداشت',
-    'commission' => 'کمیسیون',
     'bonus'      => 'جایزه',
+    'commission' => 'کمیسیون',
+    'deposit'    => 'خرید',
     'transfer'   => 'انتقال',
+    'withdrawal' => 'برداشت',
 ];

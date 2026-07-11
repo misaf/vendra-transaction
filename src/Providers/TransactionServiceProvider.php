@@ -8,6 +8,7 @@ use Filament\Panel;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Foundation\Console\AboutCommand;
 use Illuminate\Support\Facades\Event;
+use Misaf\VendraSupport\Filament\Concerns\ResolvesConfiguredPanels;
 use Misaf\VendraTransaction\Listeners\TransactionTransferSubscriber;
 use Misaf\VendraTransaction\Listeners\WithdrawalLimitSubscriber;
 use Misaf\VendraTransaction\Services\TransactionService;
@@ -17,6 +18,8 @@ use Spatie\LaravelPackageTools\PackageServiceProvider;
 
 final class TransactionServiceProvider extends PackageServiceProvider
 {
+    use ResolvesConfiguredPanels;
+
     public function configurePackage(Package $package): void
     {
         $package
@@ -35,7 +38,7 @@ final class TransactionServiceProvider extends PackageServiceProvider
         $this->app->bind('transaction-service', fn(Application $app) => new TransactionService());
 
         Panel::configureUsing(function (Panel $panel): void {
-            if ('admin' !== $panel->getId()) {
+            if ( ! $this->shouldRegisterOnPanel($panel->getId(), 'vendra-transaction')) {
                 return;
             }
 

@@ -7,6 +7,6 @@ return [
     'declined'   => 'تایید نشده',
     'failed'     => 'خطا',
     'pending'    => 'در حال انتظار',
-    'review'     => 'در حال بررسی',
     'processing' => 'در حال پردازش',
+    'review'     => 'در حال بررسی',
 ];
