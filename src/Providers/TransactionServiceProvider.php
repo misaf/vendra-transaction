@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Misaf\VendraTransaction\Providers;
 
+use Composer\InstalledVersions;
+
 use Filament\Panel;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Foundation\Console\AboutCommand;
@@ -53,7 +55,7 @@ final class TransactionServiceProvider extends PackageServiceProvider
 
     public function packageBooted(): void
     {
-        AboutCommand::add('Vendra Transaction', fn() => ['Version' => 'dev-master']);
+        AboutCommand::add('Vendra Transaction', fn() => ['Version' => InstalledVersions::getPrettyVersion('misaf/vendra-transaction')]);
 
         Event::subscribe(TransactionTransferSubscriber::class);
         Event::subscribe(WithdrawalLimitSubscriber::class);

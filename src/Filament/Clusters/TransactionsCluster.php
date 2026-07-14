@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace Misaf\VendraTransaction\Filament\Clusters;
 
+use BackedEnum;
 use Filament\Clusters\Cluster;
+use Filament\Pages\Enums\SubNavigationPosition;
+use Filament\Support\Icons\Heroicon;
+use Misaf\VendraSupport\Filament\Navigation\NavigationGroup;
 
 final class TransactionsCluster extends Cluster
 {
@@ -12,9 +16,13 @@ final class TransactionsCluster extends Cluster
 
     protected static ?string $slug = 'transactions';
 
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
+
     public static function getNavigationGroup(): string
     {
-        return __('navigation.billing_management');
+        return NavigationGroup::Sales->getLabel();
     }
 
     public static function getNavigationLabel(): string
@@ -24,6 +32,6 @@ final class TransactionsCluster extends Cluster
 
     public static function getClusterBreadcrumb(): string
     {
-        return __('navigation.billing_management');
+        return __('vendra-transaction::navigation.transaction');
     }
 }
