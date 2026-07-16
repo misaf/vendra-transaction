@@ -233,6 +233,7 @@ final class TransactionResource extends Resource
 
                 SpatieTagsColumn::make('tags')
                     ->label(__('vendra-tagger::navigation.tag'))
+                    ->type(Transaction::TAG_TYPE)
                     ->action(AddTagAction::make())
                     ->toggleable(),
 
@@ -333,6 +334,7 @@ final class TransactionResource extends Resource
                         ->schema([
                             SpatieTagsInput::make('tags')
                                 ->label(__('vendra-tagger::navigation.tag'))
+                                ->type(Transaction::TAG_TYPE)
                                 ->reorderable(),
                         ]),
                 ]),

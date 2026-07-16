@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Misaf\VendraSupport\Contracts\ShouldLogActivity;
 use Misaf\VendraSupport\Traits\BelongsToTenant;
+use Misaf\VendraSupport\Traits\HasOptionalTags;
 use Misaf\VendraTransaction\Database\Factories\TransactionFactory;
 use Misaf\VendraTransaction\Enums\TransactionStatusEnum;
 use Misaf\VendraTransaction\Enums\TransactionTypeEnum;
@@ -51,16 +52,17 @@ final class Transaction extends Model implements ShouldLogActivity
     /** @use HasFactory<TransactionFactory> */
     use HasFactory;
 
-    use HasTags;
+    use HasOptionalTags, HasTags {
+        HasOptionalTags::tags insteadof HasTags;
+    }
     use HasTransactionCheck;
     use HasTransactionFee;
     use HasTransactionMetadata;
     use HasTransactionTransfer;
     use SoftDeletes;
 
-    /**
-     * @var array<string, string>
-     */
+    public const string TAG_TYPE = 'transaction';
+
     /**
      * @return array<string, string>
      */
@@ -77,14 +79,6 @@ final class Transaction extends Model implements ShouldLogActivity
             'status'                 => TransactionStatusEnum::class,
         ];
     }
-
-    /**
-     * @var list<string>
-     */
-
-    /**
-     * @var list<string>
-     */
 
     /**
      * @param  Builder<self>  $builder
@@ -172,6 +166,11 @@ final class Transaction extends Model implements ShouldLogActivity
     public function scopeProcessing(Builder $builder): void
     {
         $builder->where('status', TransactionStatusEnum::Processing);
+    }
+
+    protected function tagType(): string
+    {
+        return self::TAG_TYPE;
     }
 
     protected static function booted(): void

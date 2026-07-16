@@ -7,6 +7,12 @@ description: "Create, modify, review, or test the Vendra Transaction package in 
 
 ## Workflow
 
+## Translatable Persistence
+
+- Making a persisted model field translatable is an explicit domain choice unless this package already requires it.
+- Every field listed in a model's `$translatable` array must definitely use a JSON database column. Keep its model traits/casts, factories, validation, Filament locale UI, API serialization, and tests translation-aware.
+- A field not listed in `$translatable` must use the appropriate scalar database type and must not use Spatie Translatable, translatable slug traits, locale switchers, translated callbacks, or translation-shaped array data.
+
 Always use this skill together with `laravel-best-practices` for Laravel PHP and `pest-testing` when tests are added or changed. Use `tailwindcss-development` only when editing Blade or Tailwind UI.
 
 Before code changes, use Laravel Boost `application-info` and `search-docs` for the relevant packages. Prefer Boost database and browser tools over ad hoc debugging.
@@ -29,11 +35,12 @@ Follow the existing `Transaction` and `TransactionGateway` patterns for new tran
 - Prefer only the Laravel attributes already used by the affected sibling model; do not add model attributes merely because another package uses them.
 - Keep the module tenant-agnostic: derive tenant awareness purely from the bound `TenantResolver` in `misaf/vendra-support` (`TenantAwareness`, `BelongsToTenant`, `TenantSchema`, `RequiresCurrentTenant`). The module must build and run whether or not a tenant provider is installed, so never reference a concrete provider such as `Misaf\VendraTenant` anywhere — models, migrations, factories, seeders, or fixtures. There is no `tenant_aware` config toggle.
 - Hide `tenant_id` and keep tenant behavior centralized in the support layer; do not duplicate tenant scoping or `tenant_id` assignment in models, Filament resources, factories, or seeders. `BelongsToTenant` assigns `tenant_id` on `creating` from the current tenant.
+- Tag-consuming models must use `Misaf\VendraSupport\Traits\HasOptionalTags` as the single source of their `tags()` relationship and pivot metadata. Keep the package tag-agnostic: define a stable package-owned tag type, use `TagIntegration` for availability and UI integration, never import the concrete Vendra Tagger model/provider or define the relationship through Spatie `HasTags`, and list Tagger only under Composer `suggest`.
 - Reuse only the traits and conventions present on the affected sibling model; do not infer translations, media, slugs, sorting, or soft deletes from another package.
 
 ## Filament Standards
 
-Keep Filament UI organized under `src/Filament/Clusters`.
+Keep every resource that declares a `$cluster`, including its complete supporting tree, under `src/Filament/Clusters/Resources/` with the matching `Misaf\VendraTransaction\Filament\Clusters\Resources` namespace and plugin discovery path. Resources without a cluster belong under `src/Filament/Resources/`.
 
 - Register module UI through the module `Plugin` and `ServiceProvider`; do not manually wire resources in unrelated panel providers.
 - Preserve the current structure: `TransactionResource`, `TransactionGatewayResource`, and their relation managers define schemas inline. Introduce separate `Schemas` or `Tables` classes only as a deliberate, complete refactor.

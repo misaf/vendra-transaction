@@ -73,7 +73,8 @@ final class LatestTransactionTableWidget extends BaseWidget
                     ->label(__('vendra-transaction::attributes.status')),
 
                 SpatieTagsColumn::make('tags')
-                    ->label(__('vendra-tagger::navigation.tag')),
+                    ->label(__('vendra-tagger::navigation.tag'))
+                    ->type(Transaction::TAG_TYPE),
 
                 TextColumn::make('created_at')
                     ->label(__('vendra-transaction::attributes.status')),
