@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions;
 
-use App\Filament\Admin\Clusters\Transactions\TransactionsCluster;
 use App\Filament\Admin\Resources\Tags\Actions\AddTagAction;
 use App\Tables\Columns\CreatedAtTextColumn;
 use App\Tables\Columns\ModelLinkColumn;
 use App\Tables\Columns\UpdatedAtTextColumn;
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -25,6 +25,7 @@ use Filament\Resources\RelationManagers\RelationManagerConfiguration;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Colors\Color;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\SpatieTagsColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
@@ -38,7 +39,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Number;
 use Illuminate\Support\Str;
+use Misaf\VendraSupport\Filament\Clusters\SalesCluster;
 use Misaf\VendraTransaction\Enums\TransactionStatusEnum;
 use Misaf\VendraTransaction\Enums\TransactionTypeEnum;
 use Misaf\VendraTransaction\Facades\TransactionService;
@@ -53,6 +56,8 @@ final class TransactionResource extends Resource
 {
     protected static ?string $model = Transaction::class;
 
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowsRightLeft;
+
     protected static ?int $navigationSort = 1;
 
     /**
@@ -65,7 +70,7 @@ final class TransactionResource extends Resource
     /**
      * @var class-string<Cluster>|null
      */
-    protected static ?string $cluster = TransactionsCluster::class;
+    protected static ?string $cluster = SalesCluster::class;
 
     public static function getBreadcrumb(): string
     {
@@ -85,6 +90,16 @@ final class TransactionResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('vendra-transaction::navigation.transaction');
+    }
+
+    public static function getNavigationBadge(): string
+    {
+        return (string) Number::format(Transaction::query()->count());
+    }
+
+    public static function getNavigationBadgeTooltip(): string
+    {
+        return __('vendra-transaction::navigation.navigation_badge_tooltip');
     }
 
     public static function getPluralModelLabel(): string

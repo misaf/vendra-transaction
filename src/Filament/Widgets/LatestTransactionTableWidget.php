@@ -13,16 +13,9 @@ use Misaf\VendraTransaction\Models\Transaction;
 
 final class LatestTransactionTableWidget extends BaseWidget
 {
-    protected static ?int $sort = 7;
+    protected static ?int $sort = 3;
 
-    /**
-     * @var int|string|array<string, int|null>
-     */
-    protected int|string|array $columnSpan = [
-        'sm' => 1,
-        'md' => 2,
-        'lg' => 4,
-    ];
+    protected int|string|array $columnSpan = 'full';
 
     protected function getColumns(): int
     {
@@ -86,7 +79,6 @@ final class LatestTransactionTableWidget extends BaseWidget
                     ->label(__('vendra-transaction::attributes.status')),
             ])
             ->paginated(false)
-            ->searchable(false)
-            ->poll('10s');
+            ->searchable(false);
     }
 }

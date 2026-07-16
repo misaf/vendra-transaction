@@ -37,12 +37,12 @@ use Misaf\VendraUser\Models\User;
  * @method static Transaction createTransaction(string $transactionGateway, User $user, TransactionTypeEnum $transactionType, int $amount, TransactionStatusEnum $status, array $metadatas = [], ?string $token = null)
  * @method static void createTransactionMetadatas(Transaction $transaction, array $metadatas)
  *
- * @see \Misaf\Transaction\Services\TransactionService
+ * @see \Misaf\VendraTransaction\Services\TransactionService
  */
 final class TransactionService extends Facade
 {
     protected static function getFacadeAccessor(): string
     {
-        return 'transaction-service';
+        return \Misaf\VendraTransaction\Services\TransactionService::class;
     }
 }

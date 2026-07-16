@@ -15,6 +15,8 @@ final class TransactionGatewayChart extends ChartWidget
      */
     protected int|string|array $columnSpan = 'full';
 
+    protected ?string $pollingInterval = null;
+
     protected function getData(): array
     {
         $startOfWeek = now()->startOfWeek(6);

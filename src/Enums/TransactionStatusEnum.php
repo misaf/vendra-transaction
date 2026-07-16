@@ -56,12 +56,12 @@ enum TransactionStatusEnum: string implements HasColor, HasIcon, HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            self::Approved   => __('vendra-transaction::transaction_status_enum.approved'),
-            self::Declined   => __('vendra-transaction::transaction_status_enum.declined'),
-            self::Failed     => __('vendra-transaction::transaction_status_enum.failed'),
-            self::Pending    => __('vendra-transaction::transaction_status_enum.pending'),
-            self::Review     => __('vendra-transaction::transaction_status_enum.review'),
-            self::Processing => __('vendra-transaction::transaction_status_enum.processing'),
+            self::Approved   => __('vendra-transaction::enums.transaction_status_approved'),
+            self::Declined   => __('vendra-transaction::enums.transaction_status_declined'),
+            self::Failed     => __('vendra-transaction::enums.transaction_status_failed'),
+            self::Pending    => __('vendra-transaction::enums.transaction_status_pending'),
+            self::Review     => __('vendra-transaction::enums.transaction_status_review'),
+            self::Processing => __('vendra-transaction::enums.transaction_status_processing'),
         };
     }
 }

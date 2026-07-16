@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways;
 
-use App\Filament\Admin\Clusters\Transactions\TransactionsCluster;
 use App\Forms\Components\SlugTextInput;
 use App\Forms\Components\StatusToggle;
 use App\Forms\Components\TranslatableDescriptionTextarea;
@@ -12,6 +11,7 @@ use App\Tables\Columns\CreatedAtTextColumn;
 use App\Tables\Columns\NameTextColumn;
 use App\Tables\Columns\StatusToggleColumn;
 use App\Tables\Columns\UpdatedAtTextColumn;
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -27,6 +27,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
@@ -35,6 +36,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Unique;
 use LaraZeus\SpatieTranslatable\Resources\Concerns\Translatable;
 use Livewire\Component as Livewire;
+use Misaf\VendraSupport\Filament\Clusters\SalesCluster;
 use Misaf\VendraSupport\Support\TenantAwareness;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Pages\CreateTransactionGateway;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Pages\EditTransactionGateway;
@@ -49,14 +51,16 @@ final class TransactionGatewayResource extends Resource
 
     protected static ?string $model = TransactionGateway::class;
 
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCreditCard;
+
     protected static ?int $navigationSort = 3;
 
-    protected static ?string $slug = 'gateways';
+    protected static ?string $slug = 'transaction-gateways';
 
     /**
      * @var class-string<Cluster>|null
      */
-    protected static ?string $cluster = TransactionsCluster::class;
+    protected static ?string $cluster = SalesCluster::class;
 
     public static function getBreadcrumb(): string
     {

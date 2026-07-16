@@ -53,11 +53,11 @@ enum TransactionTypeEnum: string implements HasColor, HasIcon, HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            self::Deposit    => __('vendra-transaction::transaction_type_enum.deposit'),
-            self::Withdrawal => __('vendra-transaction::transaction_type_enum.withdrawal'),
-            self::Commission => __('vendra-transaction::transaction_type_enum.commission'),
-            self::Bonus      => __('vendra-transaction::transaction_type_enum.bonus'),
-            self::Transfer   => __('vendra-transaction::transaction_type_enum.transfer'),
+            self::Deposit    => __('vendra-transaction::enums.transaction_type_deposit'),
+            self::Withdrawal => __('vendra-transaction::enums.transaction_type_withdrawal'),
+            self::Commission => __('vendra-transaction::enums.transaction_type_commission'),
+            self::Bonus      => __('vendra-transaction::enums.transaction_type_bonus'),
+            self::Transfer   => __('vendra-transaction::enums.transaction_type_transfer'),
         };
     }
 }

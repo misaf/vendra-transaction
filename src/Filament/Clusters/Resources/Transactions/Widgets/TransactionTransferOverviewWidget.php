@@ -23,6 +23,8 @@ final class TransactionTransferOverviewWidget extends StatsOverviewWidget
         'sm' => 1,
     ];
 
+    protected ?string $pollingInterval = null;
+
     protected function getColumns(): int
     {
         return 1;
