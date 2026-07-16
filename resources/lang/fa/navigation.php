@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 return [
     'navigation_badge_tooltip'        => 'تعداد کل تراکنش‌ها',
-    'transaction'                     => 'تراکنش ها',
-    'transaction_gateway'             => 'درگاه تراکنش',
-    'transaction_limit'               => 'محدودیت تراکنش ها',
-    'transaction_limit_management'    => 'مدیریت محدودیت تراکنش ها',
-    'transaction_management'          => 'مدیریت تراکنش ها',
+    'transaction'                     => 'تراکنش',
+    'transaction_gateway'             => 'درگاه پرداخت',
+    'transaction_gateways'            => 'درگاه‌های پرداخت',
+    'transaction_limit'               => 'محدودیت تراکنش',
+    'transaction_limit_management'    => 'مدیریت محدودیت تراکنش‌ها',
+    'transaction_management'          => 'مدیریت تراکنش‌ها',
+    'transactions'                    => 'تراکنش‌ها',
 ];

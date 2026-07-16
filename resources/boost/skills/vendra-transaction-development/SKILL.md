@@ -46,6 +46,8 @@ Keep every resource that declares a `$cluster`, including its complete supportin
 - Preserve the current structure: `TransactionResource`, `TransactionGatewayResource`, and their relation managers define schemas inline. Introduce separate `Schemas` or `Tables` classes only as a deliberate, complete refactor.
 - Use Filament v5 namespaces: form fields from `Filament\Forms\Components`, layout from `Filament\Schemas\Components`, table columns from `Filament\Tables\Columns`, filters from `Filament\Tables\Filters`, actions from `Filament\Actions`, and icons from `Filament\Support\Icons\Heroicon`.
 - Use this module's translation keys (`vendra-transaction::attributes`, `vendra-transaction::navigation`) for labels, breadcrumbs, and navigation.
+- Keep cluster resources ungrouped and assign `$navigationSort` from their package-specific `NavigationPriority` cases; never hardcode numeric resource sort values.
+- Provide separate singular and plural resource labels in `en`, `de`, and `fa`: model labels use the singular key, while navigation and plural model labels use the plural key. Keep navigation labels at 24 characters or fewer.
 - Prevent N+1 issues in tables and relation managers with eager loading, `withCount`, or computed state based on loaded relationships.
 - Use public media visibility only when public access is actually required.
 

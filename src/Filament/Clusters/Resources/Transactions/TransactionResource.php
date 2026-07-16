@@ -42,6 +42,7 @@ use Illuminate\Support\HtmlString;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
 use Misaf\VendraSupport\Filament\Clusters\SalesCluster;
+use Misaf\VendraSupport\Filament\Navigation\NavigationPriority;
 use Misaf\VendraTransaction\Enums\TransactionStatusEnum;
 use Misaf\VendraTransaction\Enums\TransactionTypeEnum;
 use Misaf\VendraTransaction\Facades\TransactionService;
@@ -50,6 +51,7 @@ use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Pages\ListT
 use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Pages\ViewTransaction;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\RelationManagers\TransactionMetadataRelationManager;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\RelationManagers\TransactionRelationManager;
+
 use Misaf\VendraTransaction\Models\Transaction;
 
 final class TransactionResource extends Resource
@@ -58,7 +60,7 @@ final class TransactionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowsRightLeft;
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = NavigationPriority::Transactions->value;
 
     /**
      * @param  string|null  $recordTitleAttribute
@@ -82,14 +84,9 @@ final class TransactionResource extends Resource
         return __('vendra-transaction::navigation.transaction');
     }
 
-    public static function getNavigationGroup(): string
-    {
-        return __('vendra-transaction::navigation.transaction_management');
-    }
-
     public static function getNavigationLabel(): string
     {
-        return __('vendra-transaction::navigation.transaction');
+        return __('vendra-transaction::navigation.transactions');
     }
 
     public static function getNavigationBadge(): string
@@ -104,7 +101,7 @@ final class TransactionResource extends Resource
 
     public static function getPluralModelLabel(): string
     {
-        return __('vendra-transaction::navigation.transaction');
+        return __('vendra-transaction::navigation.transactions');
     }
 
     public static function getGlobalSearchEloquentQuery(): Builder

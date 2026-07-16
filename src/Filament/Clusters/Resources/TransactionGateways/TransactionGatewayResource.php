@@ -37,12 +37,14 @@ use Illuminate\Validation\Rules\Unique;
 use LaraZeus\SpatieTranslatable\Resources\Concerns\Translatable;
 use Livewire\Component as Livewire;
 use Misaf\VendraSupport\Filament\Clusters\SalesCluster;
+use Misaf\VendraSupport\Filament\Navigation\NavigationPriority;
 use Misaf\VendraSupport\Support\TenantAwareness;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Pages\CreateTransactionGateway;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Pages\EditTransactionGateway;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Pages\ListTransactionGateways;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Pages\ViewTransactionGateway;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\RelationManagers\TransactionRelationManager;
+
 use Misaf\VendraTransaction\Models\TransactionGateway;
 
 final class TransactionGatewayResource extends Resource
@@ -53,7 +55,7 @@ final class TransactionGatewayResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCreditCard;
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = NavigationPriority::TransactionGateways->value;
 
     protected static ?string $slug = 'transaction-gateways';
 
@@ -72,19 +74,14 @@ final class TransactionGatewayResource extends Resource
         return __('vendra-transaction::navigation.transaction_gateway');
     }
 
-    public static function getNavigationGroup(): string
-    {
-        return __('vendra-transaction::navigation.transaction_management');
-    }
-
     public static function getNavigationLabel(): string
     {
-        return __('vendra-transaction::navigation.transaction_gateway');
+        return __('vendra-transaction::navigation.transaction_gateways');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('vendra-transaction::navigation.transaction_gateway');
+        return __('vendra-transaction::navigation.transaction_gateways');
     }
 
     public static function getDefaultTranslatableLocale(): string
