@@ -8,6 +8,7 @@ use Filament\Support\Colors\Color;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
+use Filament\Support\Icons\Heroicon;
 
 enum TransactionTypeEnum: string implements HasColor, HasIcon, HasLabel
 {
@@ -39,14 +40,14 @@ enum TransactionTypeEnum: string implements HasColor, HasIcon, HasLabel
         };
     }
 
-    public function getIcon(): string
+    public function getIcon(): Heroicon
     {
         return match ($this) {
-            self::Deposit    => 'heroicon-o-currency-dollar',
-            self::Withdrawal => 'heroicon-o-currency-dollar',
-            self::Commission => 'heroicon-o-currency-dollar',
-            self::Bonus      => 'heroicon-o-trophy',
-            self::Transfer   => 'heroicon-o-trophy',
+            self::Deposit    => Heroicon::OutlinedCurrencyDollar,
+            self::Withdrawal => Heroicon::OutlinedCurrencyDollar,
+            self::Commission => Heroicon::OutlinedCurrencyDollar,
+            self::Bonus      => Heroicon::OutlinedTrophy,
+            self::Transfer   => Heroicon::OutlinedTrophy,
         };
     }
 

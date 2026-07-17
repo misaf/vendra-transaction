@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 return [
     'amount_copied'                          => 'مبلغ در کلیپ‌بورد کپی شد',
+    'approve_transaction'                    => 'تایید',
+    'decline_transaction'                    => 'برگشت',
     'purchase_information'                   => 'اطلاعات خرید',
     'reports'                                => 'گزارشات',
     'token_copied'                           => 'توکن در کلیپ‌بورد کپی شد',

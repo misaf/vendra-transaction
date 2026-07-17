@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 return [
     'amount_copied'                          => 'Amount copied to clipboard',
+    'approve_transaction'                    => 'Approve',
+    'decline_transaction'                    => 'Decline',
     'purchase_information'                   => 'Purchase Information',
     'reports'                                => 'Reports',
     'token_copied'                           => 'Token copied to clipboard',

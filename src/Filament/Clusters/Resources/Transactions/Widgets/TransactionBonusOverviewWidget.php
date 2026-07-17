@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Widgets;
 
+use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Flowframe\Trend\Trend;
@@ -64,7 +65,7 @@ final class TransactionBonusOverviewWidget extends StatsOverviewWidget
         $transactionBonus = Stat::make('bonus_transaction_stats', Number::format($totalBonusAmount))
             ->label(__('vendra-transaction::widgets.bonus_transaction_stats'))
             ->description(__('vendra-transaction::widgets.bonus_transaction_stats_description'))
-            ->descriptionIcon('heroicon-m-arrow-trending-up')
+            ->descriptionIcon(Heroicon::ArrowTrendingUp)
             ->chart($bonusTransactionStats->map(fn(TrendValue $value) => $value->aggregate)->toArray())
             ->color('primary');
 

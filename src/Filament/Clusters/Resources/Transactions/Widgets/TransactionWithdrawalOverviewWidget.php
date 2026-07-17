@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Widgets;
 
+use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Flowframe\Trend\Trend;
@@ -64,7 +65,7 @@ final class TransactionWithdrawalOverviewWidget extends StatsOverviewWidget
         $transactionWithdrawal = Stat::make('withdrawal_transaction_stats', Number::format($totalWithdrawalAmount))
             ->label(__('vendra-transaction::widgets.withdrawal_transaction_stats'))
             ->description(__('vendra-transaction::widgets.withdrawal_transaction_stats_description'))
-            ->descriptionIcon('heroicon-m-arrow-trending-up')
+            ->descriptionIcon(Heroicon::ArrowTrendingUp)
             ->chart($withdrawalTransactionStats->map(fn(TrendValue $value) => $value->aggregate)->toArray())
             ->color('primary');
 

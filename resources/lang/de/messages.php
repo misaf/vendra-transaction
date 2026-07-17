@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 return [
     'amount_copied'                          => 'Betrag in die Zwischenablage kopiert',
+    'approve_transaction'                    => 'Bestätigen',
+    'decline_transaction'                    => 'Ablehnen',
     'purchase_information'                   => 'Kaufinformationen',
     'reports'                                => 'Berichte',
     'token_copied'                           => 'Token in die Zwischenablage kopiert',

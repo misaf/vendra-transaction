@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\RelationManagers;
 
-use App\Tables\Columns\CreatedAtTextColumn;
-use App\Tables\Columns\UpdatedAtTextColumn;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -79,8 +77,31 @@ final class TransactionMetadataRelationManager extends RelationManager
                     ->copyMessageDuration(1500)
                     ->label(__('vendra-transaction::attributes.key_value')),
 
-                CreatedAtTextColumn::make('created_at'),
-                UpdatedAtTextColumn::make('updated_at'),
+                TextColumn::make('created_at')
+                    ->alignCenter()
+                    ->badge()
+                    ->extraCellAttributes(['dir' => 'ltr'])
+                    ->label(__('vendra-transaction::attributes.created_at'))
+                    ->sinceTooltip()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->when(
+                        app()->isLocale('fa'),
+                        fn(TextColumn $column) => $column->jalaliDateTime('Y-m-d H:i', latinNumbers: true),
+                        fn(TextColumn $column) => $column->dateTime('Y-m-d H:i')
+                    ),
+
+                TextColumn::make('updated_at')
+                    ->alignCenter()
+                    ->badge()
+                    ->extraCellAttributes(['dir' => 'ltr'])
+                    ->label(__('vendra-transaction::attributes.updated_at'))
+                    ->sinceTooltip()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->when(
+                        app()->isLocale('fa'),
+                        fn(TextColumn $column) => $column->jalaliDateTime('Y-m-d H:i', latinNumbers: true),
+                        fn(TextColumn $column) => $column->dateTime('Y-m-d H:i')
+                    ),
             ])
             ->recordActions([
                 ViewAction::make(),

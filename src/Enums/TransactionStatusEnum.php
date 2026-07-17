@@ -8,6 +8,7 @@ use Filament\Support\Colors\Color;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
+use Filament\Support\Icons\Heroicon;
 
 enum TransactionStatusEnum: string implements HasColor, HasIcon, HasLabel
 {
@@ -41,15 +42,15 @@ enum TransactionStatusEnum: string implements HasColor, HasIcon, HasLabel
         };
     }
 
-    public function getIcon(): string
+    public function getIcon(): Heroicon
     {
         return match ($this) {
-            self::Approved   => 'heroicon-o-check-circle',
-            self::Declined   => 'heroicon-o-x-circle',
-            self::Failed     => 'heroicon-o-exclamation-circle',
-            self::Pending    => 'heroicon-o-clock',
-            self::Review     => 'heroicon-o-eye',
-            self::Processing => 'heroicon-o-arrow-path',
+            self::Approved   => Heroicon::OutlinedCheckCircle,
+            self::Declined   => Heroicon::OutlinedXCircle,
+            self::Failed     => Heroicon::OutlinedExclamationCircle,
+            self::Pending    => Heroicon::OutlinedClock,
+            self::Review     => Heroicon::OutlinedEye,
+            self::Processing => Heroicon::OutlinedArrowPath,
         };
     }
 
