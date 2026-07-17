@@ -27,6 +27,13 @@ final class TransactionTransferFactory extends Factory
         ];
     }
 
+    public function forTransaction(Transaction $transaction): static
+    {
+        return $this->state(fn(): array => [
+            'transaction_id' => $transaction->id,
+        ]);
+    }
+
     public function forUser(User $user): static
     {
         return $this->state(fn(): array => [

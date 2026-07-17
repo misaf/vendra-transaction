@@ -37,7 +37,7 @@ final class TransactionTable
             ->columns([
                 TextColumn::make('row')
                     ->label('#')
-                    ->rowIndex()->sortable(),
+                    ->rowIndex()->sortable(['id']),
 
                 TextColumn::make('user.username')
                     ->alignCenter()

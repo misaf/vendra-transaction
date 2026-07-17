@@ -26,4 +26,11 @@ final class TransactionMetadataFactory extends Factory
             'key_value'      => fake()->shuffleString('abcdefghijklmnopqrstuvwxyz'),
         ];
     }
+
+    public function forTransaction(Transaction $transaction): static
+    {
+        return $this->state(fn(): array => [
+            'transaction_id' => $transaction->id,
+        ]);
+    }
 }

@@ -31,7 +31,7 @@ final class TransactionGatewayTable
             ->columns([
                 TextColumn::make('row')
                     ->label('#')
-                    ->rowIndex()->sortable(),
+                    ->rowIndex()->sortable(['id']),
 
                 SpatieMediaLibraryImageColumn::make('image')
                     ->circular()

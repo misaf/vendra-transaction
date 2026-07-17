@@ -25,4 +25,11 @@ final class TransactionCheckFactory extends Factory
             'attempt_count'  => fake()->randomElement([1, 2, 3]),
         ];
     }
+
+    public function forTransaction(Transaction $transaction): static
+    {
+        return $this->state(fn(): array => [
+            'transaction_id' => $transaction->id,
+        ]);
+    }
 }

@@ -18,41 +18,31 @@ it('charts seven days of approved deposit withdrawal and bonus trends in distinc
 
     $transactionGateway = TransactionGatewayFactory::new()->createOne();
     $user = UserFactory::new()->createOne();
-    $relationships = [
-        'transaction_gateway_id' => $transactionGateway->id,
-        'user_id'                => $user->id,
-    ];
-
-    TransactionFactory::new()->deposit()->createOne([
-        ...$relationships,
+    TransactionFactory::new()->deposit()->forGateway($transactionGateway)->forUser($user)->createOne([
         'amount'     => 125,
         'status'     => TransactionStatusEnum::Approved,
         'created_at' => now()->subDays(6),
     ]);
 
-    TransactionFactory::new()->deposit()->createOne([
-        ...$relationships,
+    TransactionFactory::new()->deposit()->forGateway($transactionGateway)->forUser($user)->createOne([
         'amount'     => 50,
         'status'     => TransactionStatusEnum::Approved,
         'created_at' => now(),
     ]);
 
-    TransactionFactory::new()->withdrawal()->createOne([
-        ...$relationships,
+    TransactionFactory::new()->withdrawal()->forGateway($transactionGateway)->forUser($user)->createOne([
         'amount'     => 75,
         'status'     => TransactionStatusEnum::Approved,
         'created_at' => now()->subDays(3),
     ]);
 
-    TransactionFactory::new()->bonus()->createOne([
-        ...$relationships,
+    TransactionFactory::new()->bonus()->forGateway($transactionGateway)->forUser($user)->createOne([
         'amount'     => 25,
         'status'     => TransactionStatusEnum::Approved,
         'created_at' => now(),
     ]);
 
-    TransactionFactory::new()->deposit()->createOne([
-        ...$relationships,
+    TransactionFactory::new()->deposit()->forGateway($transactionGateway)->forUser($user)->createOne([
         'amount'     => 500,
         'status'     => TransactionStatusEnum::Pending,
         'created_at' => now(),

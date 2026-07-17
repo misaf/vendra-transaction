@@ -50,6 +50,13 @@ final class TransactionFactory extends Factory
         ]);
     }
 
+    public function forGateway(TransactionGateway $transactionGateway): static
+    {
+        return $this->state(fn(): array => [
+            'transaction_gateway_id' => $transactionGateway->id,
+        ]);
+    }
+
     public function forUser(User $user): static
     {
         return $this->state(fn(): array => [

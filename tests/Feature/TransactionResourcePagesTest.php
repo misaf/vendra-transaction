@@ -25,10 +25,7 @@ it('renders the transactions table with its records', function (): void {
     $transactionGateway = TransactionGatewayFactory::new()->createOne();
     $user = UserFactory::new()->createOne();
 
-    $transaction = TransactionFactory::new()->deposit()->createOne([
-        'transaction_gateway_id' => $transactionGateway->id,
-        'user_id'                => $user->id,
-    ]);
+    $transaction = TransactionFactory::new()->deposit()->forGateway($transactionGateway)->forUser($user)->createOne();
 
     livewire(ListTransactions::class)
         ->assertOk()
@@ -37,6 +34,17 @@ it('renders the transactions table with its records', function (): void {
 });
 
 it('renders the transaction gateways table with its records', function (): void {
+    $transactionGateway = TransactionGatewayFactory::new()->createOne();
+
+    livewire(ListTransactionGateways::class)
+        ->assertOk()
+        ->call('loadTable')
+        ->assertCanSeeTableRecords([$transactionGateway]);
+});
+
+it('renders the reorderable transaction gateways table under strict authorization', function (): void {
+    Filament::getPanel('admin')->strictAuthorization();
+
     $transactionGateway = TransactionGatewayFactory::new()->createOne();
 
     livewire(ListTransactionGateways::class)

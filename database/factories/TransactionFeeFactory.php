@@ -25,4 +25,11 @@ final class TransactionFeeFactory extends Factory
             'amount'         => fake()->randomNumber(5, true),
         ];
     }
+
+    public function forTransaction(Transaction $transaction): static
+    {
+        return $this->state(fn(): array => [
+            'transaction_id' => $transaction->id,
+        ]);
+    }
 }
