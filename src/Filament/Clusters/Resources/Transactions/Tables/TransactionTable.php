@@ -21,6 +21,7 @@ use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
+use Misaf\VendraSupport\Support\TagIntegration;
 use Misaf\VendraTransaction\Enums\TransactionTypeEnum;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Actions\ApproveTransactionAction;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Actions\DeclineTransactionAction;
@@ -74,10 +75,12 @@ final class TransactionTable
                     ->alignStart()
                     ->label(__('vendra-transaction::attributes.status')),
 
-                SpatieTagsColumn::make('tags')
-                    ->label(__('vendra-tagger::navigation.tag'))
-                    ->type(Transaction::TAG_TYPE)
-                    ->toggleable(),
+                ...TagIntegration::isAvailable() ? [
+                    SpatieTagsColumn::make('tags')
+                        ->label(__('vendra-support::attributes.tags'))
+                        ->type(Transaction::TAG_TYPE)
+                        ->toggleable(),
+                ] : [],
 
                 TextColumn::make('created_at')
                     ->alignCenter()

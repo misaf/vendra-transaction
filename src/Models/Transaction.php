@@ -25,7 +25,6 @@ use Misaf\VendraTransaction\Traits\HasTransactionFee;
 use Misaf\VendraTransaction\Traits\HasTransactionMetadata;
 use Misaf\VendraTransaction\Traits\HasTransactionTransfer;
 use Misaf\VendraUser\Traits\BelongsToUser;
-use Spatie\Tags\HasTags;
 
 /**
  * @property int $id
@@ -52,9 +51,7 @@ final class Transaction extends Model implements ShouldLogActivity
     /** @use HasFactory<TransactionFactory> */
     use HasFactory;
 
-    use HasOptionalTags, HasTags {
-        HasOptionalTags::tags insteadof HasTags;
-    }
+    use HasOptionalTags;
     use HasTransactionCheck;
     use HasTransactionFee;
     use HasTransactionMetadata;
