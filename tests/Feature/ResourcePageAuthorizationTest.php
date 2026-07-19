@@ -5,11 +5,18 @@ declare(strict_types=1);
 use Filament\Facades\Filament;
 use LaraZeus\SpatieTranslatable\SpatieTranslatablePlugin;
 use Misaf\VendraPermission\Tests\Support\PermissionModuleTestContext;
+use Misaf\VendraTransaction\Database\Factories\TransactionFactory;
 use Misaf\VendraTransaction\Database\Factories\TransactionGatewayFactory;
+use Misaf\VendraTransaction\Database\Factories\WalletFactory;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Pages\CreateTransactionGateway;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Pages\EditTransactionGateway;
+use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Pages\ListTransactionGateways;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Pages\ViewTransactionGateway;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Pages\CreateTransaction;
+use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Pages\ListTransactions;
+use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Pages\ViewTransaction;
+use Misaf\VendraTransaction\Filament\Clusters\Resources\Wallets\Pages\ListWallets;
+use Misaf\VendraTransaction\Filament\Clusters\Resources\Wallets\Pages\ViewWallet;
 
 use function Pest\Livewire\livewire;
 
@@ -21,35 +28,32 @@ beforeEach(function (): void {
     );
 });
 
-it('renders the create transaction page under strict authorization', function (): void {
+it('renders the transaction pages under strict authorization', function (): void {
     Filament::getPanel('admin')->strictAuthorization();
 
-    livewire(CreateTransaction::class)
-        ->assertOk();
+    $transaction = TransactionFactory::new()->deposit()->create();
+
+    livewire(ListTransactions::class)->assertOk();
+    livewire(CreateTransaction::class)->assertOk();
+    livewire(ViewTransaction::class, ['record' => $transaction->getKey()])->assertOk();
 });
 
-
-it('renders the create transaction gateway page under strict authorization', function (): void {
+it('renders the transaction gateway pages under strict authorization', function (): void {
     Filament::getPanel('admin')->strictAuthorization();
 
-    livewire(CreateTransactionGateway::class)
-        ->assertOk();
+    $gateway = TransactionGatewayFactory::new()->create();
+
+    livewire(ListTransactionGateways::class)->assertOk();
+    livewire(CreateTransactionGateway::class)->assertOk();
+    livewire(ViewTransactionGateway::class, ['record' => $gateway->getKey()])->assertOk();
+    livewire(EditTransactionGateway::class, ['record' => $gateway->getKey()])->assertOk();
 });
 
-it('renders the edit transaction gateway page under strict authorization', function (): void {
+it('renders the wallet pages under strict authorization', function (): void {
     Filament::getPanel('admin')->strictAuthorization();
 
-    $gateway = TransactionGatewayFactory::new()->createOne();
+    $wallet = WalletFactory::new()->create();
 
-    livewire(EditTransactionGateway::class, ['record' => $gateway->getKey()])
-        ->assertOk();
-});
-
-it('renders the view transaction gateway page under strict authorization', function (): void {
-    Filament::getPanel('admin')->strictAuthorization();
-
-    $gateway = TransactionGatewayFactory::new()->createOne();
-
-    livewire(ViewTransactionGateway::class, ['record' => $gateway->getKey()])
-        ->assertOk();
+    livewire(ListWallets::class)->assertOk();
+    livewire(ViewWallet::class, ['record' => $wallet->getKey()])->assertOk();
 });

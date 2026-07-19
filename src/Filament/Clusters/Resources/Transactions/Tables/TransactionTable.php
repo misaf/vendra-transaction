@@ -5,82 +5,73 @@ declare(strict_types=1);
 namespace Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Tables;
 
 use Filament\Actions\ActionGroup;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
-use Filament\Tables\Columns\SpatieTagsColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\QueryBuilder;
-use Filament\Tables\Filters\QueryBuilder\Constraints\DateConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\NumberConstraint;
-use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint;
-use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Filters\QueryBuilder\Constraints\SelectConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
-use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
-use Illuminate\Support\Str;
-use Misaf\VendraSupport\Support\TagIntegration;
 use Misaf\VendraTransaction\Enums\TransactionTypeEnum;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Actions\ApproveTransactionAction;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Actions\DeclineTransactionAction;
-use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Actions\DepositInfoAction;
-use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Actions\TagTransactionAction;
-use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Actions\WithdrawalInfoAction;
+use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Actions\FailTransactionAction;
 use Misaf\VendraTransaction\Models\Transaction;
+use Misaf\VendraTransaction\States\TransactionState;
 
 final class TransactionTable
 {
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn($query) => $query->with(['wallet.user', 'wallet.currency', 'transactionGateway']))
             ->columns([
                 TextColumn::make('row')
                     ->label('#')
-                    ->rowIndex()->sortable(['id']),
+                    ->rowIndex()
+                    ->sortable(['id']),
 
-                TextColumn::make('user.username')
-                    ->alignCenter()
-                    ->label(__('vendra-user::navigation.user'))
+                TextColumn::make('token')
+                    ->copyable()
+                    ->extraCellAttributes(['dir' => 'ltr'])
+                    ->fontFamily('mono')
+                    ->label(__('vendra-transaction::attributes.token'))
+                    ->limit(12)
                     ->searchable(),
 
+                TextColumn::make('wallet.user')
+                    ->label(__('vendra-transaction::attributes.user'))
+                    ->state(function (Transaction $record): string {
+                        return (string) ($record->wallet->user?->getAttribute('username')
+                            ?? $record->wallet->user?->getAttribute('name')
+                            ?? "#{$record->wallet->user_id}");
+                    }),
+
+                TextColumn::make('wallet.currency.iso_code')
+                    ->badge()
+                    ->label(__('vendra-transaction::attributes.currency')),
+
                 TextColumn::make('transactionGateway.name')
-                    ->label(__('vendra-transaction::navigation.transaction_gateway')),
+                    ->label(__('vendra-transaction::attributes.transaction_gateway'))
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('transaction_type')
                     ->badge()
                     ->label(__('vendra-transaction::attributes.transaction_type')),
 
-                TextColumn::make('token')
-                    ->alignCenter()
-                    ->copyable()
-                    ->copyMessage(__('vendra-transaction::messages.token_copied'))
-                    ->copyMessageDuration(1500)
-                    ->extraCellAttributes(['dir' => 'ltr'])
-                    ->formatStateUsing(fn(string $state): string => Str::of($state)->split(4)->implode(' '))
-                    ->label(__('vendra-transaction::attributes.token'))
-                    ->searchable(isGlobal: true),
-
                 TextColumn::make('amount')
-                    ->alignCenter()
-                    ->copyable()
-                    ->copyMessage(__('vendra-transaction::messages.amount_copied'))
-                    ->copyMessageDuration(1500)
                     ->extraCellAttributes(['dir' => 'ltr'])
                     ->label(__('vendra-transaction::attributes.amount'))
-                    ->numeric(locale: 'en', maxDecimalPlaces: 0),
+                    ->numeric()
+                    ->sortable(),
 
                 TextColumn::make('status')
-                    ->alignStart()
+                    ->badge()
+                    ->color(fn(TransactionState $state): array => $state->getColor())
+                    ->formatStateUsing(fn(TransactionState $state): string => $state->getLabel())
+                    ->icon(fn(TransactionState $state) => $state->getIcon())
                     ->label(__('vendra-transaction::attributes.status')),
-
-                ...TagIntegration::isAvailable() ? [
-                    SpatieTagsColumn::make('tags')
-                        ->label(__('vendra-support::attributes.tags'))
-                        ->type(Transaction::TAG_TYPE)
-                        ->toggleable(),
-                ] : [],
 
                 TextColumn::make('created_at')
                     ->alignCenter()
@@ -88,68 +79,38 @@ final class TransactionTable
                     ->extraCellAttributes(['dir' => 'ltr'])
                     ->label(__('vendra-transaction::attributes.created_at'))
                     ->sinceTooltip()
-                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->sortable()
                     ->when(
                         app()->isLocale('fa'),
                         fn(TextColumn $column) => $column->jalaliDateTime('Y-m-d H:i', latinNumbers: true),
-                        fn(TextColumn $column) => $column->dateTime('Y-m-d H:i')
-                    ),
-
-                TextColumn::make('updated_at')
-                    ->alignCenter()
-                    ->badge()
-                    ->extraCellAttributes(['dir' => 'ltr'])
-                    ->label(__('vendra-transaction::attributes.updated_at'))
-                    ->sinceTooltip()
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->when(
-                        app()->isLocale('fa'),
-                        fn(TextColumn $column) => $column->jalaliDateTime('Y-m-d H:i', latinNumbers: true),
-                        fn(TextColumn $column) => $column->dateTime('Y-m-d H:i')
+                        fn(TextColumn $column) => $column->dateTime('Y-m-d H:i'),
                     ),
             ])
             ->filters(
                 [
-                    TrashedFilter::make(),
                     QueryBuilder::make()
                         ->constraints([
-                            RelationshipConstraint::make('transactionGateway')
-                                ->selectable(
-                                    IsRelatedToOperator::make()
-                                        ->preload()
-                                        ->searchable()
-                                        ->titleAttribute('name'),
-                                ),
-
-                            RelationshipConstraint::make('user')
-                                ->selectable(
-                                    IsRelatedToOperator::make()
-                                        ->preload()
-                                        ->searchable()
-                                        ->titleAttribute('username'),
-                                ),
-
-                            SelectConstraint::make('transaction_type')
-                                ->label(__('vendra-transaction::attributes.transaction_type'))
-                                ->multiple()
-                                ->options(TransactionTypeEnum::class),
-
                             TextConstraint::make('token')
                                 ->label(__('vendra-transaction::attributes.token')),
 
-                            NumberConstraint::make('amount')
-                                ->label(__('vendra-transaction::attributes.amount')),
+                            SelectConstraint::make('transaction_type')
+                                ->label(__('vendra-transaction::attributes.transaction_type'))
+                                ->options(
+                                    collect(TransactionTypeEnum::cases())
+                                        ->mapWithKeys(fn(TransactionTypeEnum $type): array => [$type->value => $type->getLabel()])
+                                        ->all(),
+                                ),
 
                             SelectConstraint::make('status')
                                 ->label(__('vendra-transaction::attributes.status'))
-                                ->multiple()
-                                ->options(TransactionStatusEnum::class),
+                                ->options(
+                                    TransactionState::all()
+                                        ->mapWithKeys(fn(string $state): array => [$state::getMorphClass() => (new $state(new Transaction()))->getLabel()])
+                                        ->all(),
+                                ),
 
-                            DateConstraint::make('created_at')
-                                ->label(__('vendra-transaction::attributes.created_at')),
-
-                            DateConstraint::make('updated_at')
-                                ->label(__('vendra-transaction::attributes.updated_at')),
+                            NumberConstraint::make('amount')
+                                ->label(__('vendra-transaction::attributes.amount')),
                         ]),
                 ],
                 layout: FiltersLayout::AboveContentCollapsible,
@@ -158,20 +119,11 @@ final class TransactionTable
                 ActionGroup::make([
                     ViewAction::make(),
 
-                    DepositInfoAction::make(),
-
-                    WithdrawalInfoAction::make(),
-
                     ApproveTransactionAction::make(),
 
                     DeclineTransactionAction::make(),
 
-                    TagTransactionAction::make(),
-                ]),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    FailTransactionAction::make(),
                 ]),
             ])
             ->defaultSort(column: 'id', direction: 'desc');

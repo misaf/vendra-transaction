@@ -6,36 +6,31 @@ namespace Misaf\VendraTransaction\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
-use Misaf\VendraSupport\Contracts\ShouldLogActivity;
 use Misaf\VendraTransaction\Database\Factories\TransactionLimitFactory;
 use Misaf\VendraTransaction\Enums\TransactionTypeEnum;
-use Misaf\VendraUser\Traits\BelongsToUser;
 
 /**
+ * A per-wallet, per-type ceiling on single transaction amounts, expressed
+ * in the wallet currency's minor units.
+ *
  * @property int $id
- * @property int $user_id
+ * @property int $wallet_id
  * @property TransactionTypeEnum $transaction_type
  * @property int $amount
  * @property Carbon $created_at
  * @property Carbon $updated_at
  */
-#[Fillable(['user_id', 'transaction_type', 'amount'])]
+#[Fillable(['wallet_id', 'transaction_type', 'amount'])]
 #[UseFactory(TransactionLimitFactory::class)]
-final class TransactionLimit extends Model implements ShouldLogActivity
+final class TransactionLimit extends Model
 {
-    use BelongsToUser;
-
     /** @use HasFactory<TransactionLimitFactory> */
     use HasFactory;
 
-
-    /**
-     * @var array<string, string>
-     */
     /**
      * @return array<string, string>
      */
@@ -43,53 +38,17 @@ final class TransactionLimit extends Model implements ShouldLogActivity
     {
         return [
             'id'               => 'integer',
-            'user_id'          => 'integer',
+            'wallet_id'        => 'integer',
             'transaction_type' => TransactionTypeEnum::class,
             'amount'           => 'integer',
         ];
     }
 
     /**
-     * @var list<string>
+     * @return BelongsTo<Wallet, $this>
      */
-
-    /**
-     * @param  Builder<self>  $builder
-     */
-    public function scopeDeposit(Builder $builder): void
+    public function wallet(): BelongsTo
     {
-        $builder->where('transaction_type', TransactionTypeEnum::Deposit);
-    }
-
-    /**
-     * @param  Builder<self>  $builder
-     */
-    public function scopeWithdrawal(Builder $builder): void
-    {
-        $builder->where('transaction_type', TransactionTypeEnum::Withdrawal);
-    }
-
-    /**
-     * @param  Builder<self>  $builder
-     */
-    public function scopeCommission(Builder $builder): void
-    {
-        $builder->where('transaction_type', TransactionTypeEnum::Commission);
-    }
-
-    /**
-     * @param  Builder<self>  $builder
-     */
-    public function scopeBonus(Builder $builder): void
-    {
-        $builder->where('transaction_type', TransactionTypeEnum::Bonus);
-    }
-
-    /**
-     * @param  Builder<self>  $builder
-     */
-    public function scopeTransfer(Builder $builder): void
-    {
-        $builder->where('transaction_type', TransactionTypeEnum::Transfer);
+        return $this->belongsTo(Wallet::class);
     }
 }

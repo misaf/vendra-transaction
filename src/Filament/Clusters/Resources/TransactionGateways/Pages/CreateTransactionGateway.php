@@ -15,11 +15,6 @@ final class CreateTransactionGateway extends CreateRecord
 
     protected static string $resource = TransactionGatewayResource::class;
 
-    public function getBreadcrumb(): string
-    {
-        return self::$breadcrumb ?? __('filament-panels::resources/pages/create-record.breadcrumb') . ' ' . __('vendra-transaction::navigation.transaction_gateway');
-    }
-
     protected function getHeaderActions(): array
     {
         return [

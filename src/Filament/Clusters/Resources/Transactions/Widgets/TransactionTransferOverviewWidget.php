@@ -51,14 +51,12 @@ final class TransactionTransferOverviewWidget extends StatsOverviewWidget
         $startOfWeek = now()->startOfWeek(6);
         $endOfWeek = now()->endOfWeek();
 
-        $transferTransactionStats = Trend::query(Transaction::query()->transfer()->approved()
-            ->where('amount', '>', 0))
+        $transferTransactionStats = Trend::query(Transaction::query()->transfer()->approved())
             ->between($startOfWeek, $endOfWeek)
             ->perDay()
             ->sum('amount');
 
         $totalTransferAmount = (int) Transaction::query()->transfer()->approved()
-            ->where('amount', '>', 0)
             ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
             ->sum('amount');
 

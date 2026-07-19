@@ -9,27 +9,15 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Misaf\VendraTransaction\Models\Transaction;
 use Misaf\VendraTransaction\Models\TransactionFee;
 
-/**
- * @extends Factory<TransactionFee>
- */
+/** @extends Factory<TransactionFee> */
 #[UseModel(TransactionFee::class)]
 final class TransactionFeeFactory extends Factory
 {
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
             'transaction_id' => Transaction::factory(),
-            'amount'         => fake()->randomNumber(5, true),
+            'amount'         => fake()->numberBetween(100, 10_000),
         ];
-    }
-
-    public function forTransaction(Transaction $transaction): static
-    {
-        return $this->state(fn(): array => [
-            'transaction_id' => $transaction->id,
-        ]);
     }
 }

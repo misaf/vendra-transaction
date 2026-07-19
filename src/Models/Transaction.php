@@ -10,52 +10,60 @@ use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Misaf\VendraSupport\Contracts\ShouldLogActivity;
 use Misaf\VendraSupport\Traits\BelongsToTenant;
 use Misaf\VendraSupport\Traits\HasOptionalTags;
 use Misaf\VendraTransaction\Database\Factories\TransactionFactory;
-use Misaf\VendraTransaction\Enums\TransactionStatusEnum;
 use Misaf\VendraTransaction\Enums\TransactionTypeEnum;
+use Misaf\VendraTransaction\Events\TransactionDeclined;
+use Misaf\VendraTransaction\Events\TransactionFailed;
 use Misaf\VendraTransaction\Facades\TransactionService;
-use Misaf\VendraTransaction\Traits\BelongsToTransactionGateway;
-use Misaf\VendraTransaction\Traits\HasTransactionCheck;
-use Misaf\VendraTransaction\Traits\HasTransactionFee;
-use Misaf\VendraTransaction\Traits\HasTransactionMetadata;
-use Misaf\VendraTransaction\Traits\HasTransactionTransfer;
-use Misaf\VendraUser\Traits\BelongsToUser;
+use Misaf\VendraTransaction\States\Approved;
+use Misaf\VendraTransaction\States\Declined;
+use Misaf\VendraTransaction\States\Failed;
+use Misaf\VendraTransaction\States\Pending;
+use Misaf\VendraTransaction\States\Processing;
+use Misaf\VendraTransaction\States\Review;
+use Misaf\VendraTransaction\States\TransactionState;
+use Spatie\ModelStates\HasStates;
 
 /**
+ * A gateway-facing money movement against a wallet. The `amount` is always
+ * the absolute value in the wallet currency's minor units; the sign of the
+ * eventual ledger entry derives from the transaction type. Settlement into
+ * the ledger happens exactly once, on the transition to Approved.
+ *
  * @property int $id
  * @property int $tenant_id
+ * @property int $wallet_id
  * @property int $transaction_gateway_id
- * @property int $user_id
+ * @property int|null $counterparty_wallet_id
  * @property TransactionTypeEnum $transaction_type
  * @property string $token
  * @property int $amount
- * @property TransactionStatusEnum $status
+ * @property TransactionState $status
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property Carbon|null $deleted_at
  */
-#[Fillable(['transaction_gateway_id', 'user_id', 'transaction_type', 'token', 'amount', 'status'])]
+#[Fillable(['wallet_id', 'transaction_gateway_id', 'counterparty_wallet_id', 'transaction_type', 'token', 'amount', 'status'])]
 #[Hidden(['tenant_id'])]
 #[UseFactory(TransactionFactory::class)]
 final class Transaction extends Model implements ShouldLogActivity
 {
     use BelongsToTenant;
-    use BelongsToTransactionGateway;
-    use BelongsToUser;
 
     /** @use HasFactory<TransactionFactory> */
     use HasFactory;
 
     use HasOptionalTags;
-    use HasTransactionCheck;
-    use HasTransactionFee;
-    use HasTransactionMetadata;
-    use HasTransactionTransfer;
+    use HasStates;
     use SoftDeletes;
 
     public const string TAG_TYPE = 'transaction';
@@ -68,13 +76,99 @@ final class Transaction extends Model implements ShouldLogActivity
         return [
             'id'                     => 'integer',
             'tenant_id'              => 'integer',
+            'wallet_id'              => 'integer',
             'transaction_gateway_id' => 'integer',
-            'user_id'                => 'integer',
+            'counterparty_wallet_id' => 'integer',
             'transaction_type'       => TransactionTypeEnum::class,
             'token'                  => 'string',
             'amount'                 => 'integer',
-            'status'                 => TransactionStatusEnum::class,
+            'status'                 => TransactionState::class,
         ];
+    }
+
+    /**
+     * @return BelongsTo<Wallet, $this>
+     */
+    public function wallet(): BelongsTo
+    {
+        return $this->belongsTo(Wallet::class);
+    }
+
+    /**
+     * @return BelongsTo<Wallet, $this>
+     */
+    public function counterpartyWallet(): BelongsTo
+    {
+        return $this->belongsTo(Wallet::class, 'counterparty_wallet_id');
+    }
+
+    /**
+     * @return BelongsTo<TransactionGateway, $this>
+     */
+    public function transactionGateway(): BelongsTo
+    {
+        return $this->belongsTo(TransactionGateway::class);
+    }
+
+    /**
+     * @return HasOne<TransactionFee, $this>
+     */
+    public function transactionFee(): HasOne
+    {
+        return $this->hasOne(TransactionFee::class);
+    }
+
+    /**
+     * @return HasMany<TransactionMetadata, $this>
+     */
+    public function transactionMetadatas(): HasMany
+    {
+        return $this->hasMany(TransactionMetadata::class);
+    }
+
+    /**
+     * @return MorphMany<LedgerEntry, $this>
+     */
+    public function ledgerEntries(): MorphMany
+    {
+        return $this->morphMany(LedgerEntry::class, 'source');
+    }
+
+    public function approve(): void
+    {
+        $this->status->transitionTo(Approved::class);
+    }
+
+    public function decline(): void
+    {
+        $this->status->transitionTo(Declined::class);
+
+        TransactionDeclined::dispatch($this);
+    }
+
+    public function fail(): void
+    {
+        $this->status->transitionTo(Failed::class);
+
+        TransactionFailed::dispatch($this);
+    }
+
+    public function markProcessing(): void
+    {
+        $this->status->transitionTo(Processing::class);
+    }
+
+    public function markReview(): void
+    {
+        $this->status->transitionTo(Review::class);
+    }
+
+    /**
+     * @param  Builder<self>  $builder
+     */
+    public function scopeOfType(Builder $builder, TransactionTypeEnum $transactionType): void
+    {
+        $builder->where('transaction_type', $transactionType);
     }
 
     /**
@@ -122,7 +216,7 @@ final class Transaction extends Model implements ShouldLogActivity
      */
     public function scopeApproved(Builder $builder): void
     {
-        $builder->where('status', TransactionStatusEnum::Approved);
+        $builder->whereState('status', Approved::class);
     }
 
     /**
@@ -130,7 +224,7 @@ final class Transaction extends Model implements ShouldLogActivity
      */
     public function scopeDeclined(Builder $builder): void
     {
-        $builder->where('status', TransactionStatusEnum::Declined);
+        $builder->whereState('status', Declined::class);
     }
 
     /**
@@ -138,7 +232,7 @@ final class Transaction extends Model implements ShouldLogActivity
      */
     public function scopeFailed(Builder $builder): void
     {
-        $builder->where('status', TransactionStatusEnum::Failed);
+        $builder->whereState('status', Failed::class);
     }
 
     /**
@@ -146,7 +240,7 @@ final class Transaction extends Model implements ShouldLogActivity
      */
     public function scopePending(Builder $builder): void
     {
-        $builder->where('status', TransactionStatusEnum::Pending);
+        $builder->whereState('status', Pending::class);
     }
 
     /**
@@ -154,7 +248,7 @@ final class Transaction extends Model implements ShouldLogActivity
      */
     public function scopeReview(Builder $builder): void
     {
-        $builder->where('status', TransactionStatusEnum::Review);
+        $builder->whereState('status', Review::class);
     }
 
     /**
@@ -162,7 +256,7 @@ final class Transaction extends Model implements ShouldLogActivity
      */
     public function scopeProcessing(Builder $builder): void
     {
-        $builder->where('status', TransactionStatusEnum::Processing);
+        $builder->whereState('status', Processing::class);
     }
 
     protected function tagType(): string
@@ -173,7 +267,9 @@ final class Transaction extends Model implements ShouldLogActivity
     protected static function booted(): void
     {
         self::creating(function (self $transaction): void {
-            $transaction->token = TransactionService::generateToken();
+            if (empty($transaction->token)) {
+                $transaction->token = TransactionService::generateToken();
+            }
         });
     }
 }

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\RelationManagers;
 
-use Filament\Actions\ViewAction;
-use Filament\Forms\Components\Select;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 
@@ -18,101 +18,47 @@ final class TransactionMetadataRelationManager extends RelationManager
 {
     protected static string $relationship = 'transactionMetadatas';
 
-    public static function getModelLabel(): string
-    {
-        return __('vendra-transaction::navigation.transaction');
-    }
-
-    public static function getPluralModelLabel(): string
-    {
-        return __('vendra-transaction::navigation.transaction');
-    }
-
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
-        return __('vendra-transaction::navigation.transaction');
+        return __('vendra-transaction::navigation.transaction_metadata');
     }
 
     public function form(Schema $schema): Schema
     {
-        return $schema->components([
-            Select::make('transaction_id')
-                ->columnSpanFull()
-                ->label(__('vendra-transaction::navigation.transaction'))
-                ->native(false)
-                ->preload()
-                ->relationship('transaction', 'token')
-                ->required()
-                ->searchable(),
+        return $schema
+            ->components([
+                TextInput::make('key_name')
+                    ->label(__('vendra-transaction::attributes.key_name'))
+                    ->maxLength(255)
+                    ->required(),
 
-            TextInput::make('key_name')
-                ->label(__('vendra-transaction::attributes.key_name'))
-                ->required(),
-
-            TextInput::make('key_value')
-                ->label(__('vendra-transaction::attributes.key_value'))
-                ->required(),
-        ]);
-    }
-
-    public function isReadOnly(): bool
-    {
-        return false;
+                TextInput::make('key_value')
+                    ->label(__('vendra-transaction::attributes.key_value'))
+                    ->maxLength(255)
+                    ->required(),
+            ]);
     }
 
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('name')
-            ->heading(__('vendra-transaction::navigation.transaction'))
             ->columns([
                 TextColumn::make('key_name')
-                    ->alignStart()
-                    ->label(__('vendra-transaction::attributes.key_name')),
+                    ->label(__('vendra-transaction::attributes.key_name'))
+                    ->searchable(),
 
                 TextColumn::make('key_value')
-                    ->alignStart()
-                    ->copyable()
-                    ->copyMessage(__('vendra-transaction::messages.value_copied'))
-                    ->copyMessageDuration(1500)
-                    ->label(__('vendra-transaction::attributes.key_value')),
-
-                TextColumn::make('created_at')
-                    ->alignCenter()
-                    ->badge()
-                    ->extraCellAttributes(['dir' => 'ltr'])
-                    ->label(__('vendra-transaction::attributes.created_at'))
-                    ->sinceTooltip()
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->when(
-                        app()->isLocale('fa'),
-                        fn(TextColumn $column) => $column->jalaliDateTime('Y-m-d H:i', latinNumbers: true),
-                        fn(TextColumn $column) => $column->dateTime('Y-m-d H:i')
-                    ),
-
-                TextColumn::make('updated_at')
-                    ->alignCenter()
-                    ->badge()
-                    ->extraCellAttributes(['dir' => 'ltr'])
-                    ->label(__('vendra-transaction::attributes.updated_at'))
-                    ->sinceTooltip()
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->when(
-                        app()->isLocale('fa'),
-                        fn(TextColumn $column) => $column->jalaliDateTime('Y-m-d H:i', latinNumbers: true),
-                        fn(TextColumn $column) => $column->dateTime('Y-m-d H:i')
-                    ),
+                    ->label(__('vendra-transaction::attributes.key_value'))
+                    ->searchable(),
+            ])
+            ->headerActions([
+                CreateAction::make(),
             ])
             ->recordActions([
-                ViewAction::make(),
+                EditAction::make(),
+
+                DeleteAction::make(),
             ])
-            ->groups([
-                Group::make('key_name')
-                    ->collapsible()
-                    ->label(__('vendra-transaction::attributes.key_name')),
-                Group::make('key_value')
-                    ->collapsible()
-                    ->label(__('vendra-transaction::attributes.key_value')),
-            ]);
+            ->defaultSort(column: 'id', direction: 'desc');
     }
 }

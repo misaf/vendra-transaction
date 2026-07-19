@@ -8,11 +8,13 @@ use Composer\InstalledVersions;
 
 use Filament\Panel;
 use Illuminate\Foundation\Console\AboutCommand;
-use Illuminate\Support\Facades\Event;
 use Misaf\VendraSupport\Filament\Concerns\ResolvesConfiguredPanels;
-use Misaf\VendraTransaction\Listeners\TransactionTransferSubscriber;
-use Misaf\VendraTransaction\Listeners\WithdrawalLimitSubscriber;
+use Misaf\VendraSupport\Support\TenantTableRegistry;
+use Misaf\VendraTransaction\Console\Commands\VerifyWalletBalancesCommand;
+use Misaf\VendraTransaction\Models\Wallet;
+use Misaf\VendraTransaction\Services\LedgerService;
 use Misaf\VendraTransaction\Services\TransactionService;
+use Misaf\VendraTransaction\Support\TransactionUsers;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -29,6 +31,7 @@ final class TransactionServiceProvider extends PackageServiceProvider
             ->hasMigrations([
                 'create_transactions_table',
             ])
+            ->hasCommands(VerifyWalletBalancesCommand::class)
             ->hasInstallCommand(function (InstallCommand $command): void {
                 $command->askToStarRepoOnGitHub('misaf/vendra-transaction');
             });
@@ -37,6 +40,7 @@ final class TransactionServiceProvider extends PackageServiceProvider
     public function packageRegistered(): void
     {
         $this->app->singleton(TransactionService::class);
+        $this->app->singleton(LedgerService::class);
 
         Panel::configureUsing(function (Panel $panel): void {
             if ( ! $this->shouldRegisterOnPanel($panel->getId(), 'vendra-transaction')) {
@@ -57,9 +61,21 @@ final class TransactionServiceProvider extends PackageServiceProvider
 
     public function packageBooted(): void
     {
+        $this->app->make(TenantTableRegistry::class)->register('transaction_gateways', 'wallets', 'transactions');
+
         AboutCommand::add('Vendra Transaction', fn() => ['Version' => InstalledVersions::getPrettyVersion('misaf/vendra-transaction')]);
 
-        Event::subscribe(TransactionTransferSubscriber::class);
-        Event::subscribe(WithdrawalLimitSubscriber::class);
+        $this->registerUserRelationships();
+    }
+
+    /**
+     * Attaches wallet relations to the host application's configured user
+     * model without depending on a concrete user package.
+     */
+    private function registerUserRelationships(): void
+    {
+        $userModel = TransactionUsers::model();
+
+        $userModel::resolveRelationUsing('wallets', fn($user) => $user->hasMany(Wallet::class, 'user_id'));
     }
 }

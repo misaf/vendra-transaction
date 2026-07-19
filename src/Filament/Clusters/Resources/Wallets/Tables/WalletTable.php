@@ -1,0 +1,78 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Misaf\VendraTransaction\Filament\Clusters\Resources\Wallets\Tables;
+
+use Filament\Actions\ViewAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\QueryBuilder;
+use Filament\Tables\Filters\QueryBuilder\Constraints\NumberConstraint;
+use Filament\Tables\Table;
+use Misaf\VendraTransaction\Models\Wallet;
+
+final class WalletTable
+{
+    public static function configure(Table $table): Table
+    {
+        return $table
+            ->modifyQueryUsing(fn($query) => $query->with(['user', 'currency'])->withCount('transactions'))
+            ->columns([
+                TextColumn::make('row')
+                    ->label('#')
+                    ->rowIndex()
+                    ->sortable(['id']),
+
+                TextColumn::make('user')
+                    ->label(__('vendra-transaction::attributes.user'))
+                    ->state(function (Wallet $record): string {
+                        return (string) ($record->user?->getAttribute('username')
+                            ?? $record->user?->getAttribute('name')
+                            ?? "#{$record->user_id}");
+                    }),
+
+                TextColumn::make('currency.iso_code')
+                    ->badge()
+                    ->label(__('vendra-transaction::attributes.currency')),
+
+                TextColumn::make('balance')
+                    ->extraCellAttributes(['dir' => 'ltr'])
+                    ->label(__('vendra-transaction::attributes.balance'))
+                    ->numeric()
+                    ->sortable(),
+
+                TextColumn::make('transactions_count')
+                    ->alignCenter()
+                    ->badge()
+                    ->label(__('vendra-transaction::navigation.transactions')),
+
+                TextColumn::make('created_at')
+                    ->alignCenter()
+                    ->badge()
+                    ->extraCellAttributes(['dir' => 'ltr'])
+                    ->label(__('vendra-transaction::attributes.created_at'))
+                    ->sinceTooltip()
+                    ->sortable()
+                    ->when(
+                        app()->isLocale('fa'),
+                        fn(TextColumn $column) => $column->jalaliDateTime('Y-m-d H:i', latinNumbers: true),
+                        fn(TextColumn $column) => $column->dateTime('Y-m-d H:i'),
+                    ),
+            ])
+            ->filters(
+                [
+                    QueryBuilder::make()
+                        ->constraints([
+                            NumberConstraint::make('balance')
+                                ->label(__('vendra-transaction::attributes.balance')),
+                        ]),
+                ],
+                layout: FiltersLayout::AboveContentCollapsible,
+            )
+            ->recordActions([
+                ViewAction::make(),
+            ])
+            ->defaultSort(column: 'id', direction: 'desc');
+    }
+}

@@ -1,0 +1,32 @@
+<?php
+
+declare(strict_types=1);
+
+use Misaf\VendraTenant\Models\Tenant;
+use Misaf\VendraTransaction\Database\Factories\WalletFactory;
+use Misaf\VendraTransaction\Services\LedgerService;
+
+use function Pest\Laravel\artisan;
+
+beforeEach(function (): void {
+    Tenant::factory()->enabled()->create()->makeCurrent();
+});
+
+it('passes when cached balances match the ledger', function (): void {
+    $wallet = WalletFactory::new()->create();
+    app(LedgerService::class)->post($wallet, 2_500);
+
+    artisan('vendra-transaction:verify-balances')->assertSuccessful();
+});
+
+it('fails on drifted balances and repairs them on demand', function (): void {
+    $wallet = WalletFactory::new()->create();
+    app(LedgerService::class)->post($wallet, 2_500);
+
+    $wallet->newQuery()->whereKey($wallet->id)->toBase()->update(['balance' => 9_999]);
+
+    artisan('vendra-transaction:verify-balances')->assertFailed();
+    artisan('vendra-transaction:verify-balances', ['--repair' => true])->assertSuccessful();
+
+    expect($wallet->fresh()->balance)->toBe(2_500);
+});

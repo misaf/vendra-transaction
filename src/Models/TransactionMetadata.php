@@ -8,10 +8,9 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
-use Misaf\VendraSupport\Contracts\ShouldLogActivity;
 use Misaf\VendraTransaction\Database\Factories\TransactionMetadataFactory;
-use Misaf\VendraTransaction\Traits\BelongsToTransaction;
 
 /**
  * @property int $id
@@ -23,17 +22,13 @@ use Misaf\VendraTransaction\Traits\BelongsToTransaction;
  */
 #[Fillable(['transaction_id', 'key_name', 'key_value'])]
 #[UseFactory(TransactionMetadataFactory::class)]
-final class TransactionMetadata extends Model implements ShouldLogActivity
+final class TransactionMetadata extends Model
 {
-    use BelongsToTransaction;
-
     /** @use HasFactory<TransactionMetadataFactory> */
     use HasFactory;
 
+    protected $table = 'transaction_metadata';
 
-    /**
-     * @var array<string, string>
-     */
     /**
      * @return array<string, string>
      */
@@ -48,6 +43,10 @@ final class TransactionMetadata extends Model implements ShouldLogActivity
     }
 
     /**
-     * @var list<string>
+     * @return BelongsTo<Transaction, $this>
      */
+    public function transaction(): BelongsTo
+    {
+        return $this->belongsTo(Transaction::class);
+    }
 }

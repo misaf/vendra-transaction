@@ -12,6 +12,7 @@ use Flowframe\Trend\TrendValue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Number;
+use Misaf\VendraTransaction\Enums\TransactionTypeEnum;
 use Misaf\VendraTransaction\Models\TransactionLimit;
 
 final class TransactionLimitOverviewWidget extends StatsOverviewWidget
@@ -52,14 +53,14 @@ final class TransactionLimitOverviewWidget extends StatsOverviewWidget
         $startOfWeek = now()->startOfWeek(6);
         $endOfWeek = now()->endOfWeek();
 
-        $withdrawalTransactionStats = Trend::query(TransactionLimit::query()->withdrawal()
-            ->when($this->record, fn(Builder $builder) => $builder->where('user_id', $this->record->id)))
+        $withdrawalTransactionStats = Trend::query(TransactionLimit::query()->where('transaction_type', TransactionTypeEnum::Withdrawal)
+            ->when($this->record, fn(Builder $builder) => $builder->whereHas('wallet', fn(Builder $walletQuery) => $walletQuery->where('user_id', $this->record->getKey()))))
             ->between($startOfWeek, $endOfWeek)
             ->perDay()
             ->sum('amount');
 
-        $totalWithdrawalAmount = (int) TransactionLimit::query()->withdrawal()
-            ->when($this->record, fn(Builder $builder) => $builder->where('user_id', $this->record->id))
+        $totalWithdrawalAmount = (int) TransactionLimit::query()->where('transaction_type', TransactionTypeEnum::Withdrawal)
+            ->when($this->record, fn(Builder $builder) => $builder->whereHas('wallet', fn(Builder $walletQuery) => $walletQuery->where('user_id', $this->record->getKey())))
             ->sum('amount');
 
         $transactionWithdrawal = Stat::make('withdrawal_transaction_stats', Number::format($totalWithdrawalAmount))

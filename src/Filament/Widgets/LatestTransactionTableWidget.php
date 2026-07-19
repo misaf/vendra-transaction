@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Misaf\VendraTransaction\Filament\Widgets;
 
-use Filament\Tables\Columns\SpatieTagsColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
-use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Builder;
 use Misaf\VendraTransaction\Models\Transaction;
+use Misaf\VendraTransaction\States\TransactionState;
 
 final class LatestTransactionTableWidget extends BaseWidget
 {
@@ -35,51 +35,51 @@ final class LatestTransactionTableWidget extends BaseWidget
     public function table(Table $table): Table
     {
         return $table
-            ->heading(__('vendra-transaction::widgets.latest_transaction_table'))
-            ->query(Transaction::take(10))
+            ->heading(__('vendra-transaction::widgets.recent_transaction_table'))
+            ->query(fn(): Builder => Transaction::query()->with(['wallet.user', 'wallet.currency']))
             ->columns([
-                TextColumn::make('transactionGateway.name')
-                    ->label(__('vendra-transaction::navigation.transaction_gateway')),
+                TextColumn::make('token')
+                    ->extraCellAttributes(['dir' => 'ltr'])
+                    ->fontFamily('mono')
+                    ->label(__('vendra-transaction::attributes.token'))
+                    ->limit(12),
+
+                TextColumn::make('wallet.user')
+                    ->label(__('vendra-transaction::attributes.user'))
+                    ->state(function (Transaction $record): string {
+                        return (string) ($record->wallet->user?->getAttribute('username')
+                            ?? $record->wallet->user?->getAttribute('name')
+                            ?? "#{$record->wallet->user_id}");
+                    }),
 
                 TextColumn::make('transaction_type')
                     ->badge()
                     ->label(__('vendra-transaction::attributes.transaction_type')),
 
-                TextColumn::make('user.username')
-                    ->label(__('vendra-user::attributes.username')),
-
-                TextColumn::make('token')
-                    ->alignCenter()
-                    ->copyable()
-                    ->copyMessage(__('vendra-transaction::messages.token_copied'))
-                    ->copyMessageDuration(1500)
-                    ->extraCellAttributes(['dir' => 'ltr'])
-                    ->formatStateUsing(function (string $state): string {
-                        return Str::of($state)->split(4)->implode(' ');
-                    })
-                    ->label(__('vendra-transaction::attributes.token')),
-
                 TextColumn::make('amount')
-                    ->alignCenter()
-                    ->copyable()
-                    ->copyMessage(__('vendra-transaction::messages.amount_copied'))
-                    ->copyMessageDuration(1500)
                     ->extraCellAttributes(['dir' => 'ltr'])
                     ->label(__('vendra-transaction::attributes.amount'))
-                    ->numeric(locale: 'en', maxDecimalPlaces: 0),
+                    ->numeric(),
 
                 TextColumn::make('status')
-                    ->alignStart()
+                    ->badge()
+                    ->color(fn(TransactionState $state): array => $state->getColor())
+                    ->formatStateUsing(fn(TransactionState $state): string => $state->getLabel())
                     ->label(__('vendra-transaction::attributes.status')),
-
-                SpatieTagsColumn::make('tags')
-                    ->label(__('vendra-tagger::navigation.tag'))
-                    ->type(Transaction::TAG_TYPE),
 
                 TextColumn::make('created_at')
-                    ->label(__('vendra-transaction::attributes.status')),
+                    ->alignCenter()
+                    ->badge()
+                    ->extraCellAttributes(['dir' => 'ltr'])
+                    ->label(__('vendra-transaction::attributes.created_at'))
+                    ->sinceTooltip()
+                    ->when(
+                        app()->isLocale('fa'),
+                        fn(TextColumn $column) => $column->jalaliDateTime('Y-m-d H:i', latinNumbers: true),
+                        fn(TextColumn $column) => $column->dateTime('Y-m-d H:i'),
+                    ),
             ])
-            ->paginated(false)
-            ->searchable(false);
+            ->defaultSort(column: 'id', direction: 'desc')
+            ->paginationPageOptions([5]);
     }
 }

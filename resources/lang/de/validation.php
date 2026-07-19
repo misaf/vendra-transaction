@@ -3,6 +3,5 @@
 declare(strict_types=1);
 
 return [
-    'isWithdrawalRakeRequirementNotMet' => 'Sie haben nicht genügend Punkte für eine Auszahlung.',
-    'isWithdrawalTimeLimitExceeded'     => 'Sie können maximal :count Auszahlungen innerhalb eines Zeitfensters von :hours Stunden vornehmen.',
+    'amount_exceeds_limit' => 'Der Betrag darf das Limit von :limit nicht überschreiten.',
 ];

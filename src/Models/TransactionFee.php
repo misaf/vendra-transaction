@@ -8,12 +8,15 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
-use Misaf\VendraSupport\Contracts\ShouldLogActivity;
 use Misaf\VendraTransaction\Database\Factories\TransactionFeeFactory;
-use Misaf\VendraTransaction\Traits\BelongsToTransaction;
 
 /**
+ * The fee charged for a transaction, stored as a positive amount in the
+ * wallet currency's minor units. It settles as its own negative ledger
+ * entry when the transaction is approved.
+ *
  * @property int $id
  * @property int $transaction_id
  * @property int $amount
@@ -22,17 +25,11 @@ use Misaf\VendraTransaction\Traits\BelongsToTransaction;
  */
 #[Fillable(['transaction_id', 'amount'])]
 #[UseFactory(TransactionFeeFactory::class)]
-final class TransactionFee extends Model implements ShouldLogActivity
+final class TransactionFee extends Model
 {
-    use BelongsToTransaction;
-
     /** @use HasFactory<TransactionFeeFactory> */
     use HasFactory;
 
-
-    /**
-     * @var array<string, string>
-     */
     /**
      * @return array<string, string>
      */
@@ -46,6 +43,10 @@ final class TransactionFee extends Model implements ShouldLogActivity
     }
 
     /**
-     * @var list<string>
+     * @return BelongsTo<Transaction, $this>
      */
+    public function transaction(): BelongsTo
+    {
+        return $this->belongsTo(Transaction::class);
+    }
 }

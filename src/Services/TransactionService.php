@@ -4,20 +4,24 @@ declare(strict_types=1);
 
 namespace Misaf\VendraTransaction\Services;
 
-use Exception;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Misaf\VendraTransaction\Enums\TransactionStatusEnum;
+use Misaf\VendraCurrency\Models\Currency;
 use Misaf\VendraTransaction\Enums\TransactionTypeEnum;
+use Misaf\VendraTransaction\Exceptions\TransactionLimitExceededException;
 use Misaf\VendraTransaction\Models\Transaction;
 use Misaf\VendraTransaction\Models\TransactionGateway;
-use Misaf\VendraUser\Models\User;
+use Misaf\VendraTransaction\Models\TransactionLimit;
+use Misaf\VendraTransaction\Models\Wallet;
+use RuntimeException;
 
 final class TransactionService
 {
-    private const TOKEN_CHARACTERS = '123456789';
+    public const string INTERNAL_GATEWAY_SLUG = 'internal-transactions';
 
-    private const TOKEN_LENGTH = 20;
+    private const string TOKEN_CHARACTERS = '123456789';
+
+    private const int TOKEN_LENGTH = 20;
 
     public function generateToken(): string
     {
@@ -31,195 +35,98 @@ final class TransactionService
         return $token;
     }
 
-    public function getFormattedAmount(int $amount, string $transactionType): int
+    /**
+     * The wallet holding the given user's balance in the given currency,
+     * created on first use.
+     */
+    public function walletFor(Model $user, Currency $currency): Wallet
     {
-        $transactionTypeEnum = TransactionTypeEnum::from($transactionType);
-
-        return TransactionTypeEnum::Withdrawal === $transactionTypeEnum
-            ? -abs($amount)
-            : abs($amount);
+        return Wallet::query()->firstOrCreate([
+            'user_id'     => $user->getKey(),
+            'currency_id' => $currency->id,
+        ]);
     }
 
-    public function updateTransactionStatus(Transaction $transaction, TransactionStatusEnum $newStatus): bool
+    /**
+     * The wallet for the given user in the application's default currency,
+     * created on first use.
+     */
+    public function defaultWalletFor(Model $user): Wallet
     {
-        $transaction->loadMissing('user:id,username');
+        $currency = Currency::query()
+            ->where('status', true)
+            ->orderByDesc('is_default')
+            ->orderBy('position')
+            ->firstOrFail();
 
-        return DB::transaction(function () use ($transaction, $newStatus): bool {
-            $lockedTransaction = Transaction::lockForUpdate()->find($transaction->id);
-
-            $type = $transaction->transaction_type->value;
-            $token = $transaction->token;
-            $username = $transaction->user->username ?? 'unknown';
-            $status = $newStatus->value;
-
-            $logPrefix = '[TransactionStatusUpdate]';
-
-            if ( ! $lockedTransaction) {
-                Log::info("{$logPrefix} [{$type}] Token: {$token}, User: {$username} - Transaction no longer exists. Skipping update.");
-
-                return false;
-            }
-
-            if ($lockedTransaction->status === $newStatus) {
-                Log::info("{$logPrefix} [{$type}] Token: {$token}, User: {$username} - Status already '{$status}'. Skipping update.");
-
-                return false;
-            }
-
-            $affectedRows = $lockedTransaction->update(['status' => $newStatus]);
-
-            if ( ! $affectedRows) {
-                Log::warning("{$logPrefix} [{$type}] Token: {$token}, User: {$username} - Failed to update to status '{$status}'.");
-
-                return false;
-            }
-
-            Log::info("{$logPrefix} [{$type}] Token: {$token}, User: {$username} - Successfully updated to status '{$status}'.");
-
-            return true;
-        }, 5);
-    }
-
-    public function isApproved(Transaction $transaction): bool
-    {
-        return TransactionStatusEnum::Approved === $transaction->status;
-    }
-
-    public function isDeclined(Transaction $transaction): bool
-    {
-        return TransactionStatusEnum::Declined === $transaction->status;
-    }
-
-    public function isFailed(Transaction $transaction): bool
-    {
-        return TransactionStatusEnum::Failed === $transaction->status;
-    }
-
-    public function isPending(Transaction $transaction): bool
-    {
-        return TransactionStatusEnum::Pending === $transaction->status;
-    }
-
-    public function isReview(Transaction $transaction): bool
-    {
-        return TransactionStatusEnum::Review === $transaction->status;
-    }
-
-    public function isProcessing(Transaction $transaction): bool
-    {
-        return TransactionStatusEnum::Processing === $transaction->status;
-    }
-
-    public function isDeposit(Transaction $transaction): bool
-    {
-        return TransactionTypeEnum::Deposit === $transaction->transaction_type;
-    }
-
-    public function isWithdrawal(Transaction $transaction): bool
-    {
-        return TransactionTypeEnum::Withdrawal === $transaction->transaction_type;
-    }
-
-    public function isCommission(Transaction $transaction): bool
-    {
-        return TransactionTypeEnum::Commission === $transaction->transaction_type;
-    }
-
-    public function isBonus(Transaction $transaction): bool
-    {
-        return TransactionTypeEnum::Bonus === $transaction->transaction_type;
-    }
-
-    public function isTransfer(Transaction $transaction): bool
-    {
-        return TransactionTypeEnum::Transfer === $transaction->transaction_type;
-    }
-
-    public function sumDeposits(User $user): int
-    {
-        return (int) $user->transactions()
-            ->deposit()
-            ->approved()
-            ->sum('amount');
-    }
-
-    public function sumWithdrawals(User $user): int
-    {
-        return abs((int) $user->transactions()
-            ->withdrawal()
-            ->approved()
-            ->sum('amount'));
-    }
-
-    public function sumCommissions(User $user): int
-    {
-        return abs((int) $user->transactions()
-            ->commission()
-            ->approved()
-            ->sum('amount'));
-    }
-
-    public function sumBonuses(User $user): int
-    {
-        return abs((int) $user->transactions()
-            ->bonus()
-            ->approved()
-            ->sum('amount'));
+        return $this->walletFor($user, $currency);
     }
 
     public function hasAnyActiveTransactionGateway(): bool
     {
-        return (bool) TransactionGateway::query()
-            ->whereJsonContainsLocale('slug', app()->getLocale(), 'internal-transactions', '<>')
-            ->where('status', true)
+        return TransactionGateway::query()
+            ->enabled()
+            ->where('slug', '<>', self::INTERNAL_GATEWAY_SLUG)
             ->exists();
     }
 
     public function hasActiveTransactionGateway(string $slug): bool
     {
-        return (bool) TransactionGateway::query()
-            ->whereJsonContainsLocale('slug', app()->getLocale(), $slug, '=')
-            ->where('status', true)
+        return TransactionGateway::query()
+            ->enabled()
+            ->where('slug', $slug)
             ->exists();
     }
 
-    public function getTransactionGateway(string $transactionGateway): TransactionGateway
+    public function getTransactionGateway(string $slug): TransactionGateway
     {
-        $locale = app()->getLocale();
-
-        $result = TransactionGateway::query()
-            ->whereJsonContains('slug', [$locale => $transactionGateway])
-            ->where('status', true)
+        $gateway = TransactionGateway::query()
+            ->enabled()
+            ->where('slug', $slug)
             ->first();
 
-        if ( ! $result) {
-            throw new Exception('No active transaction gateway found.');
+        if (null === $gateway) {
+            throw new RuntimeException("No active transaction gateway found for slug [{$slug}].");
         }
 
-        return $result;
+        return $gateway;
     }
 
     public function isInternalTransaction(Transaction $transaction): bool
     {
-        $internalGateway = TransactionService::getTransactionGateway('internal-transactions');
-
-        return $internalGateway->is($transaction->transactionGateway);
+        return $this->getTransactionGateway(self::INTERNAL_GATEWAY_SLUG)->is($transaction->transactionGateway);
     }
 
     /**
-     * @param  array<string, mixed>  $metadatas
+     * Creates a pending transaction against a wallet, together with its
+     * optional fee and metadata rows. Settlement into the ledger only
+     * happens later, on the transition to Approved.
+     *
+     * @param  array<string, mixed>  $metadata
      */
-    public function createTransaction(string $transactionGateway, User $user, TransactionTypeEnum $transactionType, int $amount, TransactionStatusEnum $status, array $metadatas = [], ?string $token = null): Transaction
-    {
-        $transactionGatewayId = $this->getTransactionGateway($transactionGateway)->id;
+    public function createTransaction(
+        TransactionGateway|string $transactionGateway,
+        Wallet $wallet,
+        TransactionTypeEnum $transactionType,
+        int $amount,
+        array $metadata = [],
+        ?int $fee = null,
+        ?Wallet $counterpartyWallet = null,
+        ?string $token = null,
+    ): Transaction {
+        $gateway = $transactionGateway instanceof TransactionGateway
+            ? $transactionGateway
+            : $this->getTransactionGateway($transactionGateway);
 
-        return DB::transaction(function () use ($transactionGatewayId, $transactionType, $user, $token, $amount, $status, $metadatas): Transaction {
+        $this->assertWithinLimit($wallet, $transactionType, $amount);
+
+        return DB::transaction(function () use ($gateway, $wallet, $transactionType, $amount, $metadata, $fee, $counterpartyWallet, $token): Transaction {
             $attributes = [
-                'transaction_gateway_id' => $transactionGatewayId,
-                'user_id'                => $user->id,
+                'wallet_id'              => $wallet->id,
+                'transaction_gateway_id' => $gateway->id,
+                'counterparty_wallet_id' => $counterpartyWallet?->id,
                 'transaction_type'       => $transactionType,
-                'amount'                 => $amount,
-                'status'                 => $status,
+                'amount'                 => abs($amount),
             ];
 
             if ( ! empty($token)) {
@@ -228,8 +135,12 @@ final class TransactionService
 
             $transaction = Transaction::create($attributes);
 
-            if ( ! empty($metadatas)) {
-                $this->createTransactionMetadatas($transaction, $metadatas);
+            if (null !== $fee && $fee > 0) {
+                $transaction->transactionFee()->create(['amount' => $fee]);
+            }
+
+            if ( ! empty($metadata)) {
+                $this->createTransactionMetadata($transaction, $metadata);
             }
 
             return $transaction;
@@ -237,25 +148,32 @@ final class TransactionService
     }
 
     /**
-     * @param  array<string, mixed>  $metadatas
+     * @param  array<string, mixed>  $metadata
      */
-    public function createTransactionMetadatas(Transaction $transaction, array $metadatas): void
+    public function createTransactionMetadata(Transaction $transaction, array $metadata): void
     {
-        $transaction->transactionMetadatas()->createMany($this->buildTransactionMetadatas($metadatas));
+        $transaction->transactionMetadatas()->createMany(array_map(
+            fn(string $key): array => [
+                'key_name'  => $key,
+                'key_value' => (string) ($metadata[$key] ?? ''),
+            ],
+            array_keys($metadata),
+        ));
     }
 
-    /**
-     * @param  array<string, mixed>  $data
-     * @return array<array<string, mixed>>
-     */
-    private function buildTransactionMetadatas(array $data): array
+    public function limitFor(Wallet $wallet, TransactionTypeEnum $transactionType): ?TransactionLimit
     {
-        return array_map(
-            fn($key) => [
-                'key_name'  => $key,
-                'key_value' => $data[$key] ?? '',
-            ],
-            array_keys($data),
-        );
+        return $wallet->transactionLimits()
+            ->where('transaction_type', $transactionType)
+            ->first();
+    }
+
+    private function assertWithinLimit(Wallet $wallet, TransactionTypeEnum $transactionType, int $amount): void
+    {
+        $limit = $this->limitFor($wallet, $transactionType);
+
+        if (null !== $limit && abs($amount) > $limit->amount) {
+            throw TransactionLimitExceededException::forWallet($wallet->id, $transactionType, abs($amount), $limit->amount);
+        }
     }
 }

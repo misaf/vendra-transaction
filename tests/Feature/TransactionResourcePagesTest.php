@@ -2,53 +2,140 @@
 
 declare(strict_types=1);
 
-use Filament\Facades\Filament;
-use LaraZeus\SpatieTranslatable\SpatieTranslatablePlugin;
+use Filament\Schemas\Components\Tabs\Tab;
+use Misaf\VendraCurrency\Models\Currency;
 use Misaf\VendraPermission\Tests\Support\PermissionModuleTestContext;
 use Misaf\VendraTransaction\Database\Factories\TransactionFactory;
 use Misaf\VendraTransaction\Database\Factories\TransactionGatewayFactory;
-use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Pages\ListTransactionGateways;
+use Misaf\VendraTransaction\Database\Factories\WalletFactory;
+use Misaf\VendraTransaction\Enums\TransactionTypeEnum;
+use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Pages\CreateTransaction;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Pages\ListTransactions;
-use Misaf\VendraUser\Database\Factories\UserFactory;
+use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Pages\ViewTransaction;
+use Misaf\VendraTransaction\Models\Wallet;
+use Misaf\VendraTransaction\Services\LedgerService;
+use Misaf\VendraTransaction\States\Approved;
+use Misaf\VendraTransaction\States\Declined;
+use Misaf\VendraTransaction\Support\TransactionUsers;
 
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
     PermissionModuleTestContext::setUpFilamentAdminContext();
-
-    Filament::getPanel('admin')->plugin(
-        SpatieTranslatablePlugin::make()->defaultLocales(['en', 'de']),
-    );
 });
 
-it('renders the transactions table with its records', function (): void {
-    $transactionGateway = TransactionGatewayFactory::new()->createOne();
-    $user = UserFactory::new()->createOne();
-
-    $transaction = TransactionFactory::new()->deposit()->forGateway($transactionGateway)->forUser($user)->createOne();
+it('lists transactions in the table', function (): void {
+    $transactions = TransactionFactory::new()->deposit()->count(3)->create();
 
     livewire(ListTransactions::class)
-        ->assertOk()
         ->call('loadTable')
-        ->assertCanSeeTableRecords([$transaction]);
+        ->assertCanSeeTableRecords($transactions);
 });
 
-it('renders the transaction gateways table with its records', function (): void {
-    $transactionGateway = TransactionGatewayFactory::new()->createOne();
+it('defers transaction filter tab badge queries', function (): void {
+    TransactionFactory::new()->deposit()->count(2)->create();
+    TransactionFactory::new()->withdrawal()->create();
 
-    livewire(ListTransactionGateways::class)
-        ->assertOk()
-        ->call('loadTable')
-        ->assertCanSeeTableRecords([$transactionGateway]);
+    $tabs = livewire(ListTransactions::class)->instance()->getTabs();
+    $badgeProperty = new ReflectionProperty(Tab::class, 'badge');
+
+    foreach ($tabs as $tab) {
+        expect($tab->isBadgeDeferred())->toBeTrue()
+            ->and($badgeProperty->getValue($tab))->toBeInstanceOf(Closure::class);
+    }
+
+    expect($tabs['all']->getBadge())->toBe('3')
+        ->and($tabs[TransactionTypeEnum::Deposit->value]->getBadge())->toBe('2')
+        ->and($tabs[TransactionTypeEnum::Withdrawal->value]->getBadge())->toBe('1')
+        ->and($tabs[TransactionTypeEnum::Commission->value]->getBadge())->toBe('0')
+        ->and($tabs[TransactionTypeEnum::Transfer->value]->getBadge())->toBe('0')
+        ->and($tabs[TransactionTypeEnum::Bonus->value]->getBadge())->toBe('0');
 });
 
-it('renders the reorderable transaction gateways table under strict authorization', function (): void {
-    Filament::getPanel('admin')->strictAuthorization();
+it('provisions the wallet from the selected user and currency on create', function (): void {
+    $gateway = TransactionGatewayFactory::new()->enabled()->create();
+    $currency = Currency::factory()->create(['status' => true]);
+    $user = TransactionUsers::model()::factory()->create();
 
-    $transactionGateway = TransactionGatewayFactory::new()->createOne();
+    expect(Wallet::query()->where('user_id', $user->getKey())->exists())->toBeFalse();
 
-    livewire(ListTransactionGateways::class)
-        ->assertOk()
-        ->call('loadTable')
-        ->assertCanSeeTableRecords([$transactionGateway]);
+    livewire(CreateTransaction::class)
+        ->fillForm([
+            'user_id'                => $user->getKey(),
+            'currency_id'            => $currency->id,
+            'transaction_gateway_id' => $gateway->id,
+            'transaction_type'       => TransactionTypeEnum::Deposit->value,
+            'amount'                 => 5_000,
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $wallet = Wallet::query()->where('user_id', $user->getKey())->where('currency_id', $currency->id)->sole();
+
+    expect($wallet->balance)->toBe(0)
+        ->and($wallet->transactions()->deposit()->pending()->count())->toBe(1);
+});
+
+it('provisions both wallets for a transfer created from the form', function (): void {
+    $gateway = TransactionGatewayFactory::new()->enabled()->create();
+    $currency = Currency::factory()->create(['status' => true]);
+    $source = TransactionUsers::model()::factory()->create();
+    $destination = TransactionUsers::model()::factory()->create();
+
+    livewire(CreateTransaction::class)
+        ->fillForm([
+            'user_id'                => $source->getKey(),
+            'currency_id'            => $currency->id,
+            'transaction_gateway_id' => $gateway->id,
+            'transaction_type'       => TransactionTypeEnum::Transfer->value,
+            'counterparty_user_id'   => $destination->getKey(),
+            'amount'                 => 1_000,
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $sourceWallet = Wallet::query()->where('user_id', $source->getKey())->sole();
+    $destinationWallet = Wallet::query()->where('user_id', $destination->getKey())->sole();
+
+    expect($sourceWallet->transactions()->transfer()->sole()->counterparty_wallet_id)->toBe($destinationWallet->id)
+        ->and($destinationWallet->currency_id)->toBe($currency->id);
+});
+
+it('approves a transaction from the view page and settles the ledger', function (): void {
+    $wallet = WalletFactory::new()->create();
+    $transaction = TransactionFactory::new()->forWallet($wallet)->deposit()->create(['amount' => 2_000]);
+
+    livewire(ViewTransaction::class, ['record' => $transaction->getKey()])
+        ->callAction('approve')
+        ->assertNotified();
+
+    expect($transaction->fresh()->status)->toBeInstanceOf(Approved::class)
+        ->and($wallet->fresh()->balance)->toBe(2_000);
+});
+
+it('declines a transaction from the view page without touching the ledger', function (): void {
+    $wallet = WalletFactory::new()->create();
+    $transaction = TransactionFactory::new()->forWallet($wallet)->deposit()->create(['amount' => 2_000]);
+
+    livewire(ViewTransaction::class, ['record' => $transaction->getKey()])
+        ->callAction('decline')
+        ->assertNotified();
+
+    expect($transaction->fresh()->status)->toBeInstanceOf(Declined::class)
+        ->and($wallet->fresh()->balance)->toBe(0)
+        ->and($wallet->ledgerEntries()->count())->toBe(0);
+});
+
+it('notifies instead of settling when the balance is insufficient', function (): void {
+    $wallet = WalletFactory::new()->create();
+    app(LedgerService::class)->post($wallet, 500);
+
+    $transaction = TransactionFactory::new()->forWallet($wallet)->withdrawal()->create(['amount' => 2_000]);
+
+    livewire(ViewTransaction::class, ['record' => $transaction->getKey()])
+        ->callAction('approve')
+        ->assertNotified();
+
+    expect($transaction->fresh()->status->isFinal())->toBeFalse()
+        ->and($wallet->fresh()->balance)->toBe(500);
 });

@@ -53,13 +53,13 @@ final class TransactionDepositOverviewWidget extends StatsOverviewWidget
         $endOfWeek = now()->endOfWeek();
 
         $depositTransactionStats = Trend::query(Transaction::query()->deposit()->approved()
-            ->when($this->record, fn(Builder $builder) => $builder->where('user_id', $this->record->id)))
+            ->when($this->record, fn(Builder $builder) => $builder->whereHas('wallet', fn(Builder $walletQuery) => $walletQuery->where('user_id', $this->record->getKey()))))
             ->between($startOfWeek, $endOfWeek)
             ->perDay()
             ->sum('amount');
 
         $totalDepositAmount = (int) Transaction::query()->deposit()->approved()
-            ->when($this->record, fn(Builder $builder) => $builder->where('user_id', $this->record->id))
+            ->when($this->record, fn(Builder $builder) => $builder->whereHas('wallet', fn(Builder $walletQuery) => $walletQuery->where('user_id', $this->record->getKey())))
             ->sum('amount');
 
         $transactionDeposit = Stat::make('deposit_transaction_stats', Number::format($totalDepositAmount))

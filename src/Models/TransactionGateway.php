@@ -7,8 +7,10 @@ namespace Misaf\VendraTransaction\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
@@ -16,22 +18,25 @@ use Misaf\VendraMultimedia\Concerns\HasDefaultMediaConversions;
 use Misaf\VendraSupport\Contracts\ShouldLogActivity;
 use Misaf\VendraSupport\Traits\BelongsToTenant;
 use Misaf\VendraTransaction\Database\Factories\TransactionGatewayFactory;
-use Misaf\VendraTransaction\Traits\HasTransaction;
 use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use Spatie\Sluggable\HasTranslatableSlug;
+use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 use Spatie\Translatable\HasTranslations;
 
 /**
+ * An admin-managed payment channel label. The scalar `slug` is the stable
+ * programmatic identifier; actual payment processing lives outside this
+ * module.
+ *
  * @property int $id
  * @property int $tenant_id
  * @property array<string, string> $name
- * @property array<string, string> $description
- * @property array<string, string> $slug
+ * @property array<string, string>|null $description
+ * @property string $slug
  * @property int $position
  * @property bool $status
  * @property Carbon $created_at
@@ -41,7 +46,7 @@ use Spatie\Translatable\HasTranslations;
 #[Fillable(['name', 'description', 'slug', 'position', 'status'])]
 #[Hidden(['tenant_id'])]
 #[UseFactory(TransactionGatewayFactory::class)]
-final class TransactionGateway extends Model implements HasMedia, Sortable, ShouldLogActivity
+final class TransactionGateway extends Model implements HasMedia, ShouldLogActivity, Sortable
 {
     use BelongsToTenant;
     use HasDefaultMediaConversions, InteractsWithMedia {
@@ -51,11 +56,12 @@ final class TransactionGateway extends Model implements HasMedia, Sortable, Shou
     /** @use HasFactory<TransactionGatewayFactory> */
     use HasFactory;
 
-    use HasTransaction;
-    use HasTranslatableSlug;
+    use HasSlug;
     use HasTranslations;
     use SoftDeletes;
     use SortableTrait;
+
+    public const string MEDIA_COLLECTION = 'transaction-gateways';
 
     /**
      * Pin sortable behavior regardless of the global `eloquent-sortable`
@@ -76,11 +82,8 @@ final class TransactionGateway extends Model implements HasMedia, Sortable, Shou
     /**
      * @var array<int, string>
      */
-    public array $translatable = ['name', 'description', 'slug'];
+    public array $translatable = ['name', 'description'];
 
-    /**
-     * @var array<string, string>
-     */
     /**
      * @return array<string, string>
      */
@@ -91,19 +94,19 @@ final class TransactionGateway extends Model implements HasMedia, Sortable, Shou
             'tenant_id'   => 'integer',
             'name'        => 'array',
             'description' => 'array',
-            'slug'        => 'array',
+            'slug'        => 'string',
             'position'    => 'integer',
             'status'      => 'boolean',
         ];
     }
 
     /**
-     * @var list<string>
+     * @return HasMany<Transaction, $this>
      */
-
-    /**
-     * @var list<string>
-     */
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
 
     /**
      * @return MorphMany<Media, $this>
@@ -113,10 +116,18 @@ final class TransactionGateway extends Model implements HasMedia, Sortable, Shou
         return $this->media();
     }
 
+    /**
+     * @param  Builder<self>  $builder
+     */
+    public function scopeEnabled(Builder $builder): void
+    {
+        $builder->where('status', true);
+    }
+
     public function getSlugOptions(): SlugOptions
     {
         return SlugOptions::create()
-            ->generateSlugsFrom('name')
+            ->generateSlugsFrom(fn(self $gateway): string => $gateway->getTranslation('name', config()->string('app.fallback_locale', 'en')))
             ->saveSlugsTo('slug')
             ->preventOverwrite();
     }

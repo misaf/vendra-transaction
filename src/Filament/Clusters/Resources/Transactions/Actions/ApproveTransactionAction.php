@@ -5,25 +5,37 @@ declare(strict_types=1);
 namespace Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Actions;
 
 use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
-use Misaf\VendraTransaction\Enums\TransactionStatusEnum;
-use Misaf\VendraTransaction\Facades\TransactionService;
+use Misaf\VendraTransaction\Exceptions\InsufficientBalanceException;
 use Misaf\VendraTransaction\Models\Transaction;
+use Misaf\VendraTransaction\States\Approved;
 
 final class ApproveTransactionAction
 {
     public static function make(): Action
     {
-        return Action::make(TransactionStatusEnum::Approved->value)
-            ->action(function (Transaction $record): void {
-                TransactionService::updateTransactionStatus($record, TransactionStatusEnum::Processing);
-            })
-            ->icon(Heroicon::Pencil)
-            ->label(__('vendra-transaction::messages.approve_transaction'))
+        return Action::make('approve')
+            ->authorize(fn(Transaction $record): bool => auth()->user()?->can('update', $record) ?? false)
+            ->color('success')
+            ->icon(Heroicon::OutlinedCheckCircle)
+            ->label(__('vendra-transaction::messages.approve'))
             ->requiresConfirmation()
-            ->visible(function (Transaction $record): bool {
-                return TransactionService::isWithdrawal($record)
-                    && TransactionService::isReview($record);
+            ->visible(fn(Transaction $record): bool => $record->status->canTransitionTo(Approved::class))
+            ->action(function (Transaction $record): void {
+                try {
+                    $record->approve();
+
+                    Notification::make()
+                        ->success()
+                        ->title(__('vendra-transaction::messages.transaction_approved'))
+                        ->send();
+                } catch (InsufficientBalanceException) {
+                    Notification::make()
+                        ->danger()
+                        ->title(__('vendra-transaction::messages.insufficient_balance'))
+                        ->send();
+                }
             });
     }
 }

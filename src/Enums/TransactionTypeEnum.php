@@ -27,6 +27,17 @@ enum TransactionTypeEnum: string implements HasColor, HasIcon, HasLabel
     }
 
     /**
+     * The sign applied to ledger entries posted against the source wallet.
+     */
+    public function ledgerSign(): int
+    {
+        return match ($this) {
+            self::Deposit, self::Commission, self::Bonus => 1,
+            self::Withdrawal, self::Transfer             => -1,
+        };
+    }
+
+    /**
      * @return array<string>
      */
     public function getColor(): array
@@ -43,11 +54,11 @@ enum TransactionTypeEnum: string implements HasColor, HasIcon, HasLabel
     public function getIcon(): Heroicon
     {
         return match ($this) {
-            self::Deposit    => Heroicon::OutlinedCurrencyDollar,
-            self::Withdrawal => Heroicon::OutlinedCurrencyDollar,
-            self::Commission => Heroicon::OutlinedCurrencyDollar,
+            self::Deposit    => Heroicon::OutlinedArrowDownTray,
+            self::Withdrawal => Heroicon::OutlinedArrowUpTray,
+            self::Commission => Heroicon::OutlinedReceiptPercent,
             self::Bonus      => Heroicon::OutlinedTrophy,
-            self::Transfer   => Heroicon::OutlinedTrophy,
+            self::Transfer   => Heroicon::OutlinedArrowsRightLeft,
         };
     }
 

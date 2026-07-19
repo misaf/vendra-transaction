@@ -53,13 +53,13 @@ final class TransactionWithdrawalOverviewWidget extends StatsOverviewWidget
         $endOfWeek = now()->endOfWeek();
 
         $withdrawalTransactionStats = Trend::query(Transaction::query()->withdrawal()->approved()
-            ->when($this->record, fn(Builder $builder) => $builder->where('user_id', $this->record->id)))
+            ->when($this->record, fn(Builder $builder) => $builder->whereHas('wallet', fn(Builder $walletQuery) => $walletQuery->where('user_id', $this->record->getKey()))))
             ->between($startOfWeek, $endOfWeek)
             ->perDay()
             ->sum('amount');
 
         $totalWithdrawalAmount = (int) Transaction::query()->withdrawal()->approved()
-            ->when($this->record, fn(Builder $builder) => $builder->where('user_id', $this->record->id))
+            ->when($this->record, fn(Builder $builder) => $builder->whereHas('wallet', fn(Builder $walletQuery) => $walletQuery->where('user_id', $this->record->getKey())))
             ->sum('amount');
 
         $transactionWithdrawal = Stat::make('withdrawal_transaction_stats', Number::format($totalWithdrawalAmount))

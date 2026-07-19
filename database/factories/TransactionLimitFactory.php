@@ -8,65 +8,30 @@ use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Misaf\VendraTransaction\Enums\TransactionTypeEnum;
 use Misaf\VendraTransaction\Models\TransactionLimit;
-use Misaf\VendraUser\Models\User;
+use Misaf\VendraTransaction\Models\Wallet;
 
-/**
- * @extends Factory<TransactionLimit>
- */
+/** @extends Factory<TransactionLimit> */
 #[UseModel(TransactionLimit::class)]
 final class TransactionLimitFactory extends Factory
 {
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            'user_id'          => User::factory(),
+            'wallet_id'        => Wallet::factory(),
             'transaction_type' => fake()->randomElement(TransactionTypeEnum::cases()),
-            'amount'           => fake()->numberBetween(100, 200),
+            'amount'           => fake()->numberBetween(10_000, 10_000_000),
         ];
     }
 
-    public function forUser(User $user): static
+    public function forWallet(Wallet|int $wallet): static
     {
         return $this->state(fn(): array => [
-            'user_id' => $user->id,
+            'wallet_id' => $wallet instanceof Wallet ? $wallet->id : $wallet,
         ]);
     }
 
-    public function deposit(): static
+    public function ofType(TransactionTypeEnum $transactionType): static
     {
-        return $this->state(fn(): array => [
-            'transaction_type' => TransactionTypeEnum::Deposit,
-        ]);
-    }
-
-    public function withdrawal(): static
-    {
-        return $this->state(fn(): array => [
-            'transaction_type' => TransactionTypeEnum::Withdrawal,
-        ]);
-    }
-
-    public function commission(): static
-    {
-        return $this->state(fn(): array => [
-            'transaction_type' => TransactionTypeEnum::Commission,
-        ]);
-    }
-
-    public function bonus(): static
-    {
-        return $this->state(fn(): array => [
-            'transaction_type' => TransactionTypeEnum::Bonus,
-        ]);
-    }
-
-    public function transfer(): static
-    {
-        return $this->state(fn(): array => [
-            'transaction_type' => TransactionTypeEnum::Transfer,
-        ]);
+        return $this->state(fn(): array => ['transaction_type' => $transactionType]);
     }
 }

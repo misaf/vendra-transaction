@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways;
 
 use BackedEnum;
-use Filament\Clusters\Cluster;
-use Filament\Resources\Pages\PageRegistration;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -19,8 +17,8 @@ use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Page
 use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Pages\ListTransactionGateways;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Pages\ViewTransactionGateway;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Schemas\TransactionGatewayForm;
+use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Schemas\TransactionGatewayInfolist;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Tables\TransactionGatewayTable;
-use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\RelationManagers\TransactionRelationManager;
 use Misaf\VendraTransaction\Models\TransactionGateway;
 
 final class TransactionGatewayResource extends Resource
@@ -35,10 +33,12 @@ final class TransactionGatewayResource extends Resource
 
     protected static ?string $slug = 'transaction-gateways';
 
-    /**
-     * @var class-string<Cluster>|null
-     */
     protected static ?string $cluster = SalesCluster::class;
+
+    public static function getDefaultTranslatableLocale(): string
+    {
+        return app()->getLocale();
+    }
 
     public static function getBreadcrumb(): string
     {
@@ -60,14 +60,13 @@ final class TransactionGatewayResource extends Resource
         return __('vendra-transaction::navigation.transaction_gateways');
     }
 
-    public static function getDefaultTranslatableLocale(): string
+    public static function getRelations(): array
     {
-        return app()->getLocale();
+        return [
+            RelationManagers\TransactionsRelationManager::class,
+        ];
     }
 
-    /**
-     * @return array<string, PageRegistration>
-     */
     public static function getPages(): array
     {
         return [
@@ -78,16 +77,14 @@ final class TransactionGatewayResource extends Resource
         ];
     }
 
-    public static function getRelations(): array
-    {
-        return [
-            TransactionRelationManager::class,
-        ];
-    }
-
     public static function form(Schema $schema): Schema
     {
         return TransactionGatewayForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return TransactionGatewayInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table

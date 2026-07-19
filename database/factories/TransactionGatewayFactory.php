@@ -7,32 +7,23 @@ namespace Misaf\VendraTransaction\Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
 use Misaf\VendraSupport\Support\TenantAwareness;
 use Misaf\VendraTransaction\Models\TransactionGateway;
+use Misaf\VendraTransaction\Services\TransactionService;
 
-/**
- * @extends Factory<TransactionGateway>
- */
+/** @extends Factory<TransactionGateway> */
 #[UseModel(TransactionGateway::class)]
 final class TransactionGatewayFactory extends Factory
 {
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            'name'        => fake()->unique()->sentence(3),
-            'description' => fake()->text(),
-            'slug'        => fn(array $attributes) => Str::slug($attributes['name']),
-            'status'      => fake()->boolean(),
+            'name'        => fake()->unique()->words(2, true),
+            'description' => fake()->optional()->sentence(),
+            'status'      => true,
         ];
     }
 
-    /**
-     * No-op without a tenant provider, since there is no `tenant_id` column.
-     */
     public function forTenant(Model|int $tenant): static
     {
         if ( ! TenantAwareness::enabled()) {
@@ -42,5 +33,23 @@ final class TransactionGatewayFactory extends Factory
         return $this->state(fn(): array => [
             'tenant_id' => $tenant instanceof Model ? $tenant->getKey() : $tenant,
         ]);
+    }
+
+    public function internal(): static
+    {
+        return $this->state(fn(): array => [
+            'name' => 'Internal Transactions',
+            'slug' => TransactionService::INTERNAL_GATEWAY_SLUG,
+        ]);
+    }
+
+    public function enabled(): static
+    {
+        return $this->state(fn(): array => ['status' => true]);
+    }
+
+    public function disabled(): static
+    {
+        return $this->state(fn(): array => ['status' => false]);
     }
 }

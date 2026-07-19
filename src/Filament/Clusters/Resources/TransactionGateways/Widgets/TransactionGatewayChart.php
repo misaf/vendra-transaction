@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Widgets;
 
 use Filament\Widgets\ChartWidget;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Cache;
+use Flowframe\Trend\Trend;
+use Flowframe\Trend\TrendValue;
+use Misaf\VendraTransaction\Models\Transaction;
 
 final class TransactionGatewayChart extends ChartWidget
 {
@@ -17,35 +18,30 @@ final class TransactionGatewayChart extends ChartWidget
 
     protected ?string $pollingInterval = null;
 
+    public function getHeading(): string
+    {
+        return __('vendra-transaction::messages.weekly_chart');
+    }
+
     protected function getData(): array
     {
-        $startOfWeek = now()->startOfWeek(6);
-        $dailyRakeData = $this->getWeeklyRakeData($startOfWeek);
+        $trend = Trend::query(Transaction::query())
+            ->between(now()->startOfWeek(6), now()->endOfWeek())
+            ->perDay()
+            ->count();
 
         return [
             'datasets' => [
                 [
                     'label' => __('vendra-transaction::messages.weekly_chart'),
-                    'data'  => $dailyRakeData,
+                    'data'  => $trend
+                        ->map(static fn(TrendValue $value): int => is_numeric($value->aggregate) ? (int) $value->aggregate : 0)
+                        ->values()
+                        ->all(),
                 ],
             ],
             'labels' => $this->getWeekdayLabels(),
         ];
-    }
-
-    /**
-     * @param  Carbon  $startOfWeek
-     */
-    private function getWeeklyRakeData($startOfWeek): array
-    {
-        $data = [];
-
-        for ($i = 0; $i < 7; $i++) {
-            $date = $startOfWeek->copy()->addDays($i)->format('Y-m-d');
-            $data[] = Cache::store('asd')->get("asd-stats:daily:{$date}", 0);
-        }
-
-        return $data;
     }
 
     /**

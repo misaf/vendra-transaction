@@ -17,17 +17,12 @@ final class EditTransactionGateway extends EditRecord
 
     protected static string $resource = TransactionGatewayResource::class;
 
-    public function getBreadcrumb(): string
-    {
-        return self::$breadcrumb ?? __('filament-panels::resources/pages/edit-record.breadcrumb') . ' ' . __('vendra-transaction::navigation.transaction_gateway');
-    }
-
     protected function getHeaderActions(): array
     {
         return [
+            LocaleSwitcher::make(),
             ViewAction::make(),
             DeleteAction::make(),
-            LocaleSwitcher::make(),
         ];
     }
 }

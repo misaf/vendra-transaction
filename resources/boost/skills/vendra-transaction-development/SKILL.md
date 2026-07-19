@@ -1,6 +1,6 @@
 ---
 name: vendra-transaction-development
-description: "Create, modify, review, or test the Vendra Transaction package in packages/vendra-transaction. Use for Transaction, checks, gateways, fees, limits, metadata, transfers, gateway services and rules, actions, events/listeners, policies, Filament resources, migrations, configuration, translations, and package wiring."
+description: "Create, modify, review, or test the Vendra Transaction package in packages/vendra-transaction. Use for Wallet, LedgerEntry, Transaction, TransactionGateway, fees, limits, metadata, the transaction state machine (States, ApproveTransactionTransition), LedgerService, TransactionService, verify-balances command, policies, Filament resources and widgets, migrations, translations, and package wiring."
 ---
 
 # Vendra Transaction
@@ -13,70 +13,57 @@ description: "Create, modify, review, or test the Vendra Transaction package in 
 - Every field listed in a model's `$translatable` array must definitely use a JSON database column. Keep its model traits/casts, factories, validation, Filament locale UI, API serialization, and tests translation-aware.
 - A field not listed in `$translatable` must use the appropriate scalar database type and must not use Spatie Translatable, translatable slug traits, locale switchers, translated callbacks, or translation-shaped array data.
 
+- Register every table whose migration calls `TenantSchema::addTenantColumn()` with `TenantTableRegistry` in this package's service provider, preserving configured table names and connections, so `vendra-tenant:enable {tenant}` can retrofit schemas migrated before tenancy was enabled.
+
 Always use this skill together with `laravel-best-practices` for Laravel PHP and `pest-testing` when tests are added or changed. Use `tailwindcss-development` only when editing Blade or Tailwind UI.
 
 Before code changes, use Laravel Boost `application-info` and `search-docs` for the relevant packages. Prefer Boost database and browser tools over ad hoc debugging.
 
 ## Module Boundary
 
-Treat `packages/vendra-transaction` as the source of transaction domain behavior and Filament admin UI.
+Treat `packages/vendra-transaction` as the source of the wallet/ledger financial domain and its Filament admin UI.
 
 - Use namespace `Misaf\VendraTransaction`.
-- Keep domain models, factories, seeders, policies, observers, console commands, Filament classes, config, migrations, translations, and tests inside this module.
-- Do not place transaction domain code in the host app unless the host app is only integrating the module.
-- Keep cross-module dependencies explicit in `composer.json`; do not introduce a dependency without approval.
+- Keep domain models, factories, policies, states, services, events, exceptions, console commands, Filament classes, migrations, translations, and tests inside this module.
+- Keep cross-module dependencies explicit in `composer.json`; do not introduce a dependency without approval. The module depends on `misaf/vendra-currency`, `misaf/vendra-multimedia`, and `misaf/vendra-support` but must never import `Misaf\VendraUser` or `Misaf\VendraTenant`.
 
-## Domain Model Standards
+## Domain Standards
 
-Follow the existing `Transaction` and `TransactionGateway` patterns for new transaction entities.
+The ledger is the single source of balance truth.
 
-- Use `declare(strict_types=1)`, final classes, typed method signatures, and PHPDoc generics for relationships.
-- Follow Laravel comment style: document with PHPDoc (array shapes, generics, `@see`) and reserve inline comments for genuinely complex logic. Match the surrounding file's density and do not add comments that restate the code.
-- Prefer only the Laravel attributes already used by the affected sibling model; do not add model attributes merely because another package uses them.
-- Keep the module tenant-agnostic: derive tenant awareness purely from the bound `TenantResolver` in `misaf/vendra-support` (`TenantAwareness`, `BelongsToTenant`, `TenantSchema`, `RequiresCurrentTenant`). The module must build and run whether or not a tenant provider is installed, so never reference a concrete provider such as `Misaf\VendraTenant` anywhere — models, migrations, factories, seeders, or fixtures. There is no `tenant_aware` config toggle.
-- Hide `tenant_id` and keep tenant behavior centralized in the support layer; do not duplicate tenant scoping or `tenant_id` assignment in models, Filament resources, factories, or seeders. `BelongsToTenant` assigns `tenant_id` on `creating` from the current tenant.
+- `Wallet` is one balance per user per currency; `balance` is a cache written only by `Services\LedgerService::post()` under `lockForUpdate`, together with an immutable `LedgerEntry` (`amount` signed, `balance_after` snapshot, polymorphic `source`). `LedgerEntry` throws on update/delete; never bypass the service.
+- Transaction status is a Spatie model-states machine in `States\` (`Pending → Processing → Review → Approved/Declined/Failed`). `ApproveTransactionTransition` settles principal, transfer counterpart, and fee into the ledger atomically with the status write and dispatches `TransactionApproved`. Use `approve()`, `decline()`, `fail()`, `markProcessing()`, `markReview()`; never write the status column directly.
+- `transactions.amount` is absolute minor units; ledger sign derives from `TransactionTypeEnum::ledgerSign()`. Transfers store `counterparty_wallet_id`; insufficient balance raises `InsufficientBalanceException` and rolls the whole approval back.
+- Create transactions through `TransactionService::createTransaction()` (enforces per-wallet `TransactionLimit`s, attaches fee and metadata); provision wallets with `walletFor()` / `defaultWalletFor()`.
+- Resolve the user model through `Support\TransactionUsers::model()`; the provider attaches the `wallets` relation to the configured auth model.
+- Gateways are admin-managed labels: translatable `name`/`description`, scalar `slug` (lookup key; internal slug is `TransactionService::INTERNAL_GATEWAY_SLUG`), media logo, sortable position. No payment-processing logic here.
+- Keep the module tenant-agnostic (`BelongsToTenant`, `TenantSchema`, registry registration for `transaction_gateways`, `wallets`, `transactions`); never reference `Misaf\VendraTenant`.
 - Tag-consuming models must use `Misaf\VendraSupport\Traits\HasOptionalTags` as the single source of their `tags()` relationship and pivot metadata. Keep the package tag-agnostic: define a stable package-owned tag type, use `TagIntegration` for availability and UI integration, never import the concrete Vendra Tagger model/provider or define the relationship through Spatie `HasTags`, and list Tagger only under Composer `suggest`.
-- Reuse only the traits and conventions present on the affected sibling model; do not infer translations, media, slugs, sorting, or soft deletes from another package.
 
 ## Filament Standards
 
-Keep every resource that declares a `$cluster`, including its complete supporting tree, under `src/Filament/Clusters/Resources/` with the matching `Misaf\VendraTransaction\Filament\Clusters\Resources` namespace and plugin discovery path. Resources without a cluster belong under `src/Filament/Resources/`.
+Keep every resource tree under `src/Filament/Clusters/Resources/` in the `SalesCluster`, with dedicated `Schemas/*Form.php` and `Tables/*Table.php` classes and state-transition actions under the resource `Actions/`. Any future resource without a cluster belongs under `src/Filament/Resources/` instead.
 
-- Register module UI through the module `Plugin` and `ServiceProvider`; do not manually wire resources in unrelated panel providers.
-- Preserve the current structure: `TransactionResource`, `TransactionGatewayResource`, and their relation managers define schemas inline. Introduce separate `Schemas` or `Tables` classes only as a deliberate, complete refactor.
-- Use Filament v5 namespaces: form fields from `Filament\Forms\Components`, layout from `Filament\Schemas\Components`, table columns from `Filament\Tables\Columns`, filters from `Filament\Tables\Filters`, actions from `Filament\Actions`, and icons from `Filament\Support\Icons\Heroicon`.
-- Use this module's translation keys (`vendra-transaction::attributes`, `vendra-transaction::navigation`) for labels, breadcrumbs, and navigation.
-- Keep cluster resources ungrouped and assign `$navigationSort` from their package-specific `NavigationPriority` cases; never hardcode numeric resource sort values.
-- Provide separate singular and plural resource labels in `en`, `de`, and `fa`: model labels use the singular key, while navigation and plural model labels use the plural key. Keep navigation labels at 24 characters or fewer.
+- Use Filament v5 namespaces and this module's translation keys (`vendra-transaction::attributes`, `::navigation`, `::messages`, `::widgets`).
+- Transactions have list/create/view pages only (no edit); lifecycle changes go through the Approve/Decline/Fail actions, whose visibility follows `status->canTransitionTo()`.
+- Wallets are read-only (list/view, `canCreate(): false`); the ledger relation manager stays read-only, and transaction limits are managed through their wallet relation manager.
+- Gateway resources use the LaraZeus SpatieTranslatable concern with `LocaleSwitcher` on every page.
+- Assign `$navigationSort` from the shared `NavigationPriority` cases (`Transactions`, `TransactionGateways`, `Wallets`); update `tests/Unit/AdminNavigationTest.php` when navigation changes.
+- State classes implement the Filament `HasColor`/`HasIcon`/`HasLabel` contracts; drive badges from the state instance, not hardcoded maps.
 - Prevent N+1 issues in tables and relation managers with eager loading, `withCount`, or computed state based on loaded relationships.
-- Use public media visibility only when public access is actually required.
 
-## Permissions And Navigation
+## Permissions
 
-Use policy enums and policies as the permission source.
-
-- Add enum cases for every resource action the panel exposes.
-- Keep policy method names aligned with Filament actions: `viewAny`, `view`, `create`, `update`, `delete`, `deleteAny`, `restore`, `restoreAny`, `forceDelete`, `forceDeleteAny`, `replicate`, and `reorder` as applicable.
-- Update `PermissionPolicySeeder` when new permissions are introduced.
-- Keep navigation labels and groups configurable through the module `Plugin` and `config/vendra-transaction.php`. Do not add a `tenant_aware` config value; tenant awareness derives from the bound `TenantResolver`.
+Policy enums are the permission source: `TransactionPolicyEnum`, `TransactionGatewayPolicyEnum` (includes `Reorder`), `WalletPolicyEnum`. Inline models reuse the aggregate's permissions: metadata via the transaction enum, ledger entries (view-only) and limits via the wallet enum. Compose the shared `Authorizes*Abilities` traits; keep case names matching ability names.
 
 ## Data And Localization
 
-Migrations, factories, seeders, and translation files are part of the contract.
-
-- Use package migrations in `database/migrations`, with stubs only when the install flow expects publishing.
-- Use factories under `database/factories` and seeders under `database/seeders`. Keep them tenant-safe: import no concrete tenant provider and set no `tenant_id` directly; let `BelongsToTenant` assign it from the current tenant so they work with tenancy on or off.
-- Keep demo fixtures deterministic and tenant-safe.
-- Update all supported locales together and keep translation keys sorted.
-- Preserve translation key parity tests when adding labels or attributes.
+- The migration stub `create_transactions_table.php.stub` creates `transaction_gateways`, `wallets`, `ledger_entries`, `transactions`, `transaction_fees`, `transaction_metadata`, and `transaction_limits`. Keep the published app migration in sync with the stub.
+- Keep factories tenant-safe and ledger-safe: wallet factories never set `balance`; post entries through `LedgerService` in tests. The `TransactionFactory` `approved()` state sets the column without settling — use `->create()->approve()` when ledger rows must exist.
+- Update `en`, `de`, and `fa` together; keep translation keys sorted and in parity.
 
 ## Testing And Verification
 
-Prefer focused Pest tests in the module.
-
-- Keep tests purposeful and prevent unnecessary ones: cover behavior, contracts, and edge cases — not framework internals or trivially typed code. Do not duplicate coverage a focused test already proves, and do not add throwaway verification scripts (or `tinker`) when a test fits.
-- Add or update unit tests for model contracts, policy permission coverage, resolver-derived tenant awareness, navigation/config behavior, and translation parity.
-- Keep Pest architecture tests in `tests/ArchTest.php`: the `php`, `security`, and `laravel` presets, plus an expectation that the module stays tenant-agnostic, e.g. `arch()->expect('Misaf\VendraTransaction')->not->toUse('Misaf\VendraTenant')`.
-- Add feature or Livewire tests when changing Filament behavior with meaningful user-visible effects.
-- Run module checks from the package when possible: `composer --working-dir=packages/vendra-transaction test` and `composer --working-dir=packages/vendra-transaction analyse`.
-- If PHP files changed, run Pint for the touched code: `vendor/bin/pint --dirty --format agent` from the host app, or the module formatter if working only inside the package.
+- Cover ledger integrity (cached balance vs entries, immutability, overdraft rejection), state transitions and settlement, limits, service contracts, policy coverage, translation parity, and strict-authorization rendering of every page.
+- Keep Pest architecture tests in `tests/ArchTest.php`: the `php`, `security`, and `laravel` presets plus `not->toUse('Misaf\VendraTenant')` and `not->toUse('Misaf\VendraUser')`.
+- Run the suite from the host app: `php artisan test --compact --testsuite=vendra-transaction`. If PHP files changed, run `vendor/bin/pint --dirty --format agent`.

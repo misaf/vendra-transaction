@@ -17,38 +17,50 @@ use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\QueryBuilder;
 use Filament\Tables\Filters\QueryBuilder\Constraints\BooleanConstraint;
-use Filament\Tables\Filters\QueryBuilder\Constraints\NumberConstraint;
-use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
 use Filament\Tables\Table;
-use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Actions\ReportAction;
+use Misaf\VendraSupport\Filament\Concerns\HasDefaultAvatarImageUrl;
 use Misaf\VendraTransaction\Models\TransactionGateway;
 
 final class TransactionGatewayTable
 {
+    use HasDefaultAvatarImageUrl;
+
     public static function configure(Table $table): Table
     {
         return $table
             ->columns([
                 TextColumn::make('row')
                     ->label('#')
-                    ->rowIndex()->sortable(['id']),
+                    ->rowIndex()
+                    ->sortable(['id']),
 
                 SpatieMediaLibraryImageColumn::make('image')
-                    ->circular()
+                    ->alignCenter()
+                    ->collection(TransactionGateway::MEDIA_COLLECTION)
                     ->conversion('thumb-table')
-                    ->defaultImageUrl(url('coin-payment/images/default.png'))
+                    ->defaultImageUrl(fn(TransactionGateway $record): string => static::defaultAvatarImageUrl($record->name))
                     ->extraImgAttributes(['class' => 'saturate-50', 'loading' => 'lazy'])
                     ->label(__('vendra-transaction::attributes.image'))
                     ->stacked(),
 
                 TextColumn::make('name')
                     ->alignStart()
-                    ->label(__('vendra-transaction::attributes.name')),
+                    ->description(fn(TransactionGateway $record): string => (string) $record->description)
+                    ->label(__('vendra-transaction::attributes.name'))
+                    ->searchable(),
 
                 TextColumn::make('slug')
                     ->alignStart()
                     ->label(__('vendra-transaction::attributes.slug'))
+                    ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('transactions_count')
+                    ->alignCenter()
+                    ->badge()
+                    ->counts('transactions')
+                    ->label(__('vendra-transaction::navigation.transactions')),
 
                 ToggleColumn::make('status')
                     ->label(__('vendra-transaction::attributes.status'))
@@ -60,11 +72,10 @@ final class TransactionGatewayTable
                     ->extraCellAttributes(['dir' => 'ltr'])
                     ->label(__('vendra-transaction::attributes.created_at'))
                     ->sinceTooltip()
-                    ->toggleable(isToggledHiddenByDefault: true)
                     ->when(
                         app()->isLocale('fa'),
                         fn(TextColumn $column) => $column->jalaliDateTime('Y-m-d H:i', latinNumbers: true),
-                        fn(TextColumn $column) => $column->dateTime('Y-m-d H:i')
+                        fn(TextColumn $column) => $column->dateTime('Y-m-d H:i'),
                     ),
 
                 TextColumn::make('updated_at')
@@ -73,36 +84,35 @@ final class TransactionGatewayTable
                     ->extraCellAttributes(['dir' => 'ltr'])
                     ->label(__('vendra-transaction::attributes.updated_at'))
                     ->sinceTooltip()
-                    ->toggleable(isToggledHiddenByDefault: true)
                     ->when(
                         app()->isLocale('fa'),
                         fn(TextColumn $column) => $column->jalaliDateTime('Y-m-d H:i', latinNumbers: true),
-                        fn(TextColumn $column) => $column->dateTime('Y-m-d H:i')
+                        fn(TextColumn $column) => $column->dateTime('Y-m-d H:i'),
                     ),
             ])
-            ->filters([
-                TrashedFilter::make(),
-                QueryBuilder::make()
-                    ->constraints([
-                        BooleanConstraint::make('status'),
-                        NumberConstraint::make('position'),
-                    ]),
-            ], layout: FiltersLayout::AboveContentCollapsible)
+            ->filters(
+                [
+                    QueryBuilder::make()
+                        ->constraints([
+                            TextConstraint::make('name')
+                                ->label(__('vendra-transaction::attributes.name')),
+
+                            TextConstraint::make('slug')
+                                ->label(__('vendra-transaction::attributes.slug')),
+
+                            BooleanConstraint::make('status')
+                                ->label(__('vendra-transaction::attributes.status')),
+                        ]),
+                ],
+                layout: FiltersLayout::AboveContentCollapsible,
+            )
             ->recordActions([
                 ActionGroup::make([
                     ViewAction::make(),
 
-                    EditAction::make()
-                        ->hidden(function (TransactionGateway $record): bool {
-                            return 'internal-transactions' === $record->getAttributeValue('slug');
-                        }),
+                    EditAction::make(),
 
-                    DeleteAction::make()
-                        ->hidden(function (TransactionGateway $record): bool {
-                            return 'internal-transactions' === $record->getAttributeValue('slug');
-                        }),
-
-                    ReportAction::make(),
+                    DeleteAction::make(),
                 ]),
             ])
             ->toolbarActions([
@@ -111,7 +121,6 @@ final class TransactionGatewayTable
                 ]),
             ])
             ->defaultSort(column: 'id', direction: 'desc')
-            ->paginatedWhileReordering()
-            ->reorderable('position');
+            ->reorderable(column: 'position', direction: 'desc');
     }
 }

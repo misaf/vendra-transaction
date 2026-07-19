@@ -53,13 +53,13 @@ final class TransactionCommissionOverviewWidget extends StatsOverviewWidget
         $endOfWeek = now()->endOfWeek();
 
         $commissionTransactionStats = Trend::query(Transaction::query()->commission()->approved()
-            ->when($this->record, fn(Builder $builder) => $builder->where('user_id', $this->record->id)))
+            ->when($this->record, fn(Builder $builder) => $builder->whereHas('wallet', fn(Builder $walletQuery) => $walletQuery->where('user_id', $this->record->getKey()))))
             ->between($startOfWeek, $endOfWeek)
             ->perDay()
             ->sum('amount');
 
         $totalCommissionAmount = (int) Transaction::query()->commission()->approved()
-            ->when($this->record, fn(Builder $builder) => $builder->where('user_id', $this->record->id))
+            ->when($this->record, fn(Builder $builder) => $builder->whereHas('wallet', fn(Builder $walletQuery) => $walletQuery->where('user_id', $this->record->getKey())))
             ->sum('amount');
 
         $transactionCommission = Stat::make('commission_transaction_stats', Number::format($totalCommissionAmount))

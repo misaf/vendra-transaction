@@ -6,6 +6,7 @@ namespace Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateway
 
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
+use LaraZeus\SpatieTranslatable\Actions\LocaleSwitcher;
 use LaraZeus\SpatieTranslatable\Resources\Pages\ViewRecord\Concerns\Translatable;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\TransactionGatewayResource;
 
@@ -15,14 +16,10 @@ final class ViewTransactionGateway extends ViewRecord
 
     protected static string $resource = TransactionGatewayResource::class;
 
-    public function getBreadcrumb(): string
-    {
-        return self::$breadcrumb ?? __('filament-panels::resources/pages/view-record.breadcrumb') . ' ' . __('vendra-transaction::navigation.transaction_gateway');
-    }
-
     protected function getHeaderActions(): array
     {
         return [
+            LocaleSwitcher::make(),
             EditAction::make(),
         ];
     }

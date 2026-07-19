@@ -24,8 +24,8 @@ final class ListTransactionGateways extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
             LocaleSwitcher::make(),
+            CreateAction::make(),
         ];
     }
 }
