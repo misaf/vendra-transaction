@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Event;
-use Misaf\VendraTenant\Models\Tenant;
 use Misaf\VendraTransaction\Database\Factories\TransactionFactory;
 use Misaf\VendraTransaction\Database\Factories\WalletFactory;
 use Misaf\VendraTransaction\Events\TransactionApproved;
@@ -18,7 +17,7 @@ use Misaf\VendraTransaction\States\Pending;
 use Spatie\ModelStates\Exceptions\TransitionNotFound;
 
 beforeEach(function (): void {
-    Tenant::factory()->enabled()->create()->makeCurrent();
+    makeCurrentTestTenant();
 });
 
 it('starts pending and settles a deposit into the ledger on approval', function (): void {

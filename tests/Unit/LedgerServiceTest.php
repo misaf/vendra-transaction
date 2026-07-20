@@ -2,13 +2,12 @@
 
 declare(strict_types=1);
 
-use Misaf\VendraTenant\Models\Tenant;
 use Misaf\VendraTransaction\Database\Factories\WalletFactory;
 use Misaf\VendraTransaction\Exceptions\InsufficientBalanceException;
 use Misaf\VendraTransaction\Services\LedgerService;
 
 beforeEach(function (): void {
-    Tenant::factory()->enabled()->create()->makeCurrent();
+    makeCurrentTestTenant();
 });
 
 it('posts entries and keeps the cached wallet balance in lockstep', function (): void {

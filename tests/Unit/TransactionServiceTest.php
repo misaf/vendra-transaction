@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use Misaf\VendraCurrency\Models\Currency;
-use Misaf\VendraTenant\Models\Tenant;
 use Misaf\VendraTransaction\Database\Factories\TransactionGatewayFactory;
 use Misaf\VendraTransaction\Database\Factories\TransactionLimitFactory;
 use Misaf\VendraTransaction\Database\Factories\WalletFactory;
@@ -14,7 +13,7 @@ use Misaf\VendraTransaction\States\Pending;
 use Misaf\VendraTransaction\Support\TransactionUsers;
 
 beforeEach(function (): void {
-    Tenant::factory()->enabled()->create()->makeCurrent();
+    makeCurrentTestTenant();
 });
 
 it('creates a pending transaction with fee and metadata', function (): void {
@@ -59,6 +58,39 @@ it('resolves gateways by slug and ignores disabled ones', function (): void {
         ->and(TransactionService::hasActiveTransactionGateway('internal-transactions'))->toBeTrue()
         ->and(TransactionService::hasAnyActiveTransactionGateway())->toBeFalse()
         ->and(fn() => TransactionService::getTransactionGateway('coinpayments'))->toThrow(RuntimeException::class);
+});
+
+it('provisions the default wallet in the default enabled currency', function (): void {
+    $user = TransactionUsers::model()::factory()->create();
+    Currency::factory()->create(['status' => false, 'is_default' => true, 'position' => 1]);
+    Currency::factory()->create(['status' => true, 'is_default' => false, 'position' => 2]);
+    $default = Currency::factory()->create(['status' => true, 'is_default' => true, 'position' => 3]);
+
+    $wallet = TransactionService::defaultWalletFor($user);
+
+    expect($wallet->currency_id)->toBe($default->id);
+});
+
+it('identifies internal transactions by the internal gateway', function (): void {
+    $internal = TransactionGatewayFactory::new()->internal()->create();
+    $external = TransactionGatewayFactory::new()->enabled()->create(['slug' => 'shetab']);
+    $wallet = WalletFactory::new()->create();
+
+    $internalTransaction = TransactionService::createTransaction(
+        transactionGateway: $internal,
+        wallet: $wallet,
+        transactionType: TransactionTypeEnum::Deposit,
+        amount: 1_000,
+    );
+    $externalTransaction = TransactionService::createTransaction(
+        transactionGateway: $external,
+        wallet: $wallet,
+        transactionType: TransactionTypeEnum::Deposit,
+        amount: 1_000,
+    );
+
+    expect(TransactionService::isInternalTransaction($internalTransaction))->toBeTrue()
+        ->and(TransactionService::isInternalTransaction($externalTransaction))->toBeFalse();
 });
 
 it('provisions one wallet per user and currency', function (): void {

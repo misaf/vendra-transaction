@@ -2,14 +2,13 @@
 
 declare(strict_types=1);
 
-use Misaf\VendraTenant\Models\Tenant;
 use Misaf\VendraTransaction\Database\Factories\WalletFactory;
 use Misaf\VendraTransaction\Services\LedgerService;
 
 use function Pest\Laravel\artisan;
 
 beforeEach(function (): void {
-    Tenant::factory()->enabled()->create()->makeCurrent();
+    makeCurrentTestTenant();
 });
 
 it('passes when cached balances match the ledger', function (): void {
