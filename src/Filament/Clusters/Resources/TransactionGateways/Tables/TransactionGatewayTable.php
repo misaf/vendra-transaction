@@ -19,12 +19,15 @@ use Filament\Tables\Filters\QueryBuilder;
 use Filament\Tables\Filters\QueryBuilder\Constraints\BooleanConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
 use Filament\Tables\Table;
+use Livewire\Component as Livewire;
 use Misaf\VendraSupport\Filament\Concerns\HasDefaultAvatarImageUrl;
+use Misaf\VendraSupport\Filament\Concerns\InteractsWithTranslatedTableRecords;
 use Misaf\VendraTransaction\Models\TransactionGateway;
 
 final class TransactionGatewayTable
 {
     use HasDefaultAvatarImageUrl;
+    use InteractsWithTranslatedTableRecords;
 
     public static function configure(Table $table): Table
     {
@@ -46,9 +49,13 @@ final class TransactionGatewayTable
 
                 TextColumn::make('name')
                     ->alignStart()
-                    ->description(fn(TransactionGateway $record): string => (string) $record->description)
                     ->label(__('vendra-transaction::attributes.name'))
                     ->searchable(),
+
+                TextColumn::make('description')
+                    ->label(__('vendra-transaction::attributes.description'))
+                    ->state(fn(TransactionGateway $record, Livewire $livewire): string => static::translatedAttribute($record, 'description', $livewire))
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('slug')
                     ->alignStart()

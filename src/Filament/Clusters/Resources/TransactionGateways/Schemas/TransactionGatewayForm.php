@@ -11,6 +11,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Unique;
 use Livewire\Component as Livewire;
@@ -61,8 +62,13 @@ final class TransactionGatewayForm
                     ->label(__('vendra-transaction::attributes.image')),
 
                 Toggle::make('status')
-                    ->default(true)
-                    ->label(__('vendra-transaction::attributes.status')),
+                    ->afterStateUpdated(fn(Livewire $livewire) => $livewire->validateOnly('data.status'))
+                    ->columnSpanFull()
+                    ->default(false)
+                    ->label(__('vendra-transaction::attributes.status'))
+                    ->onIcon(Heroicon::Bolt)
+                    ->required()
+                    ->rules(['boolean']),
             ]);
     }
 }

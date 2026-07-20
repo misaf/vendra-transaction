@@ -63,7 +63,7 @@ final class TransactionServiceProvider extends PackageServiceProvider
     {
         $this->app->make(TenantTableRegistry::class)->register('transaction_gateways', 'wallets', 'transactions');
 
-        AboutCommand::add('Vendra Transaction', fn() => ['Version' => InstalledVersions::getPrettyVersion('misaf/vendra-transaction')]);
+        AboutCommand::add('Vendra Transaction', fn(): array => ['Version' => InstalledVersions::getPrettyVersion('misaf/vendra-transaction')]);
 
         $this->registerUserRelationships();
     }
