@@ -9,7 +9,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
-use Misaf\VendraCurrency\Models\Currency;
+use Misaf\VendraSupport\Support\CurrencyIntegration;
 use Misaf\VendraTransaction\Enums\TransactionTypeEnum;
 use Misaf\VendraTransaction\Models\TransactionGateway;
 use Misaf\VendraTransaction\Support\TransactionUsers;
@@ -33,18 +33,11 @@ final class TransactionForm
                     ->required()
                     ->searchable(),
 
-                Select::make('currency_id')
+                Select::make('currency_code')
                     ->columnSpan(['lg' => 1])
                     ->label(__('vendra-transaction::attributes.currency'))
                     ->native(false)
-                    ->options(
-                        fn(): array => Currency::query()
-                            ->where('status', true)
-                            ->orderByDesc('is_default')
-                            ->orderBy('position')
-                            ->pluck('code', 'id')
-                            ->all(),
-                    )
+                    ->options(fn(): array => CurrencyIntegration::options())
                     ->required()
                     ->searchable(),
 

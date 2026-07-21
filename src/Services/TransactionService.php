@@ -6,7 +6,8 @@ namespace Misaf\VendraTransaction\Services;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use Misaf\VendraCurrency\Models\Currency;
+use Illuminate\Support\Str;
+use Misaf\VendraSupport\Support\CurrencyIntegration;
 use Misaf\VendraTransaction\Enums\TransactionTypeEnum;
 use Misaf\VendraTransaction\Exceptions\TransactionLimitExceededException;
 use Misaf\VendraTransaction\Models\Transaction;
@@ -39,11 +40,11 @@ final class TransactionService
      * The wallet holding the given user's balance in the given currency,
      * created on first use.
      */
-    public function walletFor(Model $user, Currency $currency): Wallet
+    public function walletFor(Model $user, string $currencyCode): Wallet
     {
         return Wallet::query()->firstOrCreate([
-            'user_id'     => $user->getKey(),
-            'currency_id' => $currency->id,
+            'user_id'       => $user->getKey(),
+            'currency_code' => Str::upper($currencyCode),
         ]);
     }
 
@@ -53,13 +54,7 @@ final class TransactionService
      */
     public function defaultWalletFor(Model $user): Wallet
     {
-        $currency = Currency::query()
-            ->where('status', true)
-            ->orderByDesc('is_default')
-            ->orderBy('position')
-            ->firstOrFail();
-
-        return $this->walletFor($user, $currency);
+        return $this->walletFor($user, CurrencyIntegration::defaultCode());
     }
 
     public function hasAnyActiveTransactionGateway(): bool

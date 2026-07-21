@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Filament\Schemas\Components\Tabs\Tab;
-use Misaf\VendraCurrency\Models\Currency;
+use Misaf\VendraSupport\Support\CurrencyIntegration;
 use Misaf\VendraTransaction\Database\Factories\TransactionFactory;
 use Misaf\VendraTransaction\Database\Factories\TransactionGatewayFactory;
 use Misaf\VendraTransaction\Database\Factories\WalletFactory;
@@ -53,7 +53,7 @@ it('defers transaction filter tab badge queries', function (): void {
 
 it('provisions the wallet from the selected user and currency on create', function (): void {
     $gateway = TransactionGatewayFactory::new()->enabled()->create();
-    $currency = Currency::factory()->create(['status' => true]);
+    $currencyCode = CurrencyIntegration::defaultCode();
     $user = TransactionUsers::model()::factory()->create();
 
     expect(Wallet::query()->where('user_id', $user->getKey())->exists())->toBeFalse();
@@ -61,7 +61,7 @@ it('provisions the wallet from the selected user and currency on create', functi
     livewire(CreateTransaction::class)
         ->fillForm([
             'user_id'                => $user->getKey(),
-            'currency_id'            => $currency->id,
+            'currency_code'          => $currencyCode,
             'transaction_gateway_id' => $gateway->id,
             'transaction_type'       => TransactionTypeEnum::Deposit->value,
             'amount'                 => 5_000,
@@ -69,7 +69,7 @@ it('provisions the wallet from the selected user and currency on create', functi
         ->call('create')
         ->assertHasNoFormErrors();
 
-    $wallet = Wallet::query()->where('user_id', $user->getKey())->where('currency_id', $currency->id)->sole();
+    $wallet = Wallet::query()->where('user_id', $user->getKey())->where('currency_code', $currencyCode)->sole();
 
     expect($wallet->balance)->toBe(0)
         ->and($wallet->transactions()->deposit()->pending()->count())->toBe(1);
@@ -77,14 +77,14 @@ it('provisions the wallet from the selected user and currency on create', functi
 
 it('provisions both wallets for a transfer created from the form', function (): void {
     $gateway = TransactionGatewayFactory::new()->enabled()->create();
-    $currency = Currency::factory()->create(['status' => true]);
+    $currencyCode = CurrencyIntegration::defaultCode();
     $source = TransactionUsers::model()::factory()->create();
     $destination = TransactionUsers::model()::factory()->create();
 
     livewire(CreateTransaction::class)
         ->fillForm([
             'user_id'                => $source->getKey(),
-            'currency_id'            => $currency->id,
+            'currency_code'          => $currencyCode,
             'transaction_gateway_id' => $gateway->id,
             'transaction_type'       => TransactionTypeEnum::Transfer->value,
             'counterparty_user_id'   => $destination->getKey(),
@@ -97,7 +97,7 @@ it('provisions both wallets for a transfer created from the form', function (): 
     $destinationWallet = Wallet::query()->where('user_id', $destination->getKey())->sole();
 
     expect($sourceWallet->transactions()->transfer()->sole()->counterparty_wallet_id)->toBe($destinationWallet->id)
-        ->and($destinationWallet->currency_id)->toBe($currency->id);
+        ->and($destinationWallet->currency_code)->toBe($currencyCode);
 });
 
 it('approves a transaction from the view page and settles the ledger', function (): void {

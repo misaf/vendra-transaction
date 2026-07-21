@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Misaf\VendraCurrency\Models\Currency;
+use Misaf\VendraSupport\Support\CurrencyIntegration;
 use Misaf\VendraTransaction\Database\Factories\TransactionGatewayFactory;
 use Misaf\VendraTransaction\Database\Factories\TransactionLimitFactory;
 use Misaf\VendraTransaction\Database\Factories\WalletFactory;
@@ -60,15 +60,12 @@ it('resolves gateways by slug and ignores disabled ones', function (): void {
         ->and(fn() => TransactionService::getTransactionGateway('coinpayments'))->toThrow(RuntimeException::class);
 });
 
-it('provisions the default wallet in the default enabled currency', function (): void {
+it('provisions the default wallet in the resolved default currency', function (): void {
     $user = TransactionUsers::model()::factory()->create();
-    Currency::factory()->create(['status' => false, 'is_default' => true, 'position' => 1]);
-    Currency::factory()->create(['status' => true, 'is_default' => false, 'position' => 2]);
-    $default = Currency::factory()->create(['status' => true, 'is_default' => true, 'position' => 3]);
 
     $wallet = TransactionService::defaultWalletFor($user);
 
-    expect($wallet->currency_id)->toBe($default->id);
+    expect($wallet->currency_code)->toBe(CurrencyIntegration::defaultCode());
 });
 
 it('identifies internal transactions by the internal gateway', function (): void {
@@ -95,11 +92,11 @@ it('identifies internal transactions by the internal gateway', function (): void
 
 it('provisions one wallet per user and currency', function (): void {
     $user = TransactionUsers::model()::factory()->create();
-    $currency = Currency::factory()->create();
 
-    $wallet = TransactionService::walletFor($user, $currency);
-    $again = TransactionService::walletFor($user, $currency);
+    $wallet = TransactionService::walletFor($user, 'EUR');
+    $again = TransactionService::walletFor($user, 'EUR');
 
     expect($again->is($wallet))->toBeTrue()
+        ->and($wallet->currency_code)->toBe('EUR')
         ->and($user->wallets()->count())->toBe(1);
 });

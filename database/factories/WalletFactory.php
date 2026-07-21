@@ -7,7 +7,7 @@ namespace Misaf\VendraTransaction\Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
-use Misaf\VendraCurrency\Models\Currency;
+use Illuminate\Support\Str;
 use Misaf\VendraSupport\Support\TenantAwareness;
 use Misaf\VendraTransaction\Models\Wallet;
 use Misaf\VendraTransaction\Support\TransactionUsers;
@@ -19,8 +19,8 @@ final class WalletFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id'     => TransactionUsers::model()::factory(),
-            'currency_id' => Currency::factory(),
+            'user_id'       => TransactionUsers::model()::factory(),
+            'currency_code' => 'USD',
         ];
     }
 
@@ -42,10 +42,10 @@ final class WalletFactory extends Factory
         ]);
     }
 
-    public function forCurrency(Currency|int $currency): static
+    public function forCurrency(string $currencyCode): static
     {
         return $this->state(fn(): array => [
-            'currency_id' => $currency instanceof Currency ? $currency->id : $currency,
+            'currency_code' => Str::upper($currencyCode),
         ]);
     }
 }

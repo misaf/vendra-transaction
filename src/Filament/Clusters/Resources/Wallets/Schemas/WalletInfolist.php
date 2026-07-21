@@ -31,7 +31,7 @@ final class WalletInfolist
 
                         return "#{$record->user_id}";
                     }),
-                TextEntry::make('currency.code')
+                TextEntry::make('currency_code')
                     ->badge()
                     ->label(__('vendra-transaction::attributes.currency')),
                 TextEntry::make('balance')

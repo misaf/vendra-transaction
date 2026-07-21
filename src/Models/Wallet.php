@@ -7,13 +7,14 @@ namespace Misaf\VendraTransaction\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
-use Misaf\VendraCurrency\Models\Currency;
+use Illuminate\Support\Str;
 use Misaf\VendraSupport\Contracts\ShouldLogActivity;
 use Misaf\VendraSupport\Traits\BelongsToTenant;
 use Misaf\VendraTransaction\Database\Factories\WalletFactory;
@@ -27,14 +28,13 @@ use Misaf\VendraTransaction\Support\TransactionUsers;
  * @property int $id
  * @property int $tenant_id
  * @property int $user_id
- * @property int $currency_id
+ * @property string $currency_code
  * @property int $balance
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property Carbon|null $deleted_at
- * @property-read Currency $currency
  */
-#[Fillable(['user_id', 'currency_id'])]
+#[Fillable(['user_id', 'currency_code'])]
 #[Hidden(['tenant_id'])]
 #[UseFactory(WalletFactory::class)]
 final class Wallet extends Model implements ShouldLogActivity
@@ -52,12 +52,22 @@ final class Wallet extends Model implements ShouldLogActivity
     protected function casts(): array
     {
         return [
-            'id'          => 'integer',
-            'tenant_id'   => 'integer',
-            'user_id'     => 'integer',
-            'currency_id' => 'integer',
-            'balance'     => 'integer',
+            'id'            => 'integer',
+            'tenant_id'     => 'integer',
+            'user_id'       => 'integer',
+            'currency_code' => 'string',
+            'balance'       => 'integer',
         ];
+    }
+
+    /**
+     * @return Attribute<string, string>
+     */
+    protected function currencyCode(): Attribute
+    {
+        return Attribute::make(
+            set: fn(string $value): string => Str::upper($value),
+        );
     }
 
     /**
@@ -66,14 +76,6 @@ final class Wallet extends Model implements ShouldLogActivity
     public function user(): BelongsTo
     {
         return $this->belongsTo(TransactionUsers::model(), 'user_id');
-    }
-
-    /**
-     * @return BelongsTo<Currency, $this>
-     */
-    public function currency(): BelongsTo
-    {
-        return $this->belongsTo(Currency::class);
     }
 
     /**

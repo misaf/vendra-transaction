@@ -29,7 +29,7 @@ final class TransactionTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn($query) => $query->with(['wallet.user', 'wallet.currency', 'transactionGateway']))
+            ->modifyQueryUsing(fn($query) => $query->with(['wallet.user', 'transactionGateway']))
             ->description(__('vendra-transaction::tables.description.transactions'))
             ->emptyStateHeading(__('vendra-transaction::tables.empty_state.heading.transactions'))
             ->emptyStateDescription(__('vendra-transaction::tables.empty_state.description.transactions'))
@@ -56,7 +56,7 @@ final class TransactionTable
                             ?? "#{$record->wallet->user_id}");
                     }),
 
-                TextColumn::make('wallet.currency.code')
+                TextColumn::make('wallet.currency_code')
                     ->badge()
                     ->label(__('vendra-transaction::attributes.currency')),
 

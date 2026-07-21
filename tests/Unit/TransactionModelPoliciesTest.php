@@ -18,7 +18,7 @@ use Misaf\VendraTransaction\Models\Wallet;
 it('defines the expected transaction models', function (): void {
     expect((new Transaction())->getFillable())->toContain('wallet_id', 'transaction_gateway_id', 'counterparty_wallet_id', 'transaction_type', 'token', 'amount', 'status')
         ->and((new TransactionGateway())->getFillable())->toContain('name', 'description', 'slug', 'position', 'status')
-        ->and((new Wallet())->getFillable())->toContain('user_id', 'currency_id')
+        ->and((new Wallet())->getFillable())->toContain('user_id', 'currency_code')
         ->and((new Wallet())->getFillable())->not->toContain('balance')
         ->and((new LedgerEntry())->getFillable())->toContain('amount', 'balance_after')
         ->and((new Transaction())->getHidden())->toContain('tenant_id')
@@ -33,7 +33,6 @@ it('defines the expected transaction relationships', function (): void {
         ->and((new ReflectionMethod(Transaction::class, 'transactionMetadatas'))->getReturnType()?->getName())->toBe(HasMany::class)
         ->and((new ReflectionMethod(Transaction::class, 'ledgerEntries'))->getReturnType()?->getName())->toBe(MorphMany::class)
         ->and((new ReflectionMethod(Wallet::class, 'user'))->getReturnType()?->getName())->toBe(BelongsTo::class)
-        ->and((new ReflectionMethod(Wallet::class, 'currency'))->getReturnType()?->getName())->toBe(BelongsTo::class)
         ->and((new ReflectionMethod(Wallet::class, 'ledgerEntries'))->getReturnType()?->getName())->toBe(HasMany::class)
         ->and((new ReflectionMethod(LedgerEntry::class, 'wallet'))->getReturnType()?->getName())->toBe(BelongsTo::class)
         ->and((new ReflectionMethod(LedgerEntry::class, 'source'))->getReturnType()?->getName())->toBe(MorphTo::class);

@@ -57,16 +57,14 @@ return new class () extends Migration {
             $table->foreignId('user_id')
                 ->constrained()
                 ->restrictOnDelete();
-            $table->foreignId('currency_id')
-                ->constrained()
-                ->restrictOnDelete();
+            $table->string('currency_code', 16);
             $table->bigInteger('balance')
                 ->default(0);
             $table->timestampsTz();
             $table->softDeletesTz();
 
-            $table->unique(TenantSchema::tenantIndex(['user_id', 'currency_id']));
-            $table->index(TenantSchema::tenantIndex(['currency_id']));
+            $table->unique(TenantSchema::tenantIndex(['user_id', 'currency_code']));
+            $table->index(TenantSchema::tenantIndex(['currency_code']));
         });
     }
 

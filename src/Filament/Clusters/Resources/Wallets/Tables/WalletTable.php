@@ -21,7 +21,7 @@ final class WalletTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn($query) => $query->with(['user', 'currency'])->withCount('transactions'))
+            ->modifyQueryUsing(fn($query) => $query->with(['user'])->withCount('transactions'))
             ->description(__('vendra-transaction::tables.description.wallets'))
             ->emptyStateHeading(__('vendra-transaction::tables.empty_state.heading.wallets'))
             ->emptyStateDescription(__('vendra-transaction::tables.empty_state.description.wallets'))
@@ -40,7 +40,7 @@ final class WalletTable
                             ?? "#{$record->user_id}");
                     }),
 
-                TextColumn::make('currency.code')
+                TextColumn::make('currency_code')
                     ->badge()
                     ->label(__('vendra-transaction::attributes.currency')),
 

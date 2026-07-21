@@ -26,7 +26,6 @@
         "php": "^8.3",
         "flowframe/laravel-trend": "^0.5.0",
         "lara-zeus/spatie-translatable": "^2.0.1",
-        "misaf/vendra-currency": "self.version",
         "misaf/vendra-multimedia": "self.version",
         "misaf/vendra-support": "self.version",
         "spatie/eloquent-sortable": "^5.0.1",
@@ -41,6 +40,7 @@
         "larastan/larastan": "^3.10.0",
         "laravel/boost": "^2.4.12",
         "laravel/pint": "^1.29.3",
+        "misaf/vendra-currency": "self.version",
         "misaf/vendra-testing": "self.version",
         "mockery/mockery": "^1.6.12",
         "nunomaduro/collision": "^8.9.4",
@@ -51,6 +51,9 @@
         "pestphp/pest-plugin-profanity": "^4.2.1",
         "pestphp/pest-plugin-type-coverage": "^4.0.4",
         "phpstan/extension-installer": "^1.4.3"
+    },
+    "suggest": {
+        "misaf/vendra-currency": "Install this in the host application to manage active currencies used by wallet provisioning and transaction forms."
     },
     "minimum-stability": "stable",
     "prefer-stable": true,

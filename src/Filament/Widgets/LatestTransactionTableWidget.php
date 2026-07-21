@@ -36,7 +36,7 @@ final class LatestTransactionTableWidget extends BaseWidget
     {
         return $table
             ->heading(__('vendra-transaction::widgets.recent_transaction_table'))
-            ->query(fn(): Builder => Transaction::query()->with(['wallet.user', 'wallet.currency']))
+            ->query(fn(): Builder => Transaction::query()->with(['wallet.user']))
             ->columns([
                 TextColumn::make('token')
                     ->extraCellAttributes(['dir' => 'ltr'])

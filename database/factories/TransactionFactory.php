@@ -54,8 +54,13 @@ final class TransactionFactory extends Factory
 
     public function forUser(Model|int $user): static
     {
+        $userId = $user instanceof Model ? $user->getKey() : $user;
+
         return $this->state(fn(): array => [
-            'wallet_id' => Wallet::factory()->forUser($user),
+            'wallet_id' => Wallet::query()->firstOrCreate([
+                'user_id'       => $userId,
+                'currency_code' => 'USD',
+            ])->id,
         ]);
     }
 
