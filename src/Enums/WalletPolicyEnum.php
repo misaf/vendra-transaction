@@ -11,7 +11,6 @@ enum WalletPolicyEnum: string
     case DeleteAny = 'delete-any-wallet';
     case ForceDelete = 'force-delete-wallet';
     case ForceDeleteAny = 'force-delete-any-wallet';
-    case Replicate = 'replicate-wallet';
     case Restore = 'restore-wallet';
     case RestoreAny = 'restore-any-wallet';
     case Update = 'update-wallet';

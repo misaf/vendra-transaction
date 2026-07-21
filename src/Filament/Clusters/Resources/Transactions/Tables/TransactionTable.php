@@ -6,6 +6,10 @@ namespace Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Table
 
 use Filament\Actions\ActionGroup;
 use Filament\Actions\ViewAction;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\Summarizers\Average;
+use Filament\Tables\Columns\Summarizers\Range;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\QueryBuilder;
@@ -26,6 +30,10 @@ final class TransactionTable
     {
         return $table
             ->modifyQueryUsing(fn($query) => $query->with(['wallet.user', 'wallet.currency', 'transactionGateway']))
+            ->description(__('vendra-transaction::tables.description.transactions'))
+            ->emptyStateHeading(__('vendra-transaction::tables.empty_state.heading.transactions'))
+            ->emptyStateDescription(__('vendra-transaction::tables.empty_state.description.transactions'))
+            ->emptyStateIcon(Heroicon::OutlinedArrowsRightLeft)
             ->columns([
                 TextColumn::make('row')
                     ->label('#')
@@ -48,7 +56,7 @@ final class TransactionTable
                             ?? "#{$record->wallet->user_id}");
                     }),
 
-                TextColumn::make('wallet.currency.iso_code')
+                TextColumn::make('wallet.currency.code')
                     ->badge()
                     ->label(__('vendra-transaction::attributes.currency')),
 
@@ -64,7 +72,8 @@ final class TransactionTable
                     ->extraCellAttributes(['dir' => 'ltr'])
                     ->label(__('vendra-transaction::attributes.amount'))
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->summarize([Sum::make(), Average::make(), Range::make()]),
 
                 TextColumn::make('status')
                     ->badge()

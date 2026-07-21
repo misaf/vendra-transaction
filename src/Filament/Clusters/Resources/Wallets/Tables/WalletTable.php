@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace Misaf\VendraTransaction\Filament\Clusters\Resources\Wallets\Tables;
 
 use Filament\Actions\ViewAction;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\Summarizers\Average;
+use Filament\Tables\Columns\Summarizers\Range;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\QueryBuilder;
@@ -18,6 +22,10 @@ final class WalletTable
     {
         return $table
             ->modifyQueryUsing(fn($query) => $query->with(['user', 'currency'])->withCount('transactions'))
+            ->description(__('vendra-transaction::tables.description.wallets'))
+            ->emptyStateHeading(__('vendra-transaction::tables.empty_state.heading.wallets'))
+            ->emptyStateDescription(__('vendra-transaction::tables.empty_state.description.wallets'))
+            ->emptyStateIcon(Heroicon::OutlinedWallet)
             ->columns([
                 TextColumn::make('row')
                     ->label('#')
@@ -32,7 +40,7 @@ final class WalletTable
                             ?? "#{$record->user_id}");
                     }),
 
-                TextColumn::make('currency.iso_code')
+                TextColumn::make('currency.code')
                     ->badge()
                     ->label(__('vendra-transaction::attributes.currency')),
 
@@ -40,7 +48,8 @@ final class WalletTable
                     ->extraCellAttributes(['dir' => 'ltr'])
                     ->label(__('vendra-transaction::attributes.balance'))
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->summarize([Sum::make(), Average::make(), Range::make()]),
 
                 TextColumn::make('transactions_count')
                     ->alignCenter()

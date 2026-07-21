@@ -13,6 +13,7 @@ return [
     'description'            => 'Description',
     'fee'                    => 'Fee',
     'image'                  => 'Image',
+    'is_default'             => 'Default',
     'key_name'               => 'Key',
     'key_value'              => 'Value',
     'name'                   => 'Name',

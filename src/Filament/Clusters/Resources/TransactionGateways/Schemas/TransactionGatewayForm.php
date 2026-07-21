@@ -69,6 +69,15 @@ final class TransactionGatewayForm
                     ->onIcon(Heroicon::Bolt)
                     ->required()
                     ->rules(['boolean']),
+
+                Toggle::make('is_default')
+                    ->afterStateUpdated(fn(Livewire $livewire) => $livewire->validateOnly('data.is_default'))
+                    ->columnSpanFull()
+                    ->default(false)
+                    ->label(__('vendra-transaction::attributes.is_default'))
+                    ->onIcon(Heroicon::Bolt)
+                    ->required()
+                    ->rules(['boolean']),
             ]);
     }
 }

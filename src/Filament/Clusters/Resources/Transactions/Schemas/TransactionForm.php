@@ -42,7 +42,7 @@ final class TransactionForm
                             ->where('status', true)
                             ->orderByDesc('is_default')
                             ->orderBy('position')
-                            ->pluck('iso_code', 'id')
+                            ->pluck('code', 'id')
                             ->all(),
                     )
                     ->required()

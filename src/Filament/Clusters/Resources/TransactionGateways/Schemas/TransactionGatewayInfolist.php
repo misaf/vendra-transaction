@@ -21,6 +21,9 @@ final class TransactionGatewayInfolist
                 IconEntry::make('status')
                     ->boolean()
                     ->label(__('vendra-transaction::attributes.status')),
+                IconEntry::make('is_default')
+                    ->boolean()
+                    ->label(__('vendra-transaction::attributes.is_default')),
                 TextEntry::make('description')
                     ->columnSpanFull()
                     ->label(__('vendra-transaction::attributes.description')),

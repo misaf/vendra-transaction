@@ -13,6 +13,7 @@ return [
     'description'            => 'توضیحات',
     'fee'                    => 'کارمزد',
     'image'                  => 'تصویر',
+    'is_default'             => 'پیش‌فرض',
     'key_name'               => 'کلید',
     'key_value'              => 'مقدار',
     'name'                   => 'نام',

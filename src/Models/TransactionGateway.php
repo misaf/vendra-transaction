@@ -6,6 +6,7 @@ namespace Misaf\VendraTransaction\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,6 +19,7 @@ use Misaf\VendraMultimedia\Concerns\HasDefaultMediaConversions;
 use Misaf\VendraSupport\Contracts\ShouldLogActivity;
 use Misaf\VendraSupport\Traits\BelongsToTenant;
 use Misaf\VendraTransaction\Database\Factories\TransactionGatewayFactory;
+use Misaf\VendraTransaction\Observers\TransactionGatewayObserver;
 use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 use Spatie\MediaLibrary\HasMedia;
@@ -39,12 +41,14 @@ use Spatie\Translatable\HasTranslations;
  * @property string $slug
  * @property int $position
  * @property bool $status
+ * @property bool $is_default
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property Carbon|null $deleted_at
  */
-#[Fillable(['name', 'description', 'slug', 'position', 'status'])]
-#[Hidden(['tenant_id'])]
+#[Fillable(['name', 'description', 'slug', 'position', 'status', 'is_default'])]
+#[Hidden(['tenant_id', 'default_guard'])]
+#[ObservedBy([TransactionGatewayObserver::class])]
 #[UseFactory(TransactionGatewayFactory::class)]
 final class TransactionGateway extends Model implements HasMedia, ShouldLogActivity, Sortable
 {
@@ -84,6 +88,11 @@ final class TransactionGateway extends Model implements HasMedia, ShouldLogActiv
      */
     public array $translatable = ['name', 'description'];
 
+    /** @var array<string, mixed> */
+    protected $attributes = [
+        'is_default' => false,
+    ];
+
     /**
      * @return array<string, string>
      */
@@ -97,6 +106,7 @@ final class TransactionGateway extends Model implements HasMedia, ShouldLogActiv
             'slug'        => 'string',
             'position'    => 'integer',
             'status'      => 'boolean',
+            'is_default'  => 'boolean',
         ];
     }
 

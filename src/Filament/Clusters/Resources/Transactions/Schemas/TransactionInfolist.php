@@ -42,7 +42,7 @@ final class TransactionInfolist
 
                         return "#{$wallet->user_id}";
                     }),
-                TextEntry::make('wallet.currency.iso_code')
+                TextEntry::make('wallet.currency.code')
                     ->badge()
                     ->label(__('vendra-transaction::attributes.currency')),
                 TextEntry::make('transactionGateway.name')

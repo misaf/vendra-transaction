@@ -43,6 +43,11 @@ final class TransactionGatewayFactory extends Factory
         ]);
     }
 
+    public function default(): static
+    {
+        return $this->state(fn(): array => ['is_default' => true]);
+    }
+
     public function enabled(): static
     {
         return $this->state(fn(): array => ['status' => true]);

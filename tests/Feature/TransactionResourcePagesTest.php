@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use Filament\Schemas\Components\Tabs\Tab;
 use Misaf\VendraCurrency\Models\Currency;
-use Misaf\VendraPermission\Tests\Support\PermissionModuleTestContext;
 use Misaf\VendraTransaction\Database\Factories\TransactionFactory;
 use Misaf\VendraTransaction\Database\Factories\TransactionGatewayFactory;
 use Misaf\VendraTransaction\Database\Factories\WalletFactory;
@@ -21,7 +20,7 @@ use Misaf\VendraTransaction\Support\TransactionUsers;
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
-    PermissionModuleTestContext::setUpFilamentAdminContext();
+    setUpFilamentSuperAdminTestContext();
 });
 
 it('lists transactions in the table', function (): void {

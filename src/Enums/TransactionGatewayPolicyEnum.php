@@ -12,7 +12,6 @@ enum TransactionGatewayPolicyEnum: string
     case ForceDelete = 'force-delete-transaction-gateway';
     case ForceDeleteAny = 'force-delete-any-transaction-gateway';
     case Reorder = 'reorder-transaction-gateway';
-    case Replicate = 'replicate-transaction-gateway';
     case Restore = 'restore-transaction-gateway';
     case RestoreAny = 'restore-any-transaction-gateway';
     case Update = 'update-transaction-gateway';

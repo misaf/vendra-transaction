@@ -11,7 +11,6 @@ enum TransactionPolicyEnum: string
     case DeleteAny = 'delete-any-transaction';
     case ForceDelete = 'force-delete-transaction';
     case ForceDeleteAny = 'force-delete-any-transaction';
-    case Replicate = 'replicate-transaction';
     case Restore = 'restore-transaction';
     case RestoreAny = 'restore-any-transaction';
     case Update = 'update-transaction';

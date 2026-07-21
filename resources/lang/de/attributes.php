@@ -13,6 +13,7 @@ return [
     'description'            => 'Beschreibung',
     'fee'                    => 'Gebühr',
     'image'                  => 'Bild',
+    'is_default'             => 'Standard',
     'key_name'               => 'Schlüssel',
     'key_value'              => 'Wert',
     'name'                   => 'Name',
