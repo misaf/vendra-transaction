@@ -101,6 +101,8 @@ return new class () extends Migration {
                 ->restrictOnDelete();
             $table->string('transaction_type');
             $table->string('token');
+            $table->string('idempotency_key')
+                ->nullable();
             $table->unsignedBigInteger('amount');
             $table->string('status');
             $table->timestampsTz();
@@ -110,6 +112,7 @@ return new class () extends Migration {
             $table->index(TenantSchema::tenantIndex(['transaction_gateway_id']));
             $table->index(TenantSchema::tenantIndex(['transaction_type']));
             $table->index(TenantSchema::tenantIndex(['token']));
+            $table->unique(TenantSchema::tenantIndex(['idempotency_key']));
             $table->index(TenantSchema::tenantIndex(['status']));
         });
     }

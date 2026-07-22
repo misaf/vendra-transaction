@@ -7,6 +7,8 @@ namespace Misaf\VendraTransaction\Services;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
+use LogicException;
 use Misaf\VendraSupport\Support\CurrencyIntegration;
 use Misaf\VendraTransaction\Enums\TransactionTypeEnum;
 use Misaf\VendraTransaction\Exceptions\TransactionLimitExceededException;
@@ -108,14 +110,17 @@ final class TransactionService
         ?int $fee = null,
         ?Wallet $counterpartyWallet = null,
         ?string $token = null,
+        ?string $idempotencyKey = null,
     ): Transaction {
+        if (null !== $idempotencyKey && '' === mb_trim($idempotencyKey)) {
+            throw new InvalidArgumentException('The transaction idempotency key cannot be empty.');
+        }
+
         $gateway = $transactionGateway instanceof TransactionGateway
             ? $transactionGateway
             : $this->getTransactionGateway($transactionGateway);
 
-        $this->assertWithinLimit($wallet, $transactionType, $amount);
-
-        return DB::transaction(function () use ($gateway, $wallet, $transactionType, $amount, $metadata, $fee, $counterpartyWallet, $token): Transaction {
+        return DB::transaction(function () use ($gateway, $wallet, $transactionType, $amount, $metadata, $fee, $counterpartyWallet, $token, $idempotencyKey): Transaction {
             $attributes = [
                 'wallet_id'              => $wallet->id,
                 'transaction_gateway_id' => $gateway->id,
@@ -128,7 +133,49 @@ final class TransactionService
                 $attributes['token'] = $token;
             }
 
-            $transaction = Transaction::create($attributes);
+            if (null !== $idempotencyKey) {
+                $existingTransaction = Transaction::query()
+                    ->withTrashed()
+                    ->where('idempotency_key', $idempotencyKey)
+                    ->first();
+
+                if (null !== $existingTransaction) {
+                    $this->assertMatchingIdempotentTransaction(
+                        $existingTransaction,
+                        $gateway,
+                        $wallet,
+                        $transactionType,
+                        $amount,
+                        $fee,
+                        $counterpartyWallet,
+                    );
+
+                    return $existingTransaction;
+                }
+            }
+
+            $this->assertWithinLimit($wallet, $transactionType, $amount);
+
+            $transaction = null === $idempotencyKey
+                ? Transaction::query()->create($attributes)
+                : Transaction::query()->withTrashed()->firstOrCreate(
+                    ['idempotency_key' => $idempotencyKey],
+                    $attributes,
+                );
+
+            if ( ! $transaction->wasRecentlyCreated) {
+                $this->assertMatchingIdempotentTransaction(
+                    $transaction,
+                    $gateway,
+                    $wallet,
+                    $transactionType,
+                    $amount,
+                    $fee,
+                    $counterpartyWallet,
+                );
+
+                return $transaction;
+            }
 
             if (null !== $fee && $fee > 0) {
                 $transaction->transactionFee()->create(['amount' => $fee]);
@@ -150,7 +197,7 @@ final class TransactionService
         $transaction->transactionMetadatas()->createMany(array_map(
             fn(string $key): array => [
                 'key_name'  => $key,
-                'key_value' => (string) ($metadata[$key] ?? ''),
+                'key_value' => $this->stringifyMetadataValue($metadata[$key] ?? null),
             ],
             array_keys($metadata),
         ));
@@ -170,5 +217,49 @@ final class TransactionService
         if (null !== $limit && abs($amount) > $limit->amount) {
             throw TransactionLimitExceededException::forWallet($wallet->id, $transactionType, abs($amount), $limit->amount);
         }
+    }
+
+    private function assertMatchingIdempotentTransaction(
+        Transaction $transaction,
+        TransactionGateway $gateway,
+        Wallet $wallet,
+        TransactionTypeEnum $transactionType,
+        int $amount,
+        ?int $fee,
+        ?Wallet $counterpartyWallet,
+    ): void {
+        $storedFee = $transaction->transactionFee()->first()?->amount;
+        $expectedFee = null !== $fee && $fee > 0 ? $fee : null;
+        $matches = $transaction->transaction_gateway_id === $gateway->id
+            && $transaction->wallet_id === $wallet->id
+            && $transaction->transaction_type === $transactionType
+            && $transaction->amount === abs($amount)
+            && $transaction->counterparty_wallet_id === $counterpartyWallet?->id
+            && $storedFee === $expectedFee;
+
+        if ( ! $matches) {
+            throw new LogicException("Transaction idempotency key [{$transaction->idempotency_key}] was already used for different charge details.");
+        }
+    }
+
+    private function stringifyMetadataValue(mixed $value): string
+    {
+        if (null === $value) {
+            return '';
+        }
+
+        if (is_string($value)) {
+            return $value;
+        }
+
+        if (is_bool($value)) {
+            return $value ? '1' : '0';
+        }
+
+        if (is_int($value) || is_float($value)) {
+            return (string) $value;
+        }
+
+        return json_encode($value, JSON_THROW_ON_ERROR);
     }
 }

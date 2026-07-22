@@ -46,14 +46,15 @@ use Spatie\ModelStates\HasStates;
  * @property int|null $counterparty_wallet_id
  * @property TransactionTypeEnum $transaction_type
  * @property string $token
+ * @property string|null $idempotency_key
  * @property int $amount
  * @property TransactionState $status
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property Carbon|null $deleted_at
  */
-#[Fillable(['wallet_id', 'transaction_gateway_id', 'counterparty_wallet_id', 'transaction_type', 'token', 'amount', 'status'])]
-#[Hidden(['tenant_id'])]
+#[Fillable(['wallet_id', 'transaction_gateway_id', 'counterparty_wallet_id', 'transaction_type', 'token', 'idempotency_key', 'amount', 'status'])]
+#[Hidden(['tenant_id', 'idempotency_key'])]
 #[UseFactory(TransactionFactory::class)]
 final class Transaction extends Model implements ShouldLogActivity
 {
@@ -81,6 +82,7 @@ final class Transaction extends Model implements ShouldLogActivity
             'counterparty_wallet_id' => 'integer',
             'transaction_type'       => TransactionTypeEnum::class,
             'token'                  => 'string',
+            'idempotency_key'        => 'string',
             'amount'                 => 'integer',
             'status'                 => TransactionState::class,
         ];

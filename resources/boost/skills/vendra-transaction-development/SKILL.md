@@ -13,6 +13,12 @@ description: "Create, modify, review, or test the Vendra Transaction package in 
 - Every field listed in a model's `$translatable` array must definitely use a JSON database column. Keep its model traits/casts, factories, validation, Filament locale UI, API serialization, and tests translation-aware.
 - A field not listed in `$translatable` must use the appropriate scalar database type and must not use Spatie Translatable, translatable slug traits, locale switchers, translated callbacks, or translation-shaped array data.
 
+## Vendra Transitive API Policy
+
+- Treat a Vendra dependency intentionally exposed through the public API of a directly required Vendra platform package as part of the supported public contract of that package.
+- Do not add a redundant direct Composer requirement solely because source code imports a type from that exposed dependency.
+- Apply this only to Vendra platform packages listed under `require`; never extend it to `require-dev`, `suggest`, incidental implementation dependencies, or third-party packages. Removing or replacing an exposed dependency is a breaking change; keep `self.version` alignment across the Vendra package graph.
+
 - Register every table whose migration calls `TenantSchema::addTenantColumn()` with `TenantTableRegistry` in this package's service provider, preserving configured table names and connections, so `vendra-tenant:enable {tenant}` can retrofit schemas migrated before tenancy was enabled.
 
 Always use this skill together with `laravel-best-practices` for Laravel PHP and `pest-testing` when tests are added or changed. Use `tailwindcss-development` only when editing Blade or Tailwind UI.
@@ -35,6 +41,7 @@ The ledger is the single source of balance truth.
 - Transaction status is a Spatie model-states machine in `States\` (`Pending → Processing → Review → Approved/Declined/Failed`). `ApproveTransactionTransition` settles principal, transfer counterpart, and fee into the ledger atomically with the status write and dispatches `TransactionApproved`. Use `approve()`, `decline()`, `fail()`, `markProcessing()`, `markReview()`; never write the status column directly.
 - `transactions.amount` is absolute minor units; ledger sign derives from `TransactionTypeEnum::ledgerSign()`. Transfers store `counterparty_wallet_id`; insufficient balance raises `InsufficientBalanceException` and rolls the whole approval back.
 - Create transactions through `TransactionService::createTransaction()` (enforces per-wallet `TransactionLimit`s, attaches fee and metadata); provision wallets with `walletFor()` / `defaultWalletFor()`.
+- Use nullable `transactions.idempotency_key` for retry-safe creation. Return the original transaction when a key and financial payload are repeated, and reject the same key with different details. Keep it in the consolidated create migration and its package stub; do not add a follow-up alteration migration.
 - Resolve the user model through `Support\TransactionUsers::model()`; the provider attaches the `wallets` relation to the configured auth model.
 - Gateways are admin-managed labels: translatable `name`/`description`, scalar `slug` (lookup key; internal slug is `TransactionService::INTERNAL_GATEWAY_SLUG`), media logo, sortable position. No payment-processing logic here.
 - Keep the module tenant-agnostic (`BelongsToTenant`, `TenantSchema`, registry registration for `transaction_gateways`, `wallets`, `transactions`); never reference `Misaf\VendraTenant`.

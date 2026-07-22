@@ -10,6 +10,12 @@ The `misaf/vendra-transaction` package owns the wallet/ledger financial domain: 
 - Every field listed in a model's `$translatable` array must definitely use a JSON database column. Keep its model traits/casts, factories, validation, Filament locale UI, API serialization, and tests translation-aware.
 - A field not listed in `$translatable` must use the appropriate scalar database type and must not use Spatie Translatable, translatable slug traits, locale switchers, translated callbacks, or translation-shaped array data.
 
+### Vendra Transitive API Policy
+
+- Treat a Vendra dependency intentionally exposed through the public API of a directly required Vendra platform package as part of the supported public contract of that package.
+- Do not add a redundant direct Composer requirement solely because source code imports a type from that exposed dependency.
+- Apply this only to Vendra platform packages listed under `require`; never extend it to `require-dev`, `suggest`, incidental implementation dependencies, or third-party packages. Removing or replacing an exposed dependency is a breaking change; keep `self.version` alignment across the Vendra package graph.
+
 - Register every table whose migration calls `TenantSchema::addTenantColumn()` with `TenantTableRegistry` in this package's service provider, preserving configured table names and connections, so `vendra-tenant:enable {tenant}` can retrofit schemas migrated before tenancy was enabled.
 
 - Keep transaction domain code inside `packages/vendra-transaction` using the `Misaf\VendraTransaction` namespace.
@@ -24,5 +30,6 @@ The `misaf/vendra-transaction` package owns the wallet/ledger financial domain: 
 - Tag-consuming models must use `Misaf\VendraSupport\Traits\HasOptionalTags` as the single source of their `tags()` relationship and pivot metadata. Keep the package tag-agnostic: define a stable package-owned tag type, use `TagIntegration` for availability and UI integration, never import the concrete Vendra Tagger model/provider or define the relationship through Spatie `HasTags`, and keep Tagger in Composer `suggest` rather than `require`.
 - Provide separate singular and plural resource labels in `en`, `de`, and `fa`; keep translation keys sorted and in parity across locales, and navigation labels at 24 characters or fewer.
 - Follow Laravel comment style: document with PHPDoc (array shapes, generics, `@see`) and reserve inline comments for genuinely complex logic.
+- Use nullable `transactions.idempotency_key` for retry-safe creation. `TransactionService::createTransaction()` must return the original transaction for an identical key and financial payload, and reject reuse for different details. Keep it in the consolidated create migration and its package stub; do not add a follow-up alteration migration.
 - Keep tests purposeful: ledger integrity, state transitions, limits, service contracts, policy coverage, translation parity, and user-visible Filament behavior.
 - Keep Pest architecture tests in `tests/ArchTest.php`: the `php`, `security`, and `laravel` presets plus `arch()->expect('Misaf\VendraTransaction')->not->toUse('Misaf\VendraTenant')` and `->not->toUse('Misaf\VendraUser')`.

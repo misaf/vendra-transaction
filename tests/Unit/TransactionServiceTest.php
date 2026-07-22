@@ -25,7 +25,10 @@ it('creates a pending transaction with fee and metadata', function (): void {
         wallet: $wallet,
         transactionType: TransactionTypeEnum::Deposit,
         amount: 5_000,
-        metadata: ['reference' => 'abc-123'],
+        metadata: [
+            'reference' => 'abc-123',
+            'context'   => ['source' => 'test'],
+        ],
         fee: 250,
     );
 
@@ -33,8 +36,59 @@ it('creates a pending transaction with fee and metadata', function (): void {
         ->and($transaction->transaction_gateway_id)->toBe($gateway->id)
         ->and($transaction->amount)->toBe(5_000)
         ->and($transaction->transactionFee->amount)->toBe(250)
-        ->and($transaction->transactionMetadatas()->pluck('key_value', 'key_name')->all())->toBe(['reference' => 'abc-123'])
+        ->and($transaction->transactionMetadatas()->pluck('key_value', 'key_name')->all())->toBe([
+            'context'   => '{"source":"test"}',
+            'reference' => 'abc-123',
+        ])
         ->and($wallet->fresh()->balance)->toBe(0);
+});
+
+it('returns the original transaction when an idempotency key is retried', function (): void {
+    TransactionGatewayFactory::new()->enabled()->create(['slug' => 'shetab']);
+    $wallet = WalletFactory::new()->create();
+
+    $first = TransactionService::createTransaction(
+        transactionGateway: 'shetab',
+        wallet: $wallet,
+        transactionType: TransactionTypeEnum::Withdrawal,
+        amount: 5_000,
+        metadata: ['reference' => 'subscription:123'],
+        idempotencyKey: 'subscription:123',
+    );
+    $retried = TransactionService::createTransaction(
+        transactionGateway: 'shetab',
+        wallet: $wallet,
+        transactionType: TransactionTypeEnum::Withdrawal,
+        amount: 5_000,
+        metadata: ['reference' => 'subscription:123'],
+        idempotencyKey: 'subscription:123',
+    );
+
+    expect($retried->is($first))->toBeTrue()
+        ->and($first->idempotency_key)->toBe('subscription:123')
+        ->and($wallet->transactions()->count())->toBe(1)
+        ->and($first->transactionMetadatas()->count())->toBe(1);
+});
+
+it('rejects an idempotency key reused for different transaction details', function (): void {
+    TransactionGatewayFactory::new()->enabled()->create(['slug' => 'shetab']);
+    $wallet = WalletFactory::new()->create();
+
+    TransactionService::createTransaction(
+        transactionGateway: 'shetab',
+        wallet: $wallet,
+        transactionType: TransactionTypeEnum::Withdrawal,
+        amount: 5_000,
+        idempotencyKey: 'subscription:123',
+    );
+
+    expect(fn() => TransactionService::createTransaction(
+        transactionGateway: 'shetab',
+        wallet: $wallet,
+        transactionType: TransactionTypeEnum::Withdrawal,
+        amount: 6_000,
+        idempotencyKey: 'subscription:123',
+    ))->toThrow(LogicException::class);
 });
 
 it('enforces the per-wallet transaction limit at creation', function (): void {

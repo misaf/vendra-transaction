@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Misaf\VendraTransaction\Providers;
 
 use Composer\InstalledVersions;
-
 use Filament\Panel;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Console\AboutCommand;
 use Misaf\VendraSupport\Filament\Concerns\ResolvesConfiguredPanels;
 use Misaf\VendraSupport\Support\TenantTableRegistry;
@@ -76,6 +77,9 @@ final class TransactionServiceProvider extends PackageServiceProvider
     {
         $userModel = TransactionUsers::model();
 
-        $userModel::resolveRelationUsing('wallets', fn($user) => $user->hasMany(Wallet::class, 'user_id'));
+        $userModel::resolveRelationUsing(
+            'wallets',
+            fn(Model $user): HasMany => $user->hasMany(Wallet::class, 'user_id'),
+        );
     }
 }
