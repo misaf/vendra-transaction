@@ -5,7 +5,7 @@ per-currency wallet balances, an immutable ledger, a state-machine
 transaction lifecycle with multi-gateway support, and a Filament admin
 cluster for transactions, gateways, and wallets.
 
-## How it works
+## Features
 
 1. Each user holds one `Wallet` per currency (created on first use via
    `TransactionService::walletFor()` / `defaultWalletFor()`), with a cached
