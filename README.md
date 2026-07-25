@@ -72,6 +72,7 @@ php artisan vendra-transaction:verify-balances --repair
 
 ```bash
 composer test
+composer analyse
 ```
 
 ## License
