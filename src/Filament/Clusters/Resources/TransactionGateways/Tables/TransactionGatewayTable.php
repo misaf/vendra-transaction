@@ -87,13 +87,11 @@ final class TransactionGatewayTable
                     ->counts('transactions')
                     ->label(__('vendra-transaction::navigation.transactions')),
 
-                ToggleColumn::make('status')
-                    ->label(__('vendra-transaction::attributes.status'))
+                ToggleColumn::make('active')
+                    ->label(__('vendra-transaction::attributes.active'))
                     ->onIcon(Heroicon::Bolt),
 
                 TextColumn::make('created_at')
-                    ->alignCenter()
-                    ->badge()
                     ->extraCellAttributes(['dir' => 'ltr'])
                     ->label(__('vendra-transaction::attributes.created_at'))
                     ->sinceTooltip()
@@ -104,8 +102,6 @@ final class TransactionGatewayTable
                     ),
 
                 TextColumn::make('updated_at')
-                    ->alignCenter()
-                    ->badge()
                     ->extraCellAttributes(['dir' => 'ltr'])
                     ->label(__('vendra-transaction::attributes.updated_at'))
                     ->sinceTooltip()
@@ -125,8 +121,8 @@ final class TransactionGatewayTable
                             TextConstraint::make('slug')
                                 ->label(__('vendra-transaction::attributes.slug')),
 
-                            BooleanConstraint::make('status')
-                                ->label(__('vendra-transaction::attributes.status')),
+                            BooleanConstraint::make('active')
+                                ->label(__('vendra-transaction::attributes.active')),
 
                             BooleanConstraint::make('is_default')
                                 ->label(__('vendra-transaction::attributes.is_default')),

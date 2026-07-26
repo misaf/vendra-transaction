@@ -58,8 +58,6 @@ final class WalletTable
                     ->label(__('vendra-transaction::navigation.transactions')),
 
                 TextColumn::make('created_at')
-                    ->alignCenter()
-                    ->badge()
                     ->extraCellAttributes(['dir' => 'ltr'])
                     ->label(__('vendra-transaction::attributes.created_at'))
                     ->sinceTooltip()

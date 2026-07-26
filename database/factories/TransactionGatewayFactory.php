@@ -20,7 +20,7 @@ final class TransactionGatewayFactory extends Factory
         return [
             'name'        => fake()->unique()->words(2, true),
             'description' => fake()->optional()->sentence(),
-            'status'      => true,
+            'active'      => true,
         ];
     }
 
@@ -50,11 +50,11 @@ final class TransactionGatewayFactory extends Factory
 
     public function enabled(): static
     {
-        return $this->state(fn(): array => ['status' => true]);
+        return $this->state(fn(): array => ['active' => true]);
     }
 
     public function disabled(): static
     {
-        return $this->state(fn(): array => ['status' => false]);
+        return $this->state(fn(): array => ['active' => false]);
     }
 }

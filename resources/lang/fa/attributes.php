@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 return [
+    'active'                 => 'فعال',
     'amount'                 => 'مبلغ',
     'amount_helper_text'     => 'مبلغ به واحد خرد (مثلاً سِنت).',
     'balance'                => 'موجودی',

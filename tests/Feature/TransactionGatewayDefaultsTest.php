@@ -37,9 +37,9 @@ it('promotes the first enabled gateway when the default is disabled', function (
     $default = TransactionGatewayFactory::new()->default()->createOne();
     $next = TransactionGatewayFactory::new()->createOne();
 
-    $default->update(['status' => false]);
+    $default->update(['active' => false]);
 
-    expect($default->refresh()->status)->toBeFalse()
+    expect($default->refresh()->active)->toBeFalse()
         ->and($default->is_default)->toBeFalse()
         ->and($next->refresh()->is_default)->toBeTrue();
 });
@@ -66,6 +66,6 @@ it('enables a disabled gateway when it becomes the default', function (): void {
 
     (new SetDefaultTransactionGateway())->execute($gateway);
 
-    expect($gateway->refresh()->status)->toBeTrue()
+    expect($gateway->refresh()->active)->toBeTrue()
         ->and($gateway->is_default)->toBeTrue();
 });

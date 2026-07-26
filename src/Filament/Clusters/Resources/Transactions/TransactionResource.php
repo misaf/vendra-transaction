@@ -9,7 +9,10 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Number;
+use InvalidArgumentException;
 use Misaf\VendraSupport\Filament\Clusters\SalesCluster;
 use Misaf\VendraSupport\Filament\Navigation\NavigationPriority;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Pages\CreateTransaction;
@@ -29,9 +32,36 @@ final class TransactionResource extends Resource
 
     protected static ?int $navigationSort = NavigationPriority::Transactions->value;
 
+    protected static ?string $recordTitleAttribute = 'token';
+
     protected static ?string $slug = 'transactions';
 
     protected static ?string $cluster = SalesCluster::class;
+
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['token', 'wallet.user.username', 'wallet.user.email'];
+    }
+
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        return parent::getGlobalSearchEloquentQuery()->with('wallet.user');
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        $email = self::transaction($record)->wallet?->user?->getAttribute('email');
+
+        return [
+            __('vendra-user::attributes.email') => is_string($email) ? $email : '',
+        ];
+    }
 
     public static function getNavigationBadge(): string
     {
@@ -92,5 +122,14 @@ final class TransactionResource extends Resource
     public static function table(Table $table): Table
     {
         return TransactionTable::configure($table);
+    }
+
+    private static function transaction(Model $record): Transaction
+    {
+        if ( ! $record instanceof Transaction) {
+            throw new InvalidArgumentException('Transaction resources require a Transaction record.');
+        }
+
+        return $record;
     }
 }

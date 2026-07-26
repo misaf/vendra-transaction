@@ -86,8 +86,6 @@ final class TransactionTable
                     ->label(__('vendra-transaction::attributes.status')),
 
                 TextColumn::make('created_at')
-                    ->alignCenter()
-                    ->badge()
                     ->extraCellAttributes(['dir' => 'ltr'])
                     ->label(__('vendra-transaction::attributes.created_at'))
                     ->sinceTooltip()

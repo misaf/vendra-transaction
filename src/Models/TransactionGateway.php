@@ -40,13 +40,13 @@ use Spatie\Translatable\HasTranslations;
  * @property array<string, string>|null $description
  * @property string $slug
  * @property int $position
- * @property bool $status
+ * @property bool $active
  * @property bool $is_default
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property Carbon|null $deleted_at
  */
-#[Fillable(['name', 'description', 'slug', 'position', 'status', 'is_default'])]
+#[Fillable(['name', 'description', 'slug', 'position', 'active', 'is_default'])]
 #[Hidden(['tenant_id', 'default_guard'])]
 #[ObservedBy([TransactionGatewayObserver::class])]
 #[UseFactory(TransactionGatewayFactory::class)]
@@ -105,7 +105,7 @@ final class TransactionGateway extends Model implements HasMedia, ShouldLogActiv
             'description' => 'array',
             'slug'        => 'string',
             'position'    => 'integer',
-            'status'      => 'boolean',
+            'active'      => 'boolean',
             'is_default'  => 'boolean',
         ];
     }
@@ -131,7 +131,7 @@ final class TransactionGateway extends Model implements HasMedia, ShouldLogActiv
      */
     public function scopeEnabled(Builder $builder): void
     {
-        $builder->where('status', true);
+        $builder->where('active', true);
     }
 
     public function getSlugOptions(): SlugOptions

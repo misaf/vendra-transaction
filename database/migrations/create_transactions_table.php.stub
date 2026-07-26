@@ -31,7 +31,7 @@ return new class () extends Migration {
                 ->nullable();
             $table->string('slug');
             $table->unsignedBigInteger('position');
-            $table->boolean('status');
+            $table->boolean('active');
             $table->boolean('is_default')->default(false);
             $table->unsignedBigInteger('default_guard')
                 ->nullable()
@@ -44,7 +44,7 @@ return new class () extends Migration {
             $table->unique('default_guard', 'transaction_gateways_one_default_unique');
             $table->index(TenantSchema::tenantIndex(['slug']));
             $table->index(TenantSchema::tenantIndex(['position']));
-            $table->index(TenantSchema::tenantIndex(['status']));
+            $table->index(TenantSchema::tenantIndex(['active']));
             $table->index(TenantSchema::tenantIndex(['is_default']));
         });
     }

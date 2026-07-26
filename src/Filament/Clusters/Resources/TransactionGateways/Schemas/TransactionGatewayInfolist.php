@@ -18,9 +18,9 @@ final class TransactionGatewayInfolist
             ->components([
                 TextEntry::make('name')->label(__('vendra-transaction::attributes.name')),
                 TextEntry::make('slug')->label(__('vendra-transaction::attributes.slug')),
-                IconEntry::make('status')
+                IconEntry::make('active')
                     ->boolean()
-                    ->label(__('vendra-transaction::attributes.status')),
+                    ->label(__('vendra-transaction::attributes.active')),
                 IconEntry::make('is_default')
                     ->boolean()
                     ->label(__('vendra-transaction::attributes.is_default')),

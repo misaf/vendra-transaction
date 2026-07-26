@@ -10,7 +10,7 @@ final class TransactionGatewayObserver
 {
     public function creating(TransactionGateway $gateway): void
     {
-        if ( ! $gateway->status) {
+        if ( ! $gateway->active) {
             $gateway->is_default = false;
 
             return;
@@ -23,7 +23,7 @@ final class TransactionGatewayObserver
 
     public function saving(TransactionGateway $gateway): void
     {
-        if ( ! $gateway->status) {
+        if ( ! $gateway->active) {
             $gateway->is_default = false;
 
             return;
@@ -53,7 +53,7 @@ final class TransactionGatewayObserver
 
     public function saved(TransactionGateway $gateway): void
     {
-        if ($gateway->wasChanged(['status', 'is_default'])) {
+        if ($gateway->wasChanged(['active', 'is_default'])) {
             $this->ensureEnabledDefault();
         }
     }

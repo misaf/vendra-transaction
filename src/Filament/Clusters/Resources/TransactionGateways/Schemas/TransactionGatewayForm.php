@@ -69,11 +69,11 @@ final class TransactionGatewayForm
                     ->label(__('vendra-transaction::attributes.image'))
                     ->live(),
 
-                Toggle::make('status')
-                    ->afterStateUpdated(fn(Livewire $livewire) => $livewire->validateOnly('data.status'))
+                Toggle::make('active')
+                    ->afterStateUpdated(fn(Livewire $livewire) => $livewire->validateOnly('data.active'))
                     ->columnSpanFull()
                     ->default(false)
-                    ->label(__('vendra-transaction::attributes.status'))
+                    ->label(__('vendra-transaction::attributes.active'))
                     ->live()
                     ->onIcon(Heroicon::Bolt)
                     ->required()

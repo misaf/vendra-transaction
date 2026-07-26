@@ -17,7 +17,7 @@ final class SetDefaultTransactionGateway
                 ->get(['id']);
 
             $gateway->update([
-                'status'     => true,
+                'active'     => true,
                 'is_default' => true,
             ]);
         });

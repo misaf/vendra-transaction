@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 return [
+    'active'                 => 'Active',
     'amount'                 => 'Amount',
     'amount_helper_text'     => 'Amount in minor units (e.g. cents).',
     'balance'                => 'Balance',

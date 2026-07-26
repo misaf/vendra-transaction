@@ -11,6 +11,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use LaraZeus\SpatieTranslatable\Resources\Concerns\Translatable;
 use Misaf\VendraSupport\Filament\Clusters\SalesCluster;
+use Misaf\VendraSupport\Filament\Concerns\InteractsWithTranslatedGlobalSearch;
 use Misaf\VendraSupport\Filament\Navigation\NavigationPriority;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Pages\CreateTransactionGateway;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Pages\EditTransactionGateway;
@@ -23,6 +24,9 @@ use Misaf\VendraTransaction\Models\TransactionGateway;
 
 final class TransactionGatewayResource extends Resource
 {
+    use InteractsWithTranslatedGlobalSearch {
+        getGloballySearchableAttributes as getTranslatedGloballySearchableAttributes;
+    }
     use Translatable;
 
     protected static ?string $model = TransactionGateway::class;
@@ -34,6 +38,25 @@ final class TransactionGatewayResource extends Resource
     protected static ?string $slug = 'transaction-gateways';
 
     protected static ?string $cluster = SalesCluster::class;
+
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return [
+            ...static::getTranslatedGloballySearchableAttributes(),
+            'slug',
+        ];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    protected static function translatableGlobalSearchAttributes(): array
+    {
+        return ['name'];
+    }
 
     public static function getDefaultTranslatableLocale(): string
     {
