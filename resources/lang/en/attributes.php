@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 return [
     'amount'                 => 'Amount',
+    'amount_helper_text'     => 'Amount in minor units (e.g. cents).',
     'balance'                => 'Balance',
     'balance_after'          => 'Balance After',
     'counterparty_wallet'    => 'Counterparty Wallet',
@@ -14,11 +15,13 @@ return [
     'fee'                    => 'Fee',
     'image'                  => 'Image',
     'is_default'             => 'Default',
+    'is_default_helper_text' => 'Enable to use this as the default gateway for new transactions.',
     'key_name'               => 'Key',
     'key_value'              => 'Value',
     'name'                   => 'Name',
     'position'               => 'Position',
     'slug'                   => 'Slug',
+    'slug_helper_text'       => 'A unique identifier for the URL. Leave empty to auto-generate from the name.',
     'source'                 => 'Source',
     'status'                 => 'Status',
     'token'                  => 'Token',

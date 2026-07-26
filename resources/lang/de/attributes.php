@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 return [
     'amount'                 => 'Betrag',
+    'amount_helper_text'     => 'Betrag in kleinster Einheit (z. B. Cent).',
     'balance'                => 'Guthaben',
     'balance_after'          => 'Guthaben danach',
     'counterparty_wallet'    => 'Gegenpartei-Wallet',
@@ -14,11 +15,13 @@ return [
     'fee'                    => 'Gebühr',
     'image'                  => 'Bild',
     'is_default'             => 'Standard',
+    'is_default_helper_text' => 'Aktivieren, um dies als Standard-Zahlungsweg für neue Transaktionen zu verwenden.',
     'key_name'               => 'Schlüssel',
     'key_value'              => 'Wert',
     'name'                   => 'Name',
     'position'               => 'Position',
     'slug'                   => 'Slug',
+    'slug_helper_text'       => 'Eine eindeutige Kennung für die URL. Leer lassen, um sie automatisch aus dem Namen zu generieren.',
     'source'                 => 'Quelle',
     'status'                 => 'Status',
     'token'                  => 'Token',

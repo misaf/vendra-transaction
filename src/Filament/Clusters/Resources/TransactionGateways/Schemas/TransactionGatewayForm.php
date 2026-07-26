@@ -25,7 +25,9 @@ final class TransactionGatewayForm
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->afterStateUpdated(function (Get $get, Set $set, ?string $old, ?string $state): void {
+                    ->afterStateUpdated(function (Livewire $livewire, Get $get, Set $set, ?string $old, ?string $state): void {
+                        $livewire->validateOnly('data.name');
+
                         if (($get->string('slug', isNullable: true) ?? '') === Str::slug($old ?? '')) {
                             $set('slug', Str::slug($state ?? ''));
                         }
@@ -41,7 +43,9 @@ final class TransactionGatewayForm
                     ->afterStateUpdated(fn(Livewire $livewire) => $livewire->validateOnly('data.slug'))
                     ->columnSpan(['lg' => 1])
                     ->extraInputAttributes(['dir' => 'ltr'])
+                    ->helperText(__('vendra-transaction::attributes.slug_helper_text'))
                     ->label(__('vendra-transaction::attributes.slug'))
+                    ->live(onBlur: true)
                     ->maxLength(255)
                     ->required()
                     ->unique(
@@ -50,22 +54,27 @@ final class TransactionGatewayForm
                     ),
 
                 Textarea::make('description')
+                    ->afterStateUpdated(fn(Livewire $livewire) => $livewire->validateOnly('data.description'))
                     ->columnSpanFull()
                     ->label(__('vendra-transaction::attributes.description'))
+                    ->live(onBlur: true)
                     ->maxLength(1000)
                     ->rows(3),
 
                 SpatieMediaLibraryFileUpload::make('image')
+                    ->afterStateUpdated(fn(Livewire $livewire) => $livewire->validateOnly('data.image'))
                     ->collection(TransactionGateway::MEDIA_COLLECTION)
                     ->columnSpanFull()
                     ->image()
-                    ->label(__('vendra-transaction::attributes.image')),
+                    ->label(__('vendra-transaction::attributes.image'))
+                    ->live(),
 
                 Toggle::make('status')
                     ->afterStateUpdated(fn(Livewire $livewire) => $livewire->validateOnly('data.status'))
                     ->columnSpanFull()
                     ->default(false)
                     ->label(__('vendra-transaction::attributes.status'))
+                    ->live()
                     ->onIcon(Heroicon::Bolt)
                     ->required()
                     ->rules(['boolean']),
@@ -74,7 +83,9 @@ final class TransactionGatewayForm
                     ->afterStateUpdated(fn(Livewire $livewire) => $livewire->validateOnly('data.is_default'))
                     ->columnSpanFull()
                     ->default(false)
+                    ->helperText(__('vendra-transaction::attributes.is_default_helper_text'))
                     ->label(__('vendra-transaction::attributes.is_default'))
+                    ->live()
                     ->onIcon(Heroicon::Bolt)
                     ->required()
                     ->rules(['boolean']),

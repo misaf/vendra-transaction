@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 return [
     'amount'                 => 'مبلغ',
+    'amount_helper_text'     => 'مبلغ به واحد خرد (مثلاً سِنت).',
     'balance'                => 'موجودی',
     'balance_after'          => 'موجودی پس از تراکنش',
     'counterparty_wallet'    => 'کیف پول مقصد',
@@ -14,11 +15,13 @@ return [
     'fee'                    => 'کارمزد',
     'image'                  => 'تصویر',
     'is_default'             => 'پیش‌فرض',
+    'is_default_helper_text' => 'فعال کنید تا این درگاه به عنوان پیش‌فرض برای تراکنش‌های جدید استفاده شود.',
     'key_name'               => 'کلید',
     'key_value'              => 'مقدار',
     'name'                   => 'نام',
     'position'               => 'جایگاه',
     'slug'                   => 'نامک',
+    'slug_helper_text'       => 'شناسه یکتای URL. برای تولید خودکار از نام، خالی بگذارید.',
     'source'                 => 'منبع',
     'status'                 => 'وضعیت',
     'token'                  => 'توکن',
