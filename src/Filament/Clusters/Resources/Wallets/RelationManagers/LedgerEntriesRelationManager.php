@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Misaf\VendraTransaction\Filament\Clusters\Resources\Wallets\RelationManagers;
 
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
@@ -47,6 +48,7 @@ final class LedgerEntriesRelationManager extends RelationManager
                 TextColumn::make('source_type')
                     ->badge()
                     ->formatStateUsing(fn(string $state): string => class_basename($state))
+                    ->icon(Heroicon::Tag)
                     ->label(__('vendra-transaction::attributes.source')),
 
                 TextColumn::make('created_at')

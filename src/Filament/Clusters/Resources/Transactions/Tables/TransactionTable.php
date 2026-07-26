@@ -45,6 +45,7 @@ final class TransactionTable
                     ->extraCellAttributes(['dir' => 'ltr'])
                     ->fontFamily('mono')
                     ->label(__('vendra-transaction::attributes.token'))
+                    ->icon(Heroicon::Key)
                     ->limit(12)
                     ->searchable(),
 
@@ -58,7 +59,8 @@ final class TransactionTable
 
                 TextColumn::make('wallet.currency_code')
                     ->badge()
-                    ->label(__('vendra-transaction::attributes.currency')),
+                    ->label(__('vendra-transaction::attributes.currency'))
+                    ->icon(Heroicon::CurrencyDollar),
 
                 TextColumn::make('transactionGateway.name')
                     ->label(__('vendra-transaction::attributes.transaction_gateway'))
@@ -66,7 +68,8 @@ final class TransactionTable
 
                 TextColumn::make('transaction_type')
                     ->badge()
-                    ->label(__('vendra-transaction::attributes.transaction_type')),
+                    ->label(__('vendra-transaction::attributes.transaction_type'))
+                    ->icon(Heroicon::Tag),
 
                 TextColumn::make('amount')
                     ->extraCellAttributes(['dir' => 'ltr'])

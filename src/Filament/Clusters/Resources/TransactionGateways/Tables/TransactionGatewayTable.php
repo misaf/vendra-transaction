@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Tables;
 
+use Awcodes\BadgeableColumn\Components\Badge;
+use Awcodes\BadgeableColumn\Components\BadgeableColumn;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Support\Enums\Size;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -22,7 +25,6 @@ use Filament\Tables\Table;
 use Livewire\Component as Livewire;
 use Misaf\VendraSupport\Filament\Concerns\HasDefaultAvatarImageUrl;
 use Misaf\VendraSupport\Filament\Concerns\InteractsWithTranslatedTableRecords;
-use Misaf\VendraTransaction\Actions\SetDefaultTransactionGateway;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Actions\SetDefaultTransactionGatewayAction;
 use Misaf\VendraTransaction\Models\TransactionGateway;
 
@@ -53,19 +55,29 @@ final class TransactionGatewayTable
                     ->label(__('vendra-transaction::attributes.image'))
                     ->stacked(),
 
-                TextColumn::make('name')
+                BadgeableColumn::make('name')
                     ->alignStart()
                     ->label(__('vendra-transaction::attributes.name'))
-                    ->searchable(),
+                    ->icon(Heroicon::Tag)
+                    ->searchable()
+                    ->prefixBadges([
+                        Badge::make('is_default')
+                            ->label(__('vendra-transaction::attributes.is_default'))
+                            ->color('success')
+                            ->size(Size::ExtraSmall)
+                            ->hidden(fn(TransactionGateway $record): bool => ! $record->is_default),
+                    ]),
 
                 TextColumn::make('description')
                     ->label(__('vendra-transaction::attributes.description'))
+                    ->icon(Heroicon::DocumentText)
                     ->state(fn(TransactionGateway $record, Livewire $livewire): string => static::translatedAttribute($record, 'description', $livewire))
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('slug')
                     ->alignStart()
                     ->label(__('vendra-transaction::attributes.slug'))
+                    ->icon(Heroicon::Link)
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
@@ -78,18 +90,6 @@ final class TransactionGatewayTable
                 ToggleColumn::make('status')
                     ->label(__('vendra-transaction::attributes.status'))
                     ->onIcon(Heroicon::Bolt),
-
-                ToggleColumn::make('is_default')
-                    ->disabled(fn(TransactionGateway $record): bool => $record->is_default)
-                    ->label(__('vendra-transaction::attributes.is_default'))
-                    ->onIcon(Heroicon::Bolt)
-                    ->updateStateUsing(function (TransactionGateway $record, bool $state, SetDefaultTransactionGateway $setDefaultTransactionGateway): bool {
-                        if ($state) {
-                            $setDefaultTransactionGateway->execute($record);
-                        }
-
-                        return $record->refresh()->is_default;
-                    }),
 
                 TextColumn::make('created_at')
                     ->alignCenter()

@@ -89,7 +89,8 @@ final class TransactionLimitsRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('transaction_type')
                     ->badge()
-                    ->label(__('vendra-transaction::attributes.transaction_type')),
+                    ->label(__('vendra-transaction::attributes.transaction_type'))
+                    ->icon(Heroicon::Tag),
 
                 TextColumn::make('amount')
                     ->extraCellAttributes(['dir' => 'ltr'])

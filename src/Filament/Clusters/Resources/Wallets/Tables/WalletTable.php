@@ -42,7 +42,8 @@ final class WalletTable
 
                 TextColumn::make('currency_code')
                     ->badge()
-                    ->label(__('vendra-transaction::attributes.currency')),
+                    ->label(__('vendra-transaction::attributes.currency'))
+                    ->icon(Heroicon::CurrencyDollar),
 
                 TextColumn::make('balance')
                     ->extraCellAttributes(['dir' => 'ltr'])

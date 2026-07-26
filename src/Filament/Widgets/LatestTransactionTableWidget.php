@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Misaf\VendraTransaction\Filament\Widgets;
 
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -42,6 +43,7 @@ final class LatestTransactionTableWidget extends BaseWidget
                     ->extraCellAttributes(['dir' => 'ltr'])
                     ->fontFamily('mono')
                     ->label(__('vendra-transaction::attributes.token'))
+                    ->icon(Heroicon::Key)
                     ->limit(12),
 
                 TextColumn::make('wallet.user')
@@ -54,7 +56,8 @@ final class LatestTransactionTableWidget extends BaseWidget
 
                 TextColumn::make('transaction_type')
                     ->badge()
-                    ->label(__('vendra-transaction::attributes.transaction_type')),
+                    ->label(__('vendra-transaction::attributes.transaction_type'))
+                    ->icon(Heroicon::Tag),
 
                 TextColumn::make('amount')
                     ->extraCellAttributes(['dir' => 'ltr'])
