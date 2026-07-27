@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Misaf\VendraTransaction\Events;
 
+use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
 use Illuminate\Foundation\Events\Dispatchable;
 use Misaf\VendraTransaction\Models\Transaction;
 
-final class TransactionApproved
+final class TransactionApproved implements ShouldDispatchAfterCommit
 {
     use Dispatchable;
 

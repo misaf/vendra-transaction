@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
+
 arch()->preset()->php();
 arch()->preset()->security();
 arch()->preset()->laravel();
@@ -17,3 +19,7 @@ arch('the transaction module resolves users from configuration, never a concrete
 arch('the transaction module derives currency support from the support layer, never the currency module')
     ->expect('Misaf\VendraTransaction')
     ->not->toUse('Misaf\VendraCurrency');
+
+arch('transaction state events dispatch after database commits')
+    ->expect('Misaf\VendraTransaction\Events')
+    ->toImplement(ShouldDispatchAfterCommit::class);
