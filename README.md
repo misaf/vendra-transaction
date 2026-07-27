@@ -70,6 +70,8 @@ php artisan vendra-transaction:verify-balances --repair
 
 ## Testing
 
+Run the package checks from the package directory:
+
 ```bash
 composer test
 composer analyse

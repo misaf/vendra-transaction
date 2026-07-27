@@ -2,8 +2,6 @@
 
 The `misaf/vendra-transaction` package owns the wallet/ledger financial domain: per-user, per-currency `Wallet` balances, immutable `LedgerEntry` records, gateway-labelled `Transaction` lifecycles driven by a Spatie model-states machine, plus fees, metadata, limits, and the Filament admin UI for transactions, gateways, and wallets.
 
-### Standards
-
 ### Translatable Persistence
 
 - Making a persisted model field translatable is an explicit domain choice unless this package already requires it.
