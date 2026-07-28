@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use LogicException;
-use Misaf\VendraSupport\Support\CurrencyIntegration;
+use Misaf\VendraSupport\Capabilities\CurrencyIntegration;
 use Misaf\VendraTransaction\Enums\TransactionTypeEnum;
 use Misaf\VendraTransaction\Exceptions\TransactionLimitExceededException;
 use Misaf\VendraTransaction\Models\Transaction;

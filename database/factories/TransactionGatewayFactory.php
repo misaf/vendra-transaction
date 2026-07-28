@@ -7,7 +7,7 @@ namespace Misaf\VendraTransaction\Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
-use Misaf\VendraSupport\Support\TenantAwareness;
+use Misaf\VendraSupport\Tenancy\TenantAwareness;
 use Misaf\VendraTransaction\Models\TransactionGateway;
 use Misaf\VendraTransaction\Services\TransactionService;
 

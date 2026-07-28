@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Misaf\VendraMultimedia\Concerns\HasDefaultMediaConversions;
 use Misaf\VendraSupport\Contracts\ShouldLogActivity;
-use Misaf\VendraSupport\Traits\BelongsToTenant;
+use Misaf\VendraSupport\Tenancy\BelongsToTenant;
 use Misaf\VendraTransaction\Database\Factories\TransactionGatewayFactory;
 use Misaf\VendraTransaction\Observers\TransactionGatewayObserver;
 use Spatie\EloquentSortable\Sortable;

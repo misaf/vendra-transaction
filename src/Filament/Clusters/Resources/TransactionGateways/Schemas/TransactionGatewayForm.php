@@ -15,7 +15,7 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Unique;
 use Livewire\Component as Livewire;
-use Misaf\VendraSupport\Support\TenantAwareness;
+use Misaf\VendraSupport\Tenancy\TenantAwareness;
 use Misaf\VendraTransaction\Models\TransactionGateway;
 
 final class TransactionGatewayForm

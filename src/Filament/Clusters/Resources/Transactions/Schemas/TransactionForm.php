@@ -10,7 +10,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Component as Livewire;
-use Misaf\VendraSupport\Support\CurrencyIntegration;
+use Misaf\VendraSupport\Capabilities\CurrencyIntegration;
 use Misaf\VendraTransaction\Enums\TransactionTypeEnum;
 use Misaf\VendraTransaction\Models\TransactionGateway;
 use Misaf\VendraTransaction\Support\TransactionUsers;

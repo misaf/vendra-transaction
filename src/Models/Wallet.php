@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Misaf\VendraSupport\Contracts\ShouldLogActivity;
-use Misaf\VendraSupport\Traits\BelongsToTenant;
+use Misaf\VendraSupport\Tenancy\BelongsToTenant;
 use Misaf\VendraTransaction\Database\Factories\WalletFactory;
 use Misaf\VendraTransaction\Support\TransactionUsers;
 

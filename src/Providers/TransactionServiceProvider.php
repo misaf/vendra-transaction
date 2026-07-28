@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Console\AboutCommand;
 use Misaf\VendraSupport\Filament\Concerns\ResolvesConfiguredPanels;
-use Misaf\VendraSupport\Support\TenantTableRegistry;
+use Misaf\VendraSupport\Tenancy\TenantTableRegistry;
 use Misaf\VendraTransaction\Console\Commands\VerifyWalletBalancesCommand;
 use Misaf\VendraTransaction\Models\Wallet;
 use Misaf\VendraTransaction\Services\LedgerService;

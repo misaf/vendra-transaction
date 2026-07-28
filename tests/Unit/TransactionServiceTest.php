@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Misaf\VendraSupport\Support\CurrencyIntegration;
+use Misaf\VendraSupport\Capabilities\CurrencyIntegration;
 use Misaf\VendraTransaction\Database\Factories\TransactionGatewayFactory;
 use Misaf\VendraTransaction\Database\Factories\TransactionLimitFactory;
 use Misaf\VendraTransaction\Database\Factories\WalletFactory;

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Misaf\VendraTransaction\Policies;
 
-use Misaf\VendraSupport\Concerns\AuthorizesSandboxMode;
-use Misaf\VendraSupport\Concerns\AuthorizesViewAbilities;
-use Misaf\VendraSupport\Concerns\ResolvesPolicyPermissions;
+use Misaf\VendraSupport\Authorization\AuthorizesSandboxMode;
+use Misaf\VendraSupport\Authorization\AuthorizesViewAbilities;
+use Misaf\VendraSupport\Authorization\ResolvesPolicyPermissions;
 use Misaf\VendraTransaction\Enums\WalletPolicyEnum;
 
 /**

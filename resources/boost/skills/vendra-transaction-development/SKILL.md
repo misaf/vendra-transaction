@@ -48,7 +48,7 @@ The ledger is the single source of balance truth.
 - Resolve the user model through `Support\TransactionUsers::model()`; the provider attaches the `wallets` relation to the configured auth model.
 - Gateways are admin-managed labels: translatable `name`/`description`, scalar `slug` (lookup key; internal slug is `TransactionService::INTERNAL_GATEWAY_SLUG`), media logo, sortable position. No payment-processing logic here.
 - Keep the module tenant-agnostic (`BelongsToTenant`, `TenantSchema`, registry registration for `transaction_gateways`, `wallets`, `transactions`); never reference `Misaf\VendraTenant`.
-- Tag-consuming models must use `Misaf\VendraSupport\Traits\HasOptionalTags` as the single source of their `tags()` relationship and pivot metadata. Keep the package tag-agnostic: define a stable package-owned tag type, use `TagIntegration` for availability and UI integration, never import the concrete Vendra Tagger model/provider or define the relationship through Spatie `HasTags`, and list Tagger only under Composer `suggest`.
+- Tag-consuming models must use `Misaf\VendraSupport\Capabilities\HasOptionalTags` as the single source of their `tags()` relationship and pivot metadata. Keep the package tag-agnostic: define a stable package-owned tag type, use `TagIntegration` for availability and UI integration, never import the concrete Vendra Tagger model/provider or define the relationship through Spatie `HasTags`, and list Tagger only under Composer `suggest`.
 
 ## Filament Standards
 

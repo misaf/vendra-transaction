@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
-use Misaf\VendraSupport\Support\TenantAwareness;
+use Misaf\VendraSupport\Tenancy\TenantAwareness;
 use Misaf\VendraTransaction\Models\Wallet;
 use Misaf\VendraTransaction\Support\TransactionUsers;
 
