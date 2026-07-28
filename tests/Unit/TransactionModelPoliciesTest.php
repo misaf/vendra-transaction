@@ -17,7 +17,7 @@ use Misaf\VendraTransaction\Models\Wallet;
 
 it('defines the expected transaction models', function (): void {
     expect((new Transaction())->getFillable())->toContain('wallet_id', 'transaction_gateway_id', 'counterparty_wallet_id', 'transaction_type', 'token', 'idempotency_key', 'amount', 'status')
-        ->and((new TransactionGateway())->getFillable())->toContain('name', 'description', 'slug', 'position', 'status')
+        ->and((new TransactionGateway())->getFillable())->toContain('name', 'description', 'slug', 'position', 'active', 'is_default')
         ->and((new Wallet())->getFillable())->toContain('user_id', 'currency_code')
         ->and((new Wallet())->getFillable())->not->toContain('balance')
         ->and((new LedgerEntry())->getFillable())->toContain('amount', 'balance_after')
