@@ -31,9 +31,9 @@ cluster for transactions, gateways, and wallets.
    logic lives in the host application. Internal movements use the
    `internal-transactions` gateway.
 
-The module is decoupled from any concrete user package — the wallet owner
-model resolves from `auth.providers.users.model` — and consumes currencies
-through `misaf/vendra-currency`.
+The module is decoupled from concrete user and currency packages. The wallet
+owner model resolves from `auth.providers.users.model`; currency options resolve
+through the provider-neutral capability in `misaf/vendra-support`.
 
 ## Requirements
 
@@ -41,8 +41,12 @@ through `misaf/vendra-currency`.
 - Laravel 13
 - Filament 5
 - `misaf/vendra-support`
-- `misaf/vendra-currency`
 - `misaf/vendra-multimedia`
+
+Optional:
+
+- `misaf/vendra-currency` — supplies managed active/default currency options to
+  the shared Support resolver
 
 ## Installation
 

@@ -34,7 +34,7 @@ Treat `packages/vendra-transaction` as the source of the wallet/ledger financial
 
 - Use namespace `Misaf\VendraTransaction`.
 - Keep domain models, factories, policies, states, services, events, exceptions, console commands, Filament classes, migrations, translations, and tests inside this module.
-- Keep cross-module dependencies explicit in `composer.json`; do not introduce a dependency without approval. The module depends on `misaf/vendra-currency`, `misaf/vendra-multimedia`, and `misaf/vendra-support` but must never import `Misaf\VendraUser` or `Misaf\VendraTenant`.
+- Keep cross-module dependencies explicit in `composer.json`; do not introduce a dependency without approval. Production depends on `misaf/vendra-multimedia` and `misaf/vendra-support`. `misaf/vendra-currency` is an optional provider listed in `suggest` and used only for package development under `require-dev`; production code must never import it. Never import `Misaf\VendraUser` or `Misaf\VendraTenant`.
 
 ## Domain Standards
 
@@ -46,6 +46,7 @@ The ledger is the single source of balance truth.
 - Create transactions through `TransactionService::createTransaction()` (enforces per-wallet `TransactionLimit`s, attaches fee and metadata); provision wallets with `walletFor()` / `defaultWalletFor()`.
 - Use nullable `transactions.idempotency_key` for retry-safe creation. Return the original transaction when a key and financial payload are repeated, and reject the same key with different details. Keep it in the consolidated create migration and its package stub; do not add a follow-up alteration migration.
 - Resolve the user model through `Support\TransactionUsers::model()`; the provider attaches the `wallets` relation to the configured auth model.
+- Resolve currency defaults and options through Support's `CurrencyIntegration`; persist only scalar `currency_code` values. The null resolver keeps the module functional without `misaf/vendra-currency`, while an installed provider supplies managed active/default currencies.
 - Gateways are admin-managed labels: translatable `name`/`description`, scalar `slug` (lookup key; internal slug is `TransactionService::INTERNAL_GATEWAY_SLUG`), media logo, sortable position. No payment-processing logic here.
 - Keep the module tenant-agnostic (`BelongsToTenant`, `TenantSchema`, registry registration for `transaction_gateways`, `wallets`, `transactions`); never reference `Misaf\VendraTenant`.
 - Tag-consuming models must use `Misaf\VendraSupport\Capabilities\HasOptionalTags` as the single source of their `tags()` relationship and pivot metadata. Keep the package tag-agnostic: define a stable package-owned tag type, use `TagIntegration` for availability and UI integration, never import the concrete Vendra Tagger model/provider or define the relationship through Spatie `HasTags`, and list Tagger only under Composer `suggest`.
