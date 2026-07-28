@@ -17,7 +17,7 @@ beforeEach(function (): void {
 });
 
 it('creates a pending transaction with fee and metadata', function (): void {
-    $gateway = TransactionGatewayFactory::new()->enabled()->create(['slug' => 'shetab']);
+    $gateway = TransactionGatewayFactory::new()->active()->create(['slug' => 'shetab']);
     $wallet = WalletFactory::new()->create();
 
     $transaction = TransactionService::createTransaction(
@@ -44,7 +44,7 @@ it('creates a pending transaction with fee and metadata', function (): void {
 });
 
 it('returns the original transaction when an idempotency key is retried', function (): void {
-    TransactionGatewayFactory::new()->enabled()->create(['slug' => 'shetab']);
+    TransactionGatewayFactory::new()->active()->create(['slug' => 'shetab']);
     $wallet = WalletFactory::new()->create();
 
     $first = TransactionService::createTransaction(
@@ -71,7 +71,7 @@ it('returns the original transaction when an idempotency key is retried', functi
 });
 
 it('rejects an idempotency key reused for different transaction details', function (): void {
-    TransactionGatewayFactory::new()->enabled()->create(['slug' => 'shetab']);
+    TransactionGatewayFactory::new()->active()->create(['slug' => 'shetab']);
     $wallet = WalletFactory::new()->create();
 
     TransactionService::createTransaction(
@@ -92,7 +92,7 @@ it('rejects an idempotency key reused for different transaction details', functi
 });
 
 it('enforces the per-wallet transaction limit at creation', function (): void {
-    TransactionGatewayFactory::new()->enabled()->create(['slug' => 'shetab']);
+    TransactionGatewayFactory::new()->active()->create(['slug' => 'shetab']);
     $wallet = WalletFactory::new()->create();
     TransactionLimitFactory::new()->forWallet($wallet)->ofType(TransactionTypeEnum::Withdrawal)->create(['amount' => 1_000]);
 
@@ -105,7 +105,7 @@ it('enforces the per-wallet transaction limit at creation', function (): void {
 });
 
 it('resolves gateways by slug and ignores disabled ones', function (): void {
-    TransactionGatewayFactory::new()->disabled()->create(['slug' => 'coinpayments']);
+    TransactionGatewayFactory::new()->inactive()->create(['slug' => 'coinpayments']);
     TransactionGatewayFactory::new()->internal()->create();
 
     expect(TransactionService::hasActiveTransactionGateway('coinpayments'))->toBeFalse()
@@ -124,7 +124,7 @@ it('provisions the default wallet in the resolved default currency', function ()
 
 it('identifies internal transactions by the internal gateway', function (): void {
     $internal = TransactionGatewayFactory::new()->internal()->create();
-    $external = TransactionGatewayFactory::new()->enabled()->create(['slug' => 'shetab']);
+    $external = TransactionGatewayFactory::new()->active()->create(['slug' => 'shetab']);
     $wallet = WalletFactory::new()->create();
 
     $internalTransaction = TransactionService::createTransaction(

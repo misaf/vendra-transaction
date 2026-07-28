@@ -9,7 +9,7 @@ beforeEach(function (): void {
     makeCurrentTestTenant();
 });
 
-it('makes the first enabled gateway the default', function (): void {
+it('makes the first active gateway the default', function (): void {
     $gateway = TransactionGatewayFactory::new()->createOne();
 
     expect($gateway->is_default)->toBeTrue();
@@ -33,7 +33,7 @@ it('promotes the first ordered gateway when the default is deleted', function ()
         ->and($next->refresh()->is_default)->toBeTrue();
 });
 
-it('promotes the first enabled gateway when the default is disabled', function (): void {
+it('promotes the first active gateway when the default becomes inactive', function (): void {
     $default = TransactionGatewayFactory::new()->default()->createOne();
     $next = TransactionGatewayFactory::new()->createOne();
 
@@ -44,8 +44,8 @@ it('promotes the first enabled gateway when the default is disabled', function (
         ->and($next->refresh()->is_default)->toBeTrue();
 });
 
-it('disables the default flag when creating a disabled gateway', function (): void {
-    $gateway = TransactionGatewayFactory::new()->disabled()->default()->createOne();
+it('clears the default flag when creating an inactive gateway', function (): void {
+    $gateway = TransactionGatewayFactory::new()->inactive()->default()->createOne();
 
     expect($gateway->refresh()->is_default)->toBeFalse();
 });
@@ -60,9 +60,9 @@ it('switches the default gateway through the domain action', function (): void {
         ->and($second->refresh()->is_default)->toBeTrue();
 });
 
-it('enables a disabled gateway when it becomes the default', function (): void {
+it('activates an inactive gateway when it becomes the default', function (): void {
     TransactionGatewayFactory::new()->default()->createOne();
-    $gateway = TransactionGatewayFactory::new()->disabled()->createOne();
+    $gateway = TransactionGatewayFactory::new()->inactive()->createOne();
 
     (new SetDefaultTransactionGateway())->execute($gateway);
 

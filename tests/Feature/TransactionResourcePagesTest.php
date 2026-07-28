@@ -52,7 +52,7 @@ it('defers transaction filter tab badge queries', function (): void {
 });
 
 it('provisions the wallet from the selected user and currency on create', function (): void {
-    $gateway = TransactionGatewayFactory::new()->enabled()->create();
+    $gateway = TransactionGatewayFactory::new()->active()->create();
     $currencyCode = CurrencyIntegration::defaultCode();
     $user = TransactionUsers::model()::factory()->create();
 
@@ -76,7 +76,7 @@ it('provisions the wallet from the selected user and currency on create', functi
 });
 
 it('provisions both wallets for a transfer created from the form', function (): void {
-    $gateway = TransactionGatewayFactory::new()->enabled()->create();
+    $gateway = TransactionGatewayFactory::new()->active()->create();
     $currencyCode = CurrencyIntegration::defaultCode();
     $source = TransactionUsers::model()::factory()->create();
     $destination = TransactionUsers::model()::factory()->create();

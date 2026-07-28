@@ -129,7 +129,7 @@ final class TransactionGateway extends Model implements HasMedia, ShouldLogActiv
     /**
      * @param  Builder<self>  $builder
      */
-    public function scopeEnabled(Builder $builder): void
+    public function scopeActive(Builder $builder): void
     {
         $builder->where('active', true);
     }

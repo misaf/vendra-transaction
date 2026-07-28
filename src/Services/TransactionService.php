@@ -62,7 +62,7 @@ final class TransactionService
     public function hasAnyActiveTransactionGateway(): bool
     {
         return TransactionGateway::query()
-            ->enabled()
+            ->active()
             ->where('slug', '<>', self::INTERNAL_GATEWAY_SLUG)
             ->exists();
     }
@@ -70,7 +70,7 @@ final class TransactionService
     public function hasActiveTransactionGateway(string $slug): bool
     {
         return TransactionGateway::query()
-            ->enabled()
+            ->active()
             ->where('slug', $slug)
             ->exists();
     }
@@ -78,7 +78,7 @@ final class TransactionService
     public function getTransactionGateway(string $slug): TransactionGateway
     {
         $gateway = TransactionGateway::query()
-            ->enabled()
+            ->active()
             ->where('slug', $slug)
             ->first();
 

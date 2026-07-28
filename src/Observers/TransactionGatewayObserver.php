@@ -16,7 +16,7 @@ final class TransactionGatewayObserver
             return;
         }
 
-        if ( ! TransactionGateway::query()->enabled()->exists()) {
+        if ( ! TransactionGateway::query()->active()->exists()) {
             $gateway->is_default = true;
         }
     }
@@ -40,7 +40,7 @@ final class TransactionGatewayObserver
 
         if ($gateway->exists && true === $gateway->getOriginal('is_default')) {
             $hasAnotherDefault = TransactionGateway::query()
-                ->enabled()
+                ->active()
                 ->where('is_default', true)
                 ->whereKeyNot($gateway->getKey())
                 ->exists();
@@ -54,7 +54,7 @@ final class TransactionGatewayObserver
     public function saved(TransactionGateway $gateway): void
     {
         if ($gateway->wasChanged(['active', 'is_default'])) {
-            $this->ensureEnabledDefault();
+            $this->ensureActiveDefault();
         }
     }
 
@@ -68,17 +68,17 @@ final class TransactionGatewayObserver
             $gateway->forceFill(['is_default' => false])->saveQuietly();
         }
 
-        $this->ensureEnabledDefault();
+        $this->ensureActiveDefault();
     }
 
-    private function ensureEnabledDefault(): void
+    private function ensureActiveDefault(): void
     {
-        if (TransactionGateway::query()->enabled()->where('is_default', true)->exists()) {
+        if (TransactionGateway::query()->active()->where('is_default', true)->exists()) {
             return;
         }
 
         TransactionGateway::query()
-            ->enabled()
+            ->active()
             ->ordered()
             ->first()
             ?->update(['is_default' => true]);

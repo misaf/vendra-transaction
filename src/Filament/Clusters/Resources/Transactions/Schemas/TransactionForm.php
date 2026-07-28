@@ -54,7 +54,7 @@ final class TransactionForm
                     ->live()
                     ->native(false)
                     ->preload()
-                    ->relationship('transactionGateway', modifyQueryUsing: fn($query) => $query->enabled())
+                    ->relationship('transactionGateway', modifyQueryUsing: fn($query) => $query->active())
                     ->required()
                     ->searchable(),
 
