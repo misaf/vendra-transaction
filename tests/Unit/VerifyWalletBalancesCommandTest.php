@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
+use Misaf\VendraTransaction\Actions\PostLedgerEntryAction;
 use Misaf\VendraTransaction\Database\Factories\WalletFactory;
-use Misaf\VendraTransaction\Services\LedgerService;
 
 use function Pest\Laravel\artisan;
 
@@ -13,14 +13,14 @@ beforeEach(function (): void {
 
 it('passes when cached balances match the ledger', function (): void {
     $wallet = WalletFactory::new()->create();
-    app(LedgerService::class)->post($wallet, 2_500);
+    app(PostLedgerEntryAction::class)->execute($wallet, 2_500);
 
     artisan('vendra-transaction:verify-balances')->assertSuccessful();
 });
 
 it('fails on drifted balances and repairs them on demand', function (): void {
     $wallet = WalletFactory::new()->create();
-    app(LedgerService::class)->post($wallet, 2_500);
+    app(PostLedgerEntryAction::class)->execute($wallet, 2_500);
 
     $wallet->newQuery()->whereKey($wallet->id)->toBase()->update(['balance' => 9_999]);
 

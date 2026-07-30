@@ -1,6 +1,6 @@
 ---
 name: vendra-transaction-development
-description: "Create, modify, review, or test the Vendra Transaction package in packages/vendra-transaction. Use for Wallet, LedgerEntry, Transaction, TransactionGateway, fees, limits, metadata, the transaction state machine (States, ApproveTransactionTransition), LedgerService, TransactionService, verify-balances command, policies, Filament resources and widgets, migrations, translations, and package wiring."
+description: "Create, modify, review, or test the Vendra Transaction package in packages/vendra-transaction. Use for Wallet, LedgerEntry, Transaction, TransactionGateway, fees, limits, metadata, the transaction state machine (States, ApproveTransactionTransition), TransactionService, CreateTransactionAction, PostLedgerEntryAction, SettleTransactionAction, verify-balances command, policies, Filament resources and widgets, migrations, translations, and package wiring."
 ---
 
 # Vendra Transaction
@@ -40,10 +40,10 @@ Treat `packages/vendra-transaction` as the source of the wallet/ledger financial
 
 The ledger is the single source of balance truth.
 
-- `Wallet` is one balance per user per currency; `balance` is a cache written only by `Services\LedgerService::post()` under `lockForUpdate`, together with an immutable `LedgerEntry` (`amount` signed, `balance_after` snapshot, polymorphic `source`). `LedgerEntry` throws on update/delete; never bypass the service.
+- `Wallet` is one balance per user per currency; `balance` is a cache written only by `Actions\PostLedgerEntryAction::execute()` under `lockForUpdate`, together with an immutable `LedgerEntry` (`amount` signed, `balance_after` snapshot, polymorphic `source`). `LedgerEntry` throws on update/delete; never bypass the service.
 - Transaction status is a Spatie model-states machine in `States\` (`Pending → Processing → Review → Approved/Declined/Failed`). `ApproveTransactionTransition` settles principal, transfer counterpart, and fee into the ledger atomically with the status write and dispatches `TransactionApproved`. Use `approve()`, `decline()`, `fail()`, `markProcessing()`, `markReview()`; never write the status column directly.
 - `transactions.amount` is absolute minor units; ledger sign derives from `TransactionTypeEnum::ledgerSign()`. Transfers store `counterparty_wallet_id`; insufficient balance raises `InsufficientBalanceException` and rolls the whole approval back.
-- Create transactions through `TransactionService::createTransaction()` (enforces per-wallet `TransactionLimit`s, attaches fee and metadata); provision wallets with `walletFor()` / `defaultWalletFor()`.
+- Create transactions through `CreateTransactionAction::execute()` (enforces per-wallet `TransactionLimit`s, attaches fee and metadata); provision wallets with `walletFor()` / `defaultWalletFor()`.
 - Use nullable `transactions.idempotency_key` for retry-safe creation. Return the original transaction when a key and financial payload are repeated, and reject the same key with different details. Keep it in the consolidated create migration and its package stub; do not add a follow-up alteration migration.
 - Resolve the user model through `Support\TransactionUsers::model()`; the provider attaches the `wallets` relation to the configured auth model.
 - Resolve currency defaults and options through Support's `CurrencyIntegration`; persist only scalar `currency_code` values. The null resolver keeps the module functional without `misaf/vendra-currency`, while an installed provider supplies managed active/default currencies.
@@ -70,7 +70,7 @@ Policy enums are the permission source: `TransactionPolicyEnum`, `TransactionGat
 ## Data And Localization
 
 - The migration stub `create_transactions_table.php.stub` creates `transaction_gateways`, `wallets`, `ledger_entries`, `transactions`, `transaction_fees`, `transaction_metadata`, and `transaction_limits`. Keep the published app migration in sync with the stub.
-- Keep factories tenant-safe and ledger-safe: wallet factories never set `balance`; post entries through `LedgerService` in tests. The `TransactionFactory` `approved()` state sets the column without settling — use `->create()->approve()` when ledger rows must exist.
+- Keep factories tenant-safe and ledger-safe: wallet factories never set `balance`; post entries through `PostLedgerEntryAction` in tests. The `TransactionFactory` `approved()` state sets the column without settling — use `->create()->approve()` when ledger rows must exist.
 - Update `en`, `de`, and `fa` together; keep translation keys sorted and in parity.
 
 ## Testing And Verification

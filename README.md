@@ -12,11 +12,11 @@ cluster for transactions, gateways, and wallets.
    `balance` in the currency's minor units.
 2. The ledger is the single source of balance truth: every movement is an
    immutable `LedgerEntry` (signed amount, `balance_after` snapshot,
-   polymorphic source) written by `LedgerService` together with the cached
+   polymorphic source) written by `PostLedgerEntryAction` together with the cached
    wallet balance under a row lock. Overdrafts throw
    `InsufficientBalanceException`.
 3. A `Transaction` is a gateway-facing money movement created through
-   `TransactionService::createTransaction()`, which enforces per-wallet
+   `CreateTransactionAction::execute()`, which enforces per-wallet
    `TransactionLimit`s and attaches optional fee and metadata rows. Its
    `amount` is always absolute; the ledger sign derives from the
    transaction type (deposit, withdrawal, commission, transfer, bonus).

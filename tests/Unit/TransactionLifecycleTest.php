@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Event;
+use Misaf\VendraTransaction\Actions\PostLedgerEntryAction;
 use Misaf\VendraTransaction\Database\Factories\TransactionFactory;
 use Misaf\VendraTransaction\Database\Factories\WalletFactory;
 use Misaf\VendraTransaction\Events\TransactionApproved;
@@ -10,7 +11,6 @@ use Misaf\VendraTransaction\Events\TransactionDeclined;
 use Misaf\VendraTransaction\Events\TransactionFailed;
 use Misaf\VendraTransaction\Exceptions\InsufficientBalanceException;
 use Misaf\VendraTransaction\Models\Transaction;
-use Misaf\VendraTransaction\Services\LedgerService;
 use Misaf\VendraTransaction\States\Approved;
 use Misaf\VendraTransaction\States\Declined;
 use Misaf\VendraTransaction\States\Pending;
@@ -39,7 +39,7 @@ it('starts pending and settles a deposit into the ledger on approval', function 
 
 it('settles a withdrawal as a negative ledger entry', function (): void {
     $wallet = WalletFactory::new()->create();
-    app(LedgerService::class)->post($wallet, 10_000);
+    app(PostLedgerEntryAction::class)->execute($wallet, 10_000);
 
     $transaction = TransactionFactory::new()->forWallet($wallet)->withdrawal()->create(['amount' => 3_000]);
     $transaction->approve();
@@ -50,7 +50,7 @@ it('settles a withdrawal as a negative ledger entry', function (): void {
 
 it('refuses to settle a withdrawal beyond the wallet balance and stays pending', function (): void {
     $wallet = WalletFactory::new()->create();
-    app(LedgerService::class)->post($wallet, 1_000);
+    app(PostLedgerEntryAction::class)->execute($wallet, 1_000);
 
     $transaction = TransactionFactory::new()->forWallet($wallet)->withdrawal()->create(['amount' => 2_000]);
 
@@ -62,7 +62,7 @@ it('refuses to settle a withdrawal beyond the wallet balance and stays pending',
 it('settles a transfer against both wallets atomically', function (): void {
     $source = WalletFactory::new()->create();
     $destination = WalletFactory::new()->create();
-    app(LedgerService::class)->post($source, 5_000);
+    app(PostLedgerEntryAction::class)->execute($source, 5_000);
 
     $transaction = TransactionFactory::new()
         ->forWallet($source)

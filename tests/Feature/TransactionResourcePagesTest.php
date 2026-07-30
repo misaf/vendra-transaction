@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Filament\Schemas\Components\Tabs\Tab;
 use Misaf\VendraSupport\Capabilities\CurrencyIntegration;
+use Misaf\VendraTransaction\Actions\PostLedgerEntryAction;
 use Misaf\VendraTransaction\Database\Factories\TransactionFactory;
 use Misaf\VendraTransaction\Database\Factories\TransactionGatewayFactory;
 use Misaf\VendraTransaction\Database\Factories\WalletFactory;
@@ -12,7 +13,6 @@ use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Pages\Creat
 use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Pages\ListTransactions;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Pages\ViewTransaction;
 use Misaf\VendraTransaction\Models\Wallet;
-use Misaf\VendraTransaction\Services\LedgerService;
 use Misaf\VendraTransaction\States\Approved;
 use Misaf\VendraTransaction\States\Declined;
 use Misaf\VendraTransaction\Support\TransactionUsers;
@@ -127,7 +127,7 @@ it('declines a transaction from the view page without touching the ledger', func
 
 it('notifies instead of settling when the balance is insufficient', function (): void {
     $wallet = WalletFactory::new()->create();
-    app(LedgerService::class)->post($wallet, 500);
+    app(PostLedgerEntryAction::class)->execute($wallet, 500);
 
     $transaction = TransactionFactory::new()->forWallet($wallet)->withdrawal()->create(['amount' => 2_000]);
 

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Misaf\VendraTransaction\States;
 
 use Illuminate\Support\Facades\DB;
+use Misaf\VendraTransaction\Actions\SettleTransactionAction;
 use Misaf\VendraTransaction\Events\TransactionApproved;
 use Misaf\VendraTransaction\Models\Transaction;
-use Misaf\VendraTransaction\Services\LedgerService;
 use Spatie\ModelStates\Transition;
 
 /**
@@ -22,7 +22,7 @@ final class ApproveTransactionTransition extends Transition
     public function handle(): Transaction
     {
         DB::transaction(function (): void {
-            app(LedgerService::class)->settle($this->transaction);
+            app(SettleTransactionAction::class)->execute($this->transaction);
 
             $this->transaction->status = new Approved($this->transaction);
             $this->transaction->save();

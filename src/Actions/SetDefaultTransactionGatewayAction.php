@@ -7,7 +7,7 @@ namespace Misaf\VendraTransaction\Actions;
 use Illuminate\Support\Facades\DB;
 use Misaf\VendraTransaction\Models\TransactionGateway;
 
-final class SetDefaultTransactionGateway
+final class SetDefaultTransactionGatewayAction
 {
     public function execute(TransactionGateway $gateway): void
     {

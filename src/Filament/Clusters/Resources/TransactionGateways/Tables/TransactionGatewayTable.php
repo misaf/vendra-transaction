@@ -25,7 +25,7 @@ use Filament\Tables\Table;
 use Livewire\Component as Livewire;
 use Misaf\VendraSupport\Filament\Concerns\HasDefaultAvatarImageUrl;
 use Misaf\VendraSupport\Filament\Concerns\InteractsWithTranslatedTableRecords;
-use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Actions\SetDefaultTransactionGatewayAction;
+use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Actions\SetDefaultTransactionGatewayTableAction;
 use Misaf\VendraTransaction\Models\TransactionGateway;
 
 final class TransactionGatewayTable
@@ -136,7 +136,7 @@ final class TransactionGatewayTable
 
                     EditAction::make(),
 
-                    SetDefaultTransactionGatewayAction::make(),
+                    SetDefaultTransactionGatewayTableAction::make(),
 
                     DeleteAction::make(),
                 ]),

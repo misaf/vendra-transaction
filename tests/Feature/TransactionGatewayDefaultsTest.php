@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Misaf\VendraTransaction\Actions\SetDefaultTransactionGateway;
+use Misaf\VendraTransaction\Actions\SetDefaultTransactionGatewayAction;
 use Misaf\VendraTransaction\Database\Factories\TransactionGatewayFactory;
 
 beforeEach(function (): void {
@@ -54,7 +54,7 @@ it('switches the default gateway through the domain action', function (): void {
     $first = TransactionGatewayFactory::new()->default()->createOne();
     $second = TransactionGatewayFactory::new()->createOne();
 
-    (new SetDefaultTransactionGateway())->execute($second);
+    (new SetDefaultTransactionGatewayAction())->execute($second);
 
     expect($first->refresh()->is_default)->toBeFalse()
         ->and($second->refresh()->is_default)->toBeTrue();
@@ -64,7 +64,7 @@ it('activates an inactive gateway when it becomes the default', function (): voi
     TransactionGatewayFactory::new()->default()->createOne();
     $gateway = TransactionGatewayFactory::new()->inactive()->createOne();
 
-    (new SetDefaultTransactionGateway())->execute($gateway);
+    (new SetDefaultTransactionGatewayAction())->execute($gateway);
 
     expect($gateway->refresh()->active)->toBeTrue()
         ->and($gateway->is_default)->toBeTrue();

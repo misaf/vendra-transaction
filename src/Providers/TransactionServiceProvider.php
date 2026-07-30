@@ -13,7 +13,6 @@ use Misaf\VendraSupport\Filament\Concerns\ResolvesConfiguredPanels;
 use Misaf\VendraSupport\Tenancy\TenantTableRegistry;
 use Misaf\VendraTransaction\Console\Commands\VerifyWalletBalancesCommand;
 use Misaf\VendraTransaction\Models\Wallet;
-use Misaf\VendraTransaction\Services\LedgerService;
 use Misaf\VendraTransaction\Services\TransactionService;
 use Misaf\VendraTransaction\Support\TransactionUsers;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
@@ -41,7 +40,6 @@ final class TransactionServiceProvider extends PackageServiceProvider
     public function packageRegistered(): void
     {
         $this->app->singleton(TransactionService::class);
-        $this->app->singleton(LedgerService::class);
 
         Panel::configureUsing(function (Panel $panel): void {
             if ( ! $this->shouldRegisterOnPanel($panel->getId(), 'vendra-transaction')) {

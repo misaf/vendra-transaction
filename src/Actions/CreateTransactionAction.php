@@ -1,0 +1,183 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Misaf\VendraTransaction\Actions;
+
+use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
+use LogicException;
+use Misaf\VendraTransaction\Enums\TransactionTypeEnum;
+use Misaf\VendraTransaction\Exceptions\TransactionLimitExceededException;
+use Misaf\VendraTransaction\Models\Transaction;
+use Misaf\VendraTransaction\Models\TransactionGateway;
+use Misaf\VendraTransaction\Models\Wallet;
+use Misaf\VendraTransaction\Services\TransactionService;
+
+/**
+ * Creates a pending transaction against a wallet, together with its optional
+ * fee and metadata rows. Settlement into the ledger only happens later, on the
+ * transition to Approved.
+ */
+final class CreateTransactionAction
+{
+    public function __construct(private readonly TransactionService $transactionService) {}
+
+    /**
+     * @param  array<string, mixed>  $metadata
+     */
+    public function execute(
+        TransactionGateway|string $transactionGateway,
+        Wallet $wallet,
+        TransactionTypeEnum $transactionType,
+        int $amount,
+        array $metadata = [],
+        ?int $fee = null,
+        ?Wallet $counterpartyWallet = null,
+        ?string $token = null,
+        ?string $idempotencyKey = null,
+    ): Transaction {
+        if (null !== $idempotencyKey && '' === mb_trim($idempotencyKey)) {
+            throw new InvalidArgumentException('The transaction idempotency key cannot be empty.');
+        }
+
+        $gateway = $transactionGateway instanceof TransactionGateway
+            ? $transactionGateway
+            : $this->transactionService->getTransactionGateway($transactionGateway);
+
+        return DB::transaction(function () use ($gateway, $wallet, $transactionType, $amount, $metadata, $fee, $counterpartyWallet, $token, $idempotencyKey): Transaction {
+            $attributes = [
+                'wallet_id'              => $wallet->id,
+                'transaction_gateway_id' => $gateway->id,
+                'counterparty_wallet_id' => $counterpartyWallet?->id,
+                'transaction_type'       => $transactionType,
+                'amount'                 => abs($amount),
+            ];
+
+            if ( ! empty($token)) {
+                $attributes['token'] = $token;
+            }
+
+            if (null !== $idempotencyKey) {
+                $existingTransaction = Transaction::query()
+                    ->withTrashed()
+                    ->where('idempotency_key', $idempotencyKey)
+                    ->first();
+
+                if (null !== $existingTransaction) {
+                    $this->assertMatchingIdempotentTransaction(
+                        $existingTransaction,
+                        $gateway,
+                        $wallet,
+                        $transactionType,
+                        $amount,
+                        $fee,
+                        $counterpartyWallet,
+                    );
+
+                    return $existingTransaction;
+                }
+            }
+
+            $this->assertWithinLimit($wallet, $transactionType, $amount);
+
+            $transaction = null === $idempotencyKey
+                ? Transaction::query()->create($attributes)
+                : Transaction::query()->withTrashed()->firstOrCreate(
+                    ['idempotency_key' => $idempotencyKey],
+                    $attributes,
+                );
+
+            if ( ! $transaction->wasRecentlyCreated) {
+                $this->assertMatchingIdempotentTransaction(
+                    $transaction,
+                    $gateway,
+                    $wallet,
+                    $transactionType,
+                    $amount,
+                    $fee,
+                    $counterpartyWallet,
+                );
+
+                return $transaction;
+            }
+
+            if (null !== $fee && $fee > 0) {
+                $transaction->transactionFee()->create(['amount' => $fee]);
+            }
+
+            if ( ! empty($metadata)) {
+                $this->createTransactionMetadata($transaction, $metadata);
+            }
+
+            return $transaction;
+        });
+    }
+
+    /**
+     * @param  array<string, mixed>  $metadata
+     */
+    private function createTransactionMetadata(Transaction $transaction, array $metadata): void
+    {
+        $transaction->transactionMetadatas()->createMany(array_map(
+            fn(string $key): array => [
+                'key_name'  => $key,
+                'key_value' => $this->stringifyMetadataValue($metadata[$key] ?? null),
+            ],
+            array_keys($metadata),
+        ));
+    }
+
+    private function assertWithinLimit(Wallet $wallet, TransactionTypeEnum $transactionType, int $amount): void
+    {
+        $limit = $this->transactionService->limitFor($wallet, $transactionType);
+
+        if (null !== $limit && abs($amount) > $limit->amount) {
+            throw TransactionLimitExceededException::forWallet($wallet->id, $transactionType, abs($amount), $limit->amount);
+        }
+    }
+
+    private function assertMatchingIdempotentTransaction(
+        Transaction $transaction,
+        TransactionGateway $gateway,
+        Wallet $wallet,
+        TransactionTypeEnum $transactionType,
+        int $amount,
+        ?int $fee,
+        ?Wallet $counterpartyWallet,
+    ): void {
+        $storedFee = $transaction->transactionFee()->first()?->amount;
+        $expectedFee = null !== $fee && $fee > 0 ? $fee : null;
+        $matches = $transaction->transaction_gateway_id === $gateway->id
+            && $transaction->wallet_id === $wallet->id
+            && $transaction->transaction_type === $transactionType
+            && $transaction->amount === abs($amount)
+            && $transaction->counterparty_wallet_id === $counterpartyWallet?->id
+            && $storedFee === $expectedFee;
+
+        if ( ! $matches) {
+            throw new LogicException("Transaction idempotency key [{$transaction->idempotency_key}] was already used for different charge details.");
+        }
+    }
+
+    private function stringifyMetadataValue(mixed $value): string
+    {
+        if (null === $value) {
+            return '';
+        }
+
+        if (is_string($value)) {
+            return $value;
+        }
+
+        if (is_bool($value)) {
+            return $value ? '1' : '0';
+        }
+
+        if (is_int($value) || is_float($value)) {
+            return (string) $value;
+        }
+
+        return json_encode($value, JSON_THROW_ON_ERROR);
+    }
+}
