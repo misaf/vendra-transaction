@@ -20,7 +20,7 @@ use Misaf\VendraTransaction\Filament\Clusters\Resources\Wallets\Pages\ViewWallet
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
-    setUpFilamentSuperAdminTestContext();
+    setUpFilamentAdminTestContext();
 
     Filament::getPanel('admin')->plugin(
         SpatieTranslatablePlugin::make()->defaultLocales(['en', 'de']),

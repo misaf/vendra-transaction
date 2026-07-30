@@ -20,7 +20,7 @@ use Misaf\VendraTransaction\Support\TransactionUsers;
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
-    setUpFilamentSuperAdminTestContext();
+    setUpFilamentAdminTestContext();
 });
 
 it('lists transactions in the table', function (): void {
