@@ -1,8 +1,6 @@
 {
     "name": "misaf/vendra-transaction",
     "description": "Wallet and ledger based financial transaction system with multi-gateway support, state-machine lifecycle and per-currency balances",
-    "license": "MIT",
-    "type": "vendra-module",
     "keywords": [
         "laravel",
         "filamentphp",
@@ -10,6 +8,8 @@
         "vendra",
         "transaction"
     ],
+    "homepage": "https://github.com/misaf/vendra-transaction",
+    "license": "MIT",
     "authors": [
         {
             "name": "Ehsan Mahmoodi",
@@ -17,11 +17,7 @@
             "role": "Developer"
         }
     ],
-    "homepage": "https://github.com/misaf/vendra-transaction",
-    "support": {
-        "issues": "https://github.com/misaf/vendra-transaction/issues",
-        "source": "https://github.com/misaf/vendra-transaction"
-    },
+    "type": "vendra-module",
     "require": {
         "php": "^8.3",
         "flowframe/laravel-trend": "^0.5.0",
@@ -45,18 +41,13 @@
         "mockery/mockery": "^1.6.12",
         "nunomaduro/collision": "^8.9.4",
         "orchestra/testbench": "^11.1",
-        "pestphp/pest": "^4.7.5",
-        "pestphp/pest-plugin-arch": "^4.0.2",
-        "pestphp/pest-plugin-laravel": "^4.1",
-        "pestphp/pest-plugin-profanity": "^4.2.1",
-        "pestphp/pest-plugin-type-coverage": "^4.0.4",
+        "pestphp/pest": "^5.0",
+        "pestphp/pest-plugin-arch": "^5.0",
+        "pestphp/pest-plugin-laravel": "^5.0",
+        "pestphp/pest-plugin-profanity": "^5.0",
+        "pestphp/pest-plugin-type-coverage": "^5.0",
         "phpstan/extension-installer": "^1.4.3"
     },
-    "suggest": {
-        "misaf/vendra-currency": "Install this in the host application to manage active currencies used by wallet provisioning and transaction forms."
-    },
-    "minimum-stability": "stable",
-    "prefer-stable": true,
     "autoload": {
         "psr-4": {
             "Misaf\\VendraTransaction\\": "src/",
@@ -68,16 +59,6 @@
             "Misaf\\VendraTransaction\\Database\\Factories\\": "database/factories/",
             "Misaf\\VendraTransaction\\Tests\\": "tests/"
         }
-    },
-    "config": {
-        "allow-plugins": {
-            "pestphp/pest-plugin": true,
-            "php-http/discovery": true,
-            "phpstan/extension-installer": true
-        },
-        "optimize-autoloader": true,
-        "preferred-install": "dist",
-        "sort-packages": true
     },
     "extra": {
         "laravel": {
@@ -92,5 +73,24 @@
         "test": "vendor/bin/pest --parallel",
         "test-coverage": "vendor/bin/pest --coverage"
     },
+    "suggest": {
+        "misaf/vendra-currency": "Install this in the host application to manage active currencies used by wallet provisioning and transaction forms."
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "php-http/discovery": true,
+            "phpstan/extension-installer": true
+        },
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "support": {
+        "issues": "https://github.com/misaf/vendra-transaction/issues",
+        "source": "https://github.com/misaf/vendra-transaction"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
     "$schema": "https://getcomposer.org/schema.json"
 }
