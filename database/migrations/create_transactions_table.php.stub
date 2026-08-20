@@ -36,7 +36,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('default_guard')
                 ->nullable()
                 ->virtualAs(TenantSchema::enabled()
-                    ? 'CASE WHEN is_default THEN tenant_id ELSE NULL END'
+                    ? 'CASE WHEN is_default THEN ' . TenantSchema::column() . ' ELSE NULL END'
                     : 'CASE WHEN is_default THEN 1 ELSE NULL END');
             $table->timestampsTz();
             $table->softDeletesTz();
