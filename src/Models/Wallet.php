@@ -18,6 +18,7 @@ use Illuminate\Support\Str;
 use Misaf\VendraSupport\Contracts\ShouldLogActivity;
 use Misaf\VendraSupport\Tenancy\BelongsToTenant;
 use Misaf\VendraTransaction\Database\Factories\WalletFactory;
+use Misaf\VendraTransaction\Enums\TransactionTypeEnum;
 use Misaf\VendraTransaction\Support\TransactionUsers;
 
 /**
@@ -100,5 +101,18 @@ final class Wallet extends Model implements ShouldLogActivity
     public function transactionLimits(): HasMany
     {
         return $this->hasMany(TransactionLimit::class);
+    }
+
+    /**
+     * The limit governing one kind of movement on this wallet, if one is set.
+     *
+     * A wallet's own limits are wallet state, so the lookup belongs here rather
+     * than on a service that callers had to reach for separately.
+     */
+    public function limitFor(TransactionTypeEnum $transactionType): ?TransactionLimit
+    {
+        return $this->transactionLimits()
+            ->where('transaction_type', $transactionType)
+            ->first();
     }
 }

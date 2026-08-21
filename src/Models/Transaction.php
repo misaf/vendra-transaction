@@ -23,7 +23,6 @@ use Misaf\VendraTransaction\Database\Factories\TransactionFactory;
 use Misaf\VendraTransaction\Enums\TransactionTypeEnum;
 use Misaf\VendraTransaction\Events\TransactionDeclined;
 use Misaf\VendraTransaction\Events\TransactionFailed;
-use Misaf\VendraTransaction\Facades\TransactionService;
 use Misaf\VendraTransaction\States\Approved;
 use Misaf\VendraTransaction\States\Declined;
 use Misaf\VendraTransaction\States\Failed;
@@ -66,6 +65,9 @@ final class Transaction extends Model implements ShouldLogActivity
     use HasOptionalTags;
     use HasStates;
     use SoftDeletes;
+    private const string TOKEN_CHARACTERS = '123456789';
+
+    private const int TOKEN_LENGTH = 20;
 
     public const string TAG_TYPE = 'transaction';
 
@@ -270,8 +272,24 @@ final class Transaction extends Model implements ShouldLogActivity
     {
         self::creating(function (self $transaction): void {
             if (empty($transaction->token)) {
-                $transaction->token = TransactionService::generateToken();
+                $transaction->token = self::generateToken();
             }
         });
+    }
+
+    /**
+     * A transaction reference for humans to quote: digits only, no zero, so it
+     * survives being read aloud or copied off a receipt.
+     */
+    private static function generateToken(): string
+    {
+        $maxIndex = mb_strlen(self::TOKEN_CHARACTERS) - 1;
+        $token = '';
+
+        for ($i = 0; $i < self::TOKEN_LENGTH; $i++) {
+            $token .= self::TOKEN_CHARACTERS[random_int(0, $maxIndex)];
+        }
+
+        return $token;
     }
 }

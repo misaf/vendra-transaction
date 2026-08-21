@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
 use Misaf\VendraSupport\Tenancy\TenantAwareness;
 use Misaf\VendraTransaction\Models\TransactionGateway;
-use Misaf\VendraTransaction\Services\TransactionService;
+use Misaf\VendraTransaction\Services\TransactionGatewayRegistry;
 
 /** @extends Factory<TransactionGateway> */
 #[UseModel(TransactionGateway::class)]
@@ -39,7 +39,7 @@ final class TransactionGatewayFactory extends Factory
     {
         return $this->state(fn(): array => [
             'name' => 'Internal Transactions',
-            'slug' => TransactionService::INTERNAL_GATEWAY_SLUG,
+            'slug' => TransactionGatewayRegistry::INTERNAL_GATEWAY_SLUG,
         ]);
     }
 

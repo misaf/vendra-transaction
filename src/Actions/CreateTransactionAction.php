@@ -12,7 +12,7 @@ use Misaf\VendraTransaction\Exceptions\TransactionLimitExceededException;
 use Misaf\VendraTransaction\Models\Transaction;
 use Misaf\VendraTransaction\Models\TransactionGateway;
 use Misaf\VendraTransaction\Models\Wallet;
-use Misaf\VendraTransaction\Services\TransactionService;
+use Misaf\VendraTransaction\Services\TransactionGatewayRegistry;
 
 /**
  * Creates a pending transaction against a wallet, together with its optional
@@ -21,7 +21,7 @@ use Misaf\VendraTransaction\Services\TransactionService;
  */
 final class CreateTransactionAction
 {
-    public function __construct(private readonly TransactionService $transactionService) {}
+    public function __construct(private readonly TransactionGatewayRegistry $transactionGatewayRegistry) {}
 
     /**
      * @param  array<string, mixed>  $metadata
@@ -43,7 +43,7 @@ final class CreateTransactionAction
 
         $gateway = $transactionGateway instanceof TransactionGateway
             ? $transactionGateway
-            : $this->transactionService->getTransactionGateway($transactionGateway);
+            : $this->transactionGatewayRegistry->get($transactionGateway);
 
         return DB::transaction(function () use ($gateway, $wallet, $transactionType, $amount, $metadata, $fee, $counterpartyWallet, $token, $idempotencyKey): Transaction {
             $attributes = [
@@ -130,7 +130,7 @@ final class CreateTransactionAction
 
     private function assertWithinLimit(Wallet $wallet, TransactionTypeEnum $transactionType, int $amount): void
     {
-        $limit = $this->transactionService->limitFor($wallet, $transactionType);
+        $limit = $wallet->limitFor($transactionType);
 
         if (null !== $limit && abs($amount) > $limit->amount) {
             throw TransactionLimitExceededException::forWallet($wallet->id, $transactionType, abs($amount), $limit->amount);

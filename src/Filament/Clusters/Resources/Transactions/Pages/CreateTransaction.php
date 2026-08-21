@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Pages;
 
 use Filament\Resources\Pages\CreateRecord;
-use Misaf\VendraTransaction\Facades\TransactionService;
+use Misaf\VendraTransaction\Facades\WalletResolver;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\TransactionResource;
 use Misaf\VendraTransaction\Support\TransactionUsers;
 
@@ -25,13 +25,13 @@ final class CreateTransaction extends CreateRecord
     {
         $currencyCode = (string) $data['currency_code'];
 
-        $data['wallet_id'] = TransactionService::walletFor(
+        $data['wallet_id'] = WalletResolver::walletFor(
             TransactionUsers::model()::query()->findOrFail($data['user_id']),
             $currencyCode,
         )->id;
 
         if ( ! empty($data['counterparty_user_id'])) {
-            $data['counterparty_wallet_id'] = TransactionService::walletFor(
+            $data['counterparty_wallet_id'] = WalletResolver::walletFor(
                 TransactionUsers::model()::query()->findOrFail($data['counterparty_user_id']),
                 $currencyCode,
             )->id;

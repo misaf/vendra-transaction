@@ -7,7 +7,6 @@ namespace Misaf\VendraTransaction\Rules;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Misaf\VendraTransaction\Enums\TransactionTypeEnum;
-use Misaf\VendraTransaction\Facades\TransactionService;
 use Misaf\VendraTransaction\Models\Wallet;
 
 /**
@@ -27,7 +26,7 @@ final class WithinTransactionLimit implements ValidationRule
             return;
         }
 
-        $limit = TransactionService::limitFor($this->wallet, $this->transactionType);
+        $limit = $this->wallet->limitFor($this->transactionType);
 
         if (null !== $limit && abs((int) $value) > $limit->amount) {
             $fail('vendra-transaction::validation.amount_exceeds_limit')->translate([

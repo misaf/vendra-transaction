@@ -9,7 +9,8 @@ use Misaf\VendraTransaction\Database\Factories\TransactionLimitFactory;
 use Misaf\VendraTransaction\Database\Factories\WalletFactory;
 use Misaf\VendraTransaction\Enums\TransactionTypeEnum;
 use Misaf\VendraTransaction\Exceptions\TransactionLimitExceededException;
-use Misaf\VendraTransaction\Facades\TransactionService;
+use Misaf\VendraTransaction\Facades\TransactionGatewayRegistry;
+use Misaf\VendraTransaction\Facades\WalletResolver;
 use Misaf\VendraTransaction\States\Pending;
 use Misaf\VendraTransaction\Support\TransactionUsers;
 
@@ -109,16 +110,16 @@ it('resolves gateways by slug and ignores disabled ones', function (): void {
     TransactionGatewayFactory::new()->inactive()->create(['slug' => 'coinpayments']);
     TransactionGatewayFactory::new()->internal()->create();
 
-    expect(TransactionService::hasActiveTransactionGateway('coinpayments'))->toBeFalse()
-        ->and(TransactionService::hasActiveTransactionGateway('internal-transactions'))->toBeTrue()
-        ->and(TransactionService::hasAnyActiveTransactionGateway())->toBeFalse()
-        ->and(fn() => TransactionService::getTransactionGateway('coinpayments'))->toThrow(RuntimeException::class);
+    expect(TransactionGatewayRegistry::hasActive('coinpayments'))->toBeFalse()
+        ->and(TransactionGatewayRegistry::hasActive('internal-transactions'))->toBeTrue()
+        ->and(TransactionGatewayRegistry::hasAnyActive())->toBeFalse()
+        ->and(fn() => TransactionGatewayRegistry::get('coinpayments'))->toThrow(RuntimeException::class);
 });
 
 it('provisions the default wallet in the resolved default currency', function (): void {
     $user = TransactionUsers::model()::factory()->create();
 
-    $wallet = TransactionService::defaultWalletFor($user);
+    $wallet = WalletResolver::defaultWalletFor($user);
 
     expect($wallet->currency_code)->toBe(CurrencyIntegration::defaultCode());
 });
@@ -141,15 +142,15 @@ it('identifies internal transactions by the internal gateway', function (): void
         amount: 1_000,
     );
 
-    expect(TransactionService::isInternalTransaction($internalTransaction))->toBeTrue()
-        ->and(TransactionService::isInternalTransaction($externalTransaction))->toBeFalse();
+    expect(TransactionGatewayRegistry::isInternal($internalTransaction))->toBeTrue()
+        ->and(TransactionGatewayRegistry::isInternal($externalTransaction))->toBeFalse();
 });
 
 it('provisions one wallet per user and currency', function (): void {
     $user = TransactionUsers::model()::factory()->create();
 
-    $wallet = TransactionService::walletFor($user, 'EUR');
-    $again = TransactionService::walletFor($user, 'EUR');
+    $wallet = WalletResolver::walletFor($user, 'EUR');
+    $again = WalletResolver::walletFor($user, 'EUR');
 
     expect($again->is($wallet))->toBeTrue()
         ->and($wallet->currency_code)->toBe('EUR')

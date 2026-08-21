@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Misaf\VendraTransaction\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
 use Misaf\VendraTransaction\Database\Factories\LedgerEntryFactory;
-use RuntimeException;
+use Misaf\VendraTransaction\Observers\LedgerEntryObserver;
 
 /**
  * An immutable, signed movement on a wallet. Each entry snapshots the
@@ -28,6 +29,7 @@ use RuntimeException;
  * @property Carbon $created_at
  */
 #[Fillable(['amount', 'balance_after'])]
+#[ObservedBy([LedgerEntryObserver::class])]
 #[UseFactory(LedgerEntryFactory::class)]
 final class LedgerEntry extends Model
 {
@@ -66,14 +68,4 @@ final class LedgerEntry extends Model
         return $this->morphTo();
     }
 
-    protected static function booted(): void
-    {
-        self::updating(function (): never {
-            throw new RuntimeException('Ledger entries are immutable and cannot be updated.');
-        });
-
-        self::deleting(function (): never {
-            throw new RuntimeException('Ledger entries are immutable and cannot be deleted.');
-        });
-    }
 }
