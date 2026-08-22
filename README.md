@@ -37,7 +37,7 @@ through the provider-neutral capability in `misaf/vendra-support`.
 
 ## Requirements
 
-- PHP 8.3+
+- PHP 8.4+
 - Laravel 13
 - Filament 5
 - `misaf/vendra-support`
@@ -74,11 +74,11 @@ php artisan vendra-transaction:verify-balances --repair
 
 ## Testing
 
-Run the package checks from the package directory:
+Run the package checks from the project root:
 
 ```bash
-composer test
-composer analyse
+php artisan test --compact --testsuite=vendra-transaction
+composer stan
 ```
 
 ## License
