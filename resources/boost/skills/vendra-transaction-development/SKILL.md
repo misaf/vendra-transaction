@@ -59,7 +59,7 @@ Keep every resource tree under `src/Filament/Clusters/Resources/` in the `SalesC
 - Transactions have list/create/view pages only (no edit); lifecycle changes go through the Approve/Decline/Fail actions, whose visibility follows `status->canTransitionTo()`.
 - Wallets are read-only (list/view, `canCreate(): false`); the ledger relation manager stays read-only, and transaction limits are managed through their wallet relation manager.
 - Gateway resources use the LaraZeus SpatieTranslatable concern with `LocaleSwitcher` on every page.
-- Assign `$navigationSort` from the shared `NavigationPriority` cases (`Transactions`, `TransactionGateways`, `Wallets`); update `tests/Unit/AdminNavigationTest.php` when navigation changes.
+- Assign `$navigationSort` from the shared `NavigationPriority` cases (`Transactions`, `TransactionGateways`, `Wallets`); update `tests/Feature/AdminNavigationTest.php` when navigation changes.
 - State classes implement the Filament `HasColor`/`HasIcon`/`HasLabel` contracts; drive badges from the state instance, not hardcoded maps.
 - Prevent N+1 issues in tables and relation managers with eager loading, `withCount`, or computed state based on loaded relationships.
 
