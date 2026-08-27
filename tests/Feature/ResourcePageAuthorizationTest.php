@@ -14,6 +14,7 @@ use Misaf\VendraTransaction\Filament\Clusters\Resources\TransactionGateways\Page
 use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Pages\CreateTransaction;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Pages\ListTransactions;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\Pages\ViewTransaction;
+use Misaf\VendraTransaction\Filament\Clusters\Resources\Transactions\TransactionResource;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\Wallets\Pages\ListWallets;
 use Misaf\VendraTransaction\Filament\Clusters\Resources\Wallets\Pages\ViewWallet;
 
@@ -55,4 +56,41 @@ it('renders the wallet pages under strict authorization', function (): void {
 
     livewire(ListWallets::class)->assertOk();
     livewire(ViewWallet::class, ['record' => $wallet->getKey()])->assertOk();
+});
+
+it('globally searches transactions by related users inside the current tenant', function (): void {
+    $tenant = currentTestTenant();
+    $user = createTestUser([
+        'username' => 'transaction-search-user',
+        'email'    => 'transaction-search-user@example.test',
+    ]);
+    $transaction = TransactionFactory::new()->forUser($user)->deposit()->createOne();
+
+    $otherTenant = createTestTenant();
+    Filament::setTenant($otherTenant);
+    switchToTestTenant($otherTenant);
+    $otherUser = createTestUser([
+        'username' => 'other-transaction-user',
+        'email'    => 'other-transaction-user@example.test',
+    ]);
+    TransactionFactory::new()->forUser($otherUser)->deposit()->createOne();
+    Filament::setTenant($tenant);
+    switchToTestTenant($tenant);
+
+    $result = TransactionResource::getGlobalSearchResults('transaction-search-user@example.test')->sole();
+    $loadedTransaction = TransactionResource::getGlobalSearchEloquentQuery()
+        ->findOrFail($transaction->getKey());
+
+    expect(TransactionResource::getGloballySearchableAttributes())->toBe([
+        'token',
+        'wallet.user.username',
+        'wallet.user.email',
+    ])
+        ->and($result->title)->toBe($transaction->token)
+        ->and($result->details)->toBe([
+            __('vendra-user::attributes.email') => 'transaction-search-user@example.test',
+        ])
+        ->and($loadedTransaction->relationLoaded('wallet'))->toBeTrue()
+        ->and($loadedTransaction->wallet?->relationLoaded('user'))->toBeTrue()
+        ->and(TransactionResource::getGlobalSearchResults('other-transaction-user'))->toBeEmpty();
 });
