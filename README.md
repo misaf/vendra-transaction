@@ -8,7 +8,7 @@ cluster for transactions, gateways, and wallets.
 ## Features
 
 1. Each user holds one `Wallet` per currency (created on first use via
-   `WalletResolver::walletFor()` / `defaultWalletFor()`), with a cached
+   `WalletResolver::firstOrCreateWalletFor()` / `firstOrCreateDefaultWalletFor()`), with a cached
    `balance` in the currency's minor units.
 2. The ledger is the single source of balance truth: every movement is an
    immutable `LedgerEntry` (signed amount, `balance_after` snapshot,
@@ -25,7 +25,11 @@ cluster for transactions, gateways, and wallets.
    by `approve()`, `decline()`, `fail()`, `markProcessing()`, and
    `markReview()`. Settlement into the ledger happens exactly once, inside
    the transition to `Approved` — principal, mirrored transfer credit, and
-   fee commit atomically with the status change.
+   fee commit atomically with the status change. Call
+   `ApproveTransactionAction`, `DeclineTransactionAction`, or
+   `FailTransactionAction` rather than the model methods: each re-reads the
+   transaction under a row lock, so a stale copy cannot decline a transaction
+   another request has just approved.
 5. Gateways are admin-managed labels (translatable name and description, a
    scalar `slug` lookup key, logo, sortable position); payment-processing
    logic lives in the host application. Internal movements use the
